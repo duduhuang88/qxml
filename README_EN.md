@@ -8,6 +8,10 @@ A low intrusive, configurable android library that converts layout XML files int
 
 Compared with inflate, it can reduce 30% + loading time, which increases with the increase of layout complexity. See demo for details.
 
+[support-test-demo.apk](support-test-release.apk)
+
+[androidx-test-demo.apk](androidx-test-release.apk)
+
 # Require
 
 Gradle 3.5.0 above
@@ -54,10 +58,12 @@ Gradle 3.5.0 above
 
 ### 1. Add dependency in Project `build.gradle`
 
+The newest version code is **0.9.7**
+
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "0.9.6"
+    ext.qxml_version = "0.9.7"
     repositories {
         ...
         mavenCentral()

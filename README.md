@@ -8,6 +8,10 @@
 
 与 inflate 比较可减少 30%+加载时间，随布局复杂度提高而提高，详见 demo。
 
+[support-test-demo.apk](support-test-release.apk)
+
+[androidx-test-demo.apk](androidx-test-release.apk)
+
 # 要求
 
 Gradle 3.5.0 以上
@@ -54,10 +58,12 @@ Gradle 3.5.0 以上
 
 ### 1. 在 Project `build.gradle` 中添加依赖
 
+最新版本为 **0.9.7**
+
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "0.9.6"
+    ext.qxml_version = "0.9.7"
     repositories {
         ...
         mavenCentral()
