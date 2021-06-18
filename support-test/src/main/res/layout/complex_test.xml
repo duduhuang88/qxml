@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/cl_search"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@drawable/bg_shape_gradient"
+                android:layout_width="match_parent"
+                android:layout_height="100dp">
+
+                <EditText
+                    android:id="@+id/et_search"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/bg_shape_search"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"/>
+
+                <TextView
+                    app:layout_constraintTop_toTopOf="@+id/et_search"
+                    app:layout_constraintBottom_toBottomOf="@+id/et_search"
+                    app:layout_constraintEnd_toEndOf="@+id/et_search"
+                    android:text="搜索"
+                    android:paddingEnd="15dp"
+                    android:paddingStart="15dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="#000000"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"/>
+
+            </android.support.constraint.ConstraintLayout>
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/vp_banner"
+                app:layout_constraintTop_toBottomOf="@+id/cl_search"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_width="0dp"
+                android:layout_height="100dp"/>
+
+            <ImageView
+                android:id="@+id/img_enter"
+                app:layout_constraintTop_toBottomOf="@+id/vp_banner"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:src="@drawable/shape_gradient"
+                android:layout_width="0dp"
+                android:layout_height="100dp"/>
+
+            <android.support.v7.widget.RecyclerView
+                app:layout_constraintTop_toBottomOf="@+id/img_enter"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/tv_tab_home"
+                android:orientation="vertical"
+                app:layoutManager="android.support.v7.widget.GridLayoutManager"
+                android:layout_width="0dp"
+                android:layout_height="0dp"/>
+
+            <TextView
+                android:id="@+id/tv_tab_home"
+                android:text="首页"
+                android:gravity="center"
+                android:textColor="@color/sss"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tv_tab_my"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_width="0dp"
+                android:layout_height="45dp"/>
+
+            <TextView
+                android:id="@+id/tv_tab_my"
+                android:text="我的"
+                android:gravity="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/tv_tab_home"
+                android:layout_width="0dp"
+                android:layout_height="45dp"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.constraint.ConstraintLayout>

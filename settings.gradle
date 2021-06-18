@@ -1,0 +1,8 @@
+include ':support-test'
+
+rootProject.name = "qxml"
+
+includeBuild('code/codeplugin')
+includeBuild('code/sdk')
+includeBuild('code/sdk-support')
+includeBuild('code/test')

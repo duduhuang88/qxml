@@ -1,0 +1,30 @@
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'kotlin'
+
+apply from: '../../gradleScript/dokka.gradle'
+
+group 'io.github.duduhuang88'
+
+gradlePlugin {
+    plugins {
+        qxml {
+            id = "com.qxml.code.plugin"
+            implementationClass = "com.qxml.gradle.CodePlugin"
+        }
+    }
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation("com.android.tools.build:gradle:4.0.2")
+
+    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation project(":transform")
+    implementation project(":constant")
+    implementation project(":tools")
+}
+
+repositories {
+    mavenCentral()
+}

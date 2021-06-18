@@ -1,0 +1,99 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+apply plugin: 'com.qxml.code.plugin'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.qxml.androidx_test"
+        minSdkVersion 14
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../../qxml.jks')
+            keyAlias 'qxml'
+            keyPassword '123456'
+            storePassword '123456'
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            debuggable false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        midrelease.initWith(debug)
+        midrelease {
+            matchingFallbacks = [ 'debug', 'release']
+        }
+    }
+
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        disable "InvalidPackage"
+    }
+}
+
+qxml {
+    enable = true
+    logEnable = true
+    viewDebug = true
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.3.2'
+    implementation deps.androidx.compat
+    implementation deps.androidx.recyclerview
+    implementation deps.androidx.constraintlayout
+    implementation deps.androidx.viewpager2
+    implementation deps.androidx.material
+
+    implementation deps.androidx.lottie
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    kapt deps.qxml.processorConstant
+    implementation deps.qxml.dynamic_androidxLib
+
+    api deps.qxml.constantConstant
+    implementation deps.qxml.annotationsConstant
+
+    implementation deps.qxml.qxmlTest
+}

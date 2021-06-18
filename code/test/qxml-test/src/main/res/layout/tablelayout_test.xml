@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="3dip">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="3dip">
+
+        <!-- 第1个TableLayout，用于描述表中的列属性。第0列可伸展，第1列可收缩，第2列被隐藏-->
+        <TextView
+            android:text="表1：全局设置：列属性设置"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="15sp"
+            android:background="#7f00ffff"/>
+        <TableLayout
+            android:id="@+id/table1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="0"
+            android:shrinkColumns="1"
+            android:collapseColumns="2"
+            android:padding="3dip">
+            <TableRow>
+                <Button android:text="该列可伸展"/>
+                <Button android:text="该列可收缩"/>
+                <Button android:text="我被隐藏了"/>
+            </TableRow>
+
+            <TableRow>
+                <TextView android:text="我向行方向伸展，我可以很长    "/>
+                <TextView android:text="我向列方向收缩，我可以很深"/>
+            </TableRow>
+
+        </TableLayout>
+
+        <!-- 第2个TableLayout，用于描述表中单元格的属性，包括：android:layout_column 及android:layout_span-->
+        <TextView
+            android:text="表2:单元格设置：指定单元格属性设置"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="15sp"
+            android:background="#7f00ffff"/>
+        <TableLayout
+            android:id="@+id/table2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="3dip">
+            <TableRow>
+                <Button android:text="第0列"/>
+                <Button android:text="第1列"/>
+                <Button android:text="第2列"/>
+            </TableRow>
+
+            <TableRow>
+                <TextView android:text="我被指定在第1列" android:layout_column="1"/>
+            </TableRow>
+
+            <TableRow>
+                <TextView
+                    android:text="我跨1到2列，不信你看！"
+                    android:layout_column="1"
+                    android:layout_span="2"
+                    />
+            </TableRow>
+
+        </TableLayout>
+
+        <!-- 第3个TableLayout，使用可伸展特性布局-->
+        <TextView
+            android:text="表3：应用一，非均匀布局"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="15sp"
+            android:background="#7f00ffff"/>
+        <TableLayout
+            android:id="@+id/table3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            android:padding="3dip"
+            >
+            <TableRow>
+                <Button android:text="一" ></Button>
+                <Button android:text="两字"></Button>
+                <Button android:text="三个字" ></Button>
+            </TableRow>
+        </TableLayout>
+
+        <!-- 第4个TableLayout，使用可伸展特性，并指定每个控件宽度一致，如1dip-->
+        <TextView
+            android:text="表4：应用二，均匀布局"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="15sp"
+            android:background="#7f00ffff"/>
+        <TableLayout
+            android:id="@+id/table4"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            android:padding="3dip"
+            >
+            <TableRow>
+                <Button android:text="一" android:layout_width="1dip"></Button>
+                <Button android:text="两字" android:layout_width="1dip"></Button>
+                <Button android:text="三个字" android:layout_width="1dip"></Button>
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+
+</ScrollView>

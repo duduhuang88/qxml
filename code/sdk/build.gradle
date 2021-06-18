@@ -1,0 +1,37 @@
+
+buildscript {
+    ext.kotlin_version = "1.4.10"
+    ext.build_gradle_version = '4.0.2'
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "../../repo"
+        }
+        maven {
+            url "../repo"
+        }
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:$build_gradle_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'org.jetbrains.dokka:dokka-gradle-plugin:1.4.32'
+
+        //classpath 'io.github.duduhuang88:gradle-plugin:1.0.0'
+        classpath 'io.github.duduhuang88:gradle-plugin'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        mavenLocal()
+        maven {
+            url "../../repo"
+        }
+    }
+}
+
+apply from: '../../common.gradle'
+

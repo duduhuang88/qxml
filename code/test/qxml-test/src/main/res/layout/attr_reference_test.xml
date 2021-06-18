@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/view_3"
+    android:layout_width="160dp"
+    android:layout_height="wrap_content"
+    style="@style/testReferenceStyle"
+    android:rotation="?test_float"
+    android:background="?test_reference"
+    android:clickable="?test_boolean"
+    android:maxLength="?test_int"
+    android:text="?test_string"
+    android:translationX="?test_dimen"
+    android:minWidth="122dp"
+    android:minHeight="45dp"
+    android:tag="1234" />

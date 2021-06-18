@@ -1,0 +1,10 @@
+
+apply plugin: 'kotlin'
+apply plugin: 'java-library'
+
+apply from: '../../gradleScript/dokka.gradle'
+
+group 'io.github.duduhuang88'
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"

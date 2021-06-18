@@ -1,0 +1,113 @@
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+apply plugin: 'com.qxml.code.plugin'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../qxml.jks')
+            keyAlias 'qxml'
+            keyPassword '123456'
+            storePassword '123456'
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            debuggable false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        midrelease.initWith(debug)
+        midrelease {
+            matchingFallbacks = [ 'debug', 'release']
+        }
+    }
+
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        disable "InvalidPackage"
+    }
+
+    sourceSets {
+        main {
+            resources.srcDirs += "build/qxml/tempRes"
+        }
+    }
+}
+
+qxml {
+    enable true
+    useFactory false
+    viewDebug true
+    logEnable true
+    compatMode com.qxml.CompatMode.AUTO
+    acceptReferenceStyle true
+    useCreateViewListener false
+    buildType {
+        debug {
+            viewDebug true
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation deps.support.v7
+    implementation deps.support.recyclerview
+    implementation deps.support.design
+    implementation deps.support.constraintLayout
+    implementation deps.support.lottie
+
+    testImplementation deps.junit
+    androidTestImplementation deps.test.runner
+    androidTestImplementation deps.test.core
+
+    //annotationProcessor deps.qxml.processor
+    kapt deps.qxml.processor
+    //implementation deps.qxml.tools
+    implementation deps.qxml.qxmlTest
+    implementation deps.qxml.annotations
+    implementation deps.qxml.dynamic_supportLib
+
+}

@@ -1,0 +1,9 @@
+include ':lint'
+include ':tools'
+include ':transform'
+include ':gradle-plugin'
+include ':constant'
+include ':qxml-annotations'
+include ':qxml-processor'
+
+rootProject.name = "plugin"

@@ -1,0 +1,153 @@
+
+//from tencent shadow
+
+task buildSdk() {
+    dependsOn gradle.includedBuild('sdk-androidx').task(':qxml-androidx:assemble')
+}
+
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+def publicationVersion = PUBLISH_VERSION
+def pluginGroupId = 'io.github.duduhuang88'
+def libGroupId = 'io.github.duduhuang88'
+def sdkAndroidxPath = "../code/sdk-androidx"
+
+def gitProjectUrl = "https://github.com/duduhuang88/qxml"
+def gitConnection = 'scm:git:github.com/duduhuang88/qxml.git'
+def gitDeveloperConnection = 'scm:git:github.com/duduhuang88/qxml.git'
+def developerName = "duduhuang88"
+def developerEmail = "yellorCoder@outlook.com"
+def licenseName = "The Apache License, Version 2.0"
+def licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+
+ext["signing.keyId"] = ''
+ext["signing.password"] = ''
+ext["signing.secretKeyRingFile"] = ''
+ext["ossrhUsername"] = ''
+ext["ossrhPassword"] = ''
+File localPropsFile = new File(project.rootProject.rootDir.parentFile, 'local.properties')
+if (localPropsFile.exists()) {
+    Properties properties = new Properties()
+    properties.load(new FileInputStream(localPropsFile))
+    properties.each { name, value ->
+        ext[name] = value
+    }
+}
+
+//todo add doc
+def javaDocJar(String name, String path) {
+    Javadoc javaDoc =  tasks.create("javaDoc${name.capitalize()}", Javadoc) {
+        group = "javaDoc"
+        description = "package ${name} javadoc"
+        //source = "$path/src/main/java"
+        //'build/generated/not_namespaced_r_class_sources/release/generateReleaseRFile/out/com/sensorsdata/analytics/android/sdk/R.java'
+        //classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }.dependsOn(gradle.includedBuild('codeplugin').task(':gradle-plugin:assemble'))
+    return tasks.create("javaDoc${name.capitalize()}Jar", Jar) {
+        group = "javaDoc"
+        description = "package ${name} javadoc"
+        classifier = 'javadoc'
+        //from javaDoc.destinationDir
+    }.dependsOn(javaDoc)
+}
+
+def setGeneratePomFileAndDepends(publicationName) {
+    model {
+        tasks."generatePomFileFor${publicationName.capitalize()}Publication" {
+            destination = file("$buildDir/pom/$publicationName-pom.xml")
+            dependsOn(buildSdk)
+        }
+    }
+}
+
+def sourceJar(String name, String path) {
+    return tasks.create("source${name.capitalize()}Jar", Jar) {
+        group = "publishing"
+        description = "package ${name} source to jar"
+        from "$path/src/main/java"
+        from "$path/src/main/kotlin"
+        destinationDir = file("$path/build/libs/")
+        classifier = 'sources'
+        exclude "**/R.class"
+        exclude "**/BuildConfig.class"
+    }
+}
+
+static def getDependencyNode(scope, groupId, artifactId, version) {
+    Node node = new Node(null, 'dependency')
+    node.appendNode('groupId', groupId)
+    node.appendNode('artifactId', artifactId)
+    node.appendNode('version', version)
+    node.appendNode('scope', scope)
+    return node
+}
+
+publishing{
+    publications {
+
+        qxmlAndroidx(MavenPublication) {
+            groupId libGroupId
+            artifactId 'qxml-androidx'
+            version publicationVersion
+
+            artifact("$sdkAndroidxPath/qxml-androidx/build/outputs/aar/qxml-androidx-release.aar")
+            artifact sourceJar("qxml-androidx", "$sdkAndroidxPath/qxml-androidx")
+            artifact javaDocJar("qxml-androidx", "$sdkAndroidxPath/qxml-androidx")
+
+            pom {
+                name = 'qxml-androidx'
+                description = 'androidx lib of qxml'
+                url = gitProjectUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitProjectUrl
+                    connection = gitConnection
+                    developerConnection = gitDeveloperConnection
+                }
+            }
+
+            pom.withXml {
+                def root = asNode()
+                def dependencies = root.appendNode('dependencies')
+                dependencies.append(getDependencyNode('compile', libGroupId, 'qxml-base', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'constant', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'qxml-annotations', publicationVersion))
+                dependencies.append(getDependencyNode('provided', "com.airbnb.android", 'lottie', "3.7.0"))
+            }
+        }
+    }
+
+    repositories{
+        maven {
+            url "../repo"
+        }
+
+        maven {
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
+}
+
+setGeneratePomFileAndDepends('qxmlAndroidx')

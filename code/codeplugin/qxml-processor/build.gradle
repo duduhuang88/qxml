@@ -1,0 +1,25 @@
+import org.gradle.internal.jvm.Jvm
+
+apply plugin: 'java-library'
+
+//apply from: '../../gradleScript/dokka.gradle'
+
+group 'io.github.duduhuang88'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation deps.javapoet
+    implementation deps.auto.service
+    annotationProcessor deps.auto.service
+
+    implementation deps.gson
+
+    compileOnly files(Jvm.current().getToolsJar())
+
+    implementation project(":qxml-annotations")
+    implementation project(":constant")
+    implementation project(":tools")
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layoutDirection="rtl"
+        android:paddingHorizontal="10dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+
+        <View
+            android:background="#10123456"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"/>
+
+        <View
+            android:layout_marginLeft="20dp"
+            android:background="#22123456"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"/>
+
+        <View
+            android:layout_marginTop="10dp"
+            android:background="#34123456"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"/>
+
+        <View
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:background="#45123456"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"/>
+
+        <View
+            android:layout_weight="1"
+            android:background="#56123456"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"/>
+
+        <View
+            android:layout_weight="1"
+            android:background="#67123456"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_gravity="start"
+        android:background="#10123456"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
+
+    <View
+        android:layout_gravity="center"
+        android:background="#10123456"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
+
+    <View
+        android:layout_gravity="end|center_horizontal"
+        android:background="#10123456"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
+
+    <View
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center|end"
+        android:background="#10123456"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
+
+</LinearLayout>

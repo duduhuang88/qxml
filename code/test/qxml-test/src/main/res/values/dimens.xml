@@ -1,0 +1,24 @@
+<resources>
+    <dimen name="dp10">50dp</dimen>
+
+    <dimen name="sp14">2sp</dimen>
+
+
+    <dimen name="float14">20</dimen>
+    <dimen name="float0_7">0.7</dimen>
+
+
+    <item type="fraction" name="tt_test">20%p</item>
+    <item type="integer" name="tt_int">2</item>
+    <item type="fraction" name="dialog_min_width_minor">95%</item>
+    <item type="bool" name="tt_bool">true</item>
+    <item type="string" name="tt_string">20%</item>
+    <item type="string" name="tt_string_color">#ffffff</item>
+    <item type="string" name="tt_string_int">2</item>
+
+    <item type="string" name="tt_string_ee2">ee2</item>
+    <item type="string" name="tt_string_match_parent">match_parent</item>
+
+
+
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="id_view_padding_set" type="id"/>
+    <item name="id_view_margin_set" type="id"/>
+</resources>

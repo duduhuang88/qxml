@@ -1,0 +1,60 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        app:elevation="50dp"
+        app:expanded="true"
+        app:layout_anchorGravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="300dp">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:expandedTitleGravity="bottom"
+            app:collapsedTitleGravity="bottom"
+            app:collapsedTitleTextAppearance="@style/tabTextAppearance"
+            app:expandedTitleMarginStart="0dp"
+            app:expandedTitleMargin="20dp"
+            app:title="asdf"
+            app:statusBarScrim="@color/sss2"
+            app:contentScrim="@color/sss"
+            app:scrimVisibleHeightTrigger="20dp"
+            app:scrimAnimationDuration="300"
+            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
+            <!--app:layout_scrollFlags="scroll|exitUntilCollapsed"-->
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/ic_launcher"
+                app:layout_collapseMode="parallax" />
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="#5FF"
+                app:logo="@mipmap/ic_launcher"
+                app:layout_collapseMode="pin" />
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+
+        <TextView
+            android:text="123"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </android.support.v4.widget.NestedScrollView>
+</android.support.design.widget.CoordinatorLayout>

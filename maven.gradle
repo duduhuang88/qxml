@@ -1,0 +1,455 @@
+
+//from tencent shadow
+
+task buildSdk() {
+    dependsOn gradle.includedBuild('sdk').task(':qxml-lib:assemble')
+    dependsOn gradle.includedBuild('sdk-support').task(':qxml-support:assemble')
+    dependsOn gradle.includedBuild('codeplugin').task(':gradle-plugin:assemble')
+    dependsOn gradle.includedBuild('codeplugin').task(':constant:assemble')
+    dependsOn gradle.includedBuild('codeplugin').task(':qxml-annotations:assemble')
+    dependsOn gradle.includedBuild('codeplugin').task(':tools:assemble')
+    dependsOn gradle.includedBuild('codeplugin').task(':transform:assemble')
+}
+
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+def androidSupportVersion = '28.0.0'
+def publicationVersion = PUBLISH_VERSION
+def build_gradle_version = "3.5.0"
+
+def pluginGroupId = 'io.github.duduhuang88'
+def libGroupId = 'io.github.duduhuang88'
+
+def pluginPath = "code/codeplugin"
+def sdkPath = "code/sdk"
+def sdkSupportPath = "code/sdk-support"
+
+def gitProjectUrl = "https://github.com/duduhuang88/qxml"
+def gitConnection = 'scm:git:github.com/duduhuang88/qxml.git'
+def gitDeveloperConnection = 'scm:git:github.com/duduhuang88/qxml.git'
+def developerName = "duduhuang88"
+def developerEmail = "yellorCoder@outlook.com"
+def licenseName = "The Apache License, Version 2.0"
+def licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+
+ext["signing.keyId"] = ''
+ext["signing.password"] = ''
+ext["signing.secretKeyRingFile"] = ''
+ext["ossrhUsername"] = ''
+ext["ossrhPassword"] = ''
+File localPropsFile = project.rootProject.file('local.properties')
+if (localPropsFile.exists()) {
+    Properties properties = new Properties()
+    properties.load(new FileInputStream(localPropsFile))
+    properties.each { name, value ->
+        ext[name] = value
+    }
+}
+
+def setGeneratePomFileAndDepends(publicationName) {
+    model {
+        tasks."generatePomFileFor${publicationName.capitalize()}Publication" {
+            destination = file("$buildDir/pom/$publicationName-pom.xml")
+            dependsOn(buildSdk)
+        }
+    }
+}
+
+def sourceJar(String name, String path) {
+    return tasks.create("source${name.capitalize()}Jar", Jar) {
+        group = "publishing"
+        description = "package ${name} source to jar"
+        from "$path/src/main/java"
+        from "$path/src/main/kotlin"
+        destinationDir = file("$path/build/libs/")
+        classifier = 'sources'
+        exclude "**/R.class"
+        exclude "**/BuildConfig.class"
+    }
+}
+
+//todo add doc
+def javaDocJar(String name, String path) {
+    Javadoc javaDoc =  tasks.create("javaDoc${name.capitalize()}", Javadoc) {
+        group = "javaDoc"
+        description = "package ${name} javadoc"
+        //source = "$path/src/main/java"
+                //'build/generated/not_namespaced_r_class_sources/release/generateReleaseRFile/out/com/sensorsdata/analytics/android/sdk/R.java'
+        //classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }.dependsOn(gradle.includedBuild('codeplugin').task(':gradle-plugin:assemble'))
+    return tasks.create("javaDoc${name.capitalize()}Jar", Jar) {
+        group = "javaDoc"
+        description = "package ${name} javadoc"
+        classifier = 'javadoc'
+        //from javaDoc.destinationDir
+    }.dependsOn(javaDoc)
+}
+
+static def getDependencyNode(scope, groupId, artifactId, version) {
+    Node node = new Node(null, 'dependency')
+    node.appendNode('groupId', groupId)
+    node.appendNode('artifactId', artifactId)
+    node.appendNode('version', version)
+    node.appendNode('scope', scope)
+    return node
+}
+
+publishing{
+    publications {
+        gradlePlugin(MavenPublication) {
+
+            groupId pluginGroupId
+            artifactId 'gradle-plugin'
+            version publicationVersion
+
+            artifact("$pluginPath/gradle-plugin/build/libs/gradle-plugin.jar")
+            artifact sourceJar("gradle-plugin", "$pluginPath/gradle-plugin")
+            artifact javaDocJar("gradle-plugin", "$pluginPath/gradle-plugin")
+
+            pom {
+                name = 'qxml-gradle-plugin'
+                description = 'gradle plugin of qxml'
+                url = gitProjectUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitProjectUrl
+                    connection = gitConnection
+                    developerConnection = gitDeveloperConnection
+                }
+            }
+
+            pom.withXml {
+                def root = asNode()
+                def dependencies = root.appendNode('dependencies')
+                dependencies.append(getDependencyNode('compile', 'com.android.tools.build', 'gradle', build_gradle_version))
+                dependencies.append(getDependencyNode('compile', 'org.jetbrains.kotlin', 'kotlin-stdlib-jdk7', kotlin_version))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'transform', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'tools', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'constant', publicationVersion))
+            }
+        }
+
+        transform(MavenPublication) {
+            groupId pluginGroupId
+            artifactId 'transform'
+            version publicationVersion
+
+            artifact("$pluginPath/transform/build/libs/transform.jar")
+            artifact sourceJar("transform", "$pluginPath/transform")
+            artifact javaDocJar("transform", "$pluginPath/transform")
+
+            pom {
+                name = 'qxml-transform'
+                description = 'transform of qxml'
+                url = gitProjectUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitProjectUrl
+                    connection = gitConnection
+                    developerConnection = gitDeveloperConnection
+                }
+            }
+
+            pom.withXml {
+                def root = asNode()
+                def dependencies = root.appendNode('dependencies')
+                dependencies.append(getDependencyNode('compile', 'com.android.tools.build', 'gradle', build_gradle_version))
+                dependencies.append(getDependencyNode('compile', 'org.jetbrains.kotlin', 'kotlin-stdlib-jdk7', kotlin_version))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'tools', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'constant', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'qxml-annotations', publicationVersion))
+                dependencies.append(getDependencyNode('compile', 'org.javassist', 'javassist', '3.27.0-GA'))
+                dependencies.append(getDependencyNode('compile', 'com.squareup', 'javapoet', '1.11.1'))
+            }
+        }
+
+        tools(MavenPublication) {
+            groupId pluginGroupId
+            artifactId 'tools'
+            version publicationVersion
+
+            artifact("$pluginPath/tools/build/libs/tools.jar")
+            artifact sourceJar("tools", "$pluginPath/tools")
+            artifact javaDocJar("tools", "$pluginPath/tools")
+
+            pom {
+                name = 'qxml-tools'
+                description = 'tools of qxml'
+                url = gitProjectUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitProjectUrl
+                    connection = gitConnection
+                    developerConnection = gitDeveloperConnection
+                }
+            }
+
+            pom.withXml {
+                def root = asNode()
+                def dependencies = root.appendNode('dependencies')
+                dependencies.append(getDependencyNode('compile', 'org.jetbrains.kotlin', 'kotlin-stdlib-jdk7', kotlin_version))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'constant', publicationVersion))
+            }
+        }
+
+        constant(MavenPublication) {
+            groupId pluginGroupId
+            artifactId 'constant'
+            version publicationVersion
+
+            artifact("$pluginPath/constant/build/libs/constant.jar")
+            artifact sourceJar("constant", "$pluginPath/constant")
+            artifact javaDocJar("constant", "$pluginPath/constant")
+
+            pom {
+                name = 'qxml-constant'
+                description = 'constant of qxml'
+                url = gitProjectUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitProjectUrl
+                    connection = gitConnection
+                    developerConnection = gitDeveloperConnection
+                }
+            }
+        }
+
+        qxmlAnnotations(MavenPublication) {
+            groupId pluginGroupId
+            artifactId 'qxml-annotations'
+            version publicationVersion
+
+            artifact("$pluginPath/qxml-annotations/build/libs/qxml-annotations.jar")
+            artifact sourceJar("qxml-annotations", "$pluginPath/qxml-annotations")
+            artifact javaDocJar("qxml-annotations", "$pluginPath/qxml-annotations")
+
+            pom {
+                name = 'qxml-annotations'
+                description = 'annotations of qxml'
+                url = gitProjectUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitProjectUrl
+                    connection = gitConnection
+                    developerConnection = gitDeveloperConnection
+                }
+            }
+
+            pom.withXml {
+                def root = asNode()
+                def dependencies = root.appendNode('dependencies')
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'constant', publicationVersion))
+            }
+        }
+
+        qxmlProcessor(MavenPublication) {
+            groupId pluginGroupId
+            artifactId 'qxml-processor'
+            version publicationVersion
+
+            artifact("$pluginPath/qxml-processor/build/libs/qxml-processor.jar")
+            artifact sourceJar("qxml-processor", "$pluginPath/qxml-processor")
+            artifact javaDocJar("qxml-processor", "$pluginPath/qxml-processor")
+
+            pom {
+                name = 'qxml-processor'
+                description = 'processor of qxml'
+                url = gitProjectUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitProjectUrl
+                    connection = gitConnection
+                    developerConnection = gitDeveloperConnection
+                }
+            }
+
+            pom.withXml {
+                def root = asNode()
+                def dependencies = root.appendNode('dependencies')
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'tools', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'constant', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'qxml-annotations', publicationVersion))
+                dependencies.append(getDependencyNode('compile', 'com.squareup', 'javapoet', '1.11.1'))
+                dependencies.append(getDependencyNode('compile', 'com.google.code.gson', 'gson', '2.8.5'))
+            }
+        }
+
+        qxmlLib(MavenPublication) {
+            groupId libGroupId
+            artifactId 'qxml-base'
+            version publicationVersion
+
+            artifact("$sdkPath/qxml-lib/build/outputs/aar/qxml-lib-release.aar")
+            artifact sourceJar("qxml-lib", "$sdkPath/qxml-lib")
+            artifact javaDocJar("qxml-lib", "$sdkPath/qxml-lib")
+
+            pom {
+                name = 'qxml-baseLib'
+                description = 'base lib of qxml'
+                url = gitProjectUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitProjectUrl
+                    connection = gitConnection
+                    developerConnection = gitDeveloperConnection
+                }
+            }
+
+            pom.withXml {
+                def root = asNode()
+                def dependencies = root.appendNode('dependencies')
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'constant', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'qxml-annotations', publicationVersion))
+            }
+        }
+
+        qxmlSupport(MavenPublication) {
+            groupId libGroupId
+            artifactId 'qxml-support'
+            version publicationVersion
+
+            artifact("$sdkSupportPath/qxml-support/build/outputs/aar/qxml-support-release.aar")
+            artifact sourceJar("qxml-support", "$sdkSupportPath/qxml-support")
+            artifact javaDocJar("qxml-support", "$sdkSupportPath/qxml-support")
+
+            pom {
+                name = 'qxml-supportLib'
+                description = 'support lib of qxml'
+                url = gitProjectUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitProjectUrl
+                    connection = gitConnection
+                    developerConnection = gitDeveloperConnection
+                }
+            }
+
+            pom.withXml {
+                def root = asNode()
+                def dependencies = root.appendNode('dependencies')
+                dependencies.append(getDependencyNode('compile', libGroupId, 'qxml-base', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'constant', publicationVersion))
+                dependencies.append(getDependencyNode('compile', pluginGroupId, 'qxml-annotations', publicationVersion))
+                dependencies.append(getDependencyNode('provided', "com.airbnb.android", 'lottie', "2.7.0"))
+            }
+        }
+    }
+
+    repositories{
+        maven {
+            url project.rootDir.absolutePath+"/repo"
+        }
+
+        maven {
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
+}
+
+setGeneratePomFileAndDepends('gradlePlugin')
+setGeneratePomFileAndDepends('transform')
+setGeneratePomFileAndDepends('tools')
+setGeneratePomFileAndDepends('constant')
+setGeneratePomFileAndDepends('qxmlAnnotations')
+setGeneratePomFileAndDepends('qxmlProcessor')
+setGeneratePomFileAndDepends('qxmlLib')
+setGeneratePomFileAndDepends('qxmlSupport')

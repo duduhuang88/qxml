@@ -1,0 +1,5 @@
+
+include 'qxml-support'
+
+includeBuild('../codeplugin')
+includeBuild('../sdk')

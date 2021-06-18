@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">qxml</string>
+    <string name="isss">true</string>
+
+
+    <string name="isss_float">2</string>
+    <string name="isss_dimen">20dp</string>
+</resources>

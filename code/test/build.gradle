@@ -1,0 +1,32 @@
+
+buildscript {
+    ext.kotlin_version = "1.4.10"
+    ext.build_gradle_version = '4.0.2'
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "../../../repo"
+        }
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:$build_gradle_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+        //classpath 'com.qxml.gradle:gradle-plugin'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        mavenLocal()
+        maven {
+            url "../../../repo"
+        }
+    }
+}
+
+apply from: '../../common.gradle'
+

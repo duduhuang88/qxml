@@ -1,0 +1,4 @@
+
+include 'qxml-lib'
+
+includeBuild('../codeplugin')

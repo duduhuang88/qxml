@@ -1,0 +1,71 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+apply plugin: 'com.qxml.code.plugin'
+apply plugin: 'kotlin-kapt'
+
+group 'com.qxml.sdk'
+
+apply from: '../../gradleScript/privateKey.gradle'
+apply from: '../../gradleScript/dokka.gradle'
+
+android {
+    compileSdkVersion versions.compileSdkVersion
+    buildToolsVersion versions.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion versions.minSdkVersion
+        targetSdkVersion versions.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ RSA_PRIVATE_KEY : getQxmlPrivateKey() ]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+qxml {
+    logEnable = false
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testImplementation deps.junit
+
+    implementation deps.support.v7
+    implementation deps.support.constraintLayout
+    implementation deps.support.recyclerview
+    implementation deps.support.design
+
+    compileOnly deps.support.lottie
+
+    implementation deps.qxml.baseLib
+
+    kapt deps.qxml.processorConstant
+
+    api deps.qxml.constantConstant
+    implementation deps.qxml.annotationsConstant
+
+    androidTestImplementation deps.test.runner
+    androidTestImplementation deps.test.core
+}

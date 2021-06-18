@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:hint="123456"
+            android:textColorHint="@color/colorPrimary"
+            android:textColor="#000000"
+            android:digits="123456789"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+        <EditText
+            android:text="1234567891011"
+            android:textDirection="rtl"
+            android:textSize="15sp"
+            android:textColor="#000000"
+            android:gravity="right|top"
+            android:textStyle="italic"
+            android:typeface="monospace"
+            android:background="@drawable/bg_test"
+            android:layout_width="100dp"
+            android:layout_height="50dp"/>
+
+
+        <EditText
+            android:text="123456789101"
+            android:textColor="#000000"
+            android:textScaleX="0.5"
+            android:gravity="right|center"
+            android:background="@null"
+            android:inputType="number"
+            android:layout_width="100dp"
+            android:layout_height="50dp"/>
+
+        <EditText
+            android:text="abcdefg"
+            android:inputType="numberPassword"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+        <EditText
+            android:text="abcdefghijklmn"
+            android:typeface="monospace"
+            android:textColor="#000000"
+            android:gravity="center"
+            android:maxLines="1"
+            android:inputType="text"
+            android:nextFocusDown="@+id/et_5"
+            android:imeOptions="actionNext"
+            android:layout_width="120dp"
+            android:layout_height="50dp"/>
+
+        <EditText
+            android:id="@+id/et_5"
+            android:textColor="#000000"
+            android:gravity="right|center"
+            android:textColorLink="#123456"
+            android:imeOptions="normal"
+            android:autoLink="email"
+            android:text="222@gmail.com"
+            android:freezesText="true"
+            android:maxLines="1"
+            android:maxEms="10"
+            android:inputType="text"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+        <!--
+        这个属性低版本会调用反射
+        android:textCursorDrawable="@drawable/shape_cursor"-->
+
+        <EditText
+            android:id="@+id/et_6"
+            android:textAllCaps="true"
+            android:text="abcdefg"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+    </LinearLayout>
+
+
+</ScrollView>

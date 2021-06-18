@@ -1,0 +1,23 @@
+
+/*
+apply plugin: 'org.jetbrains.dokka'
+
+task generateJavadocByDokka(type: Jar, dependsOn: dokkaJavadoc) {
+    group = 'docJar'
+    classifier = 'javadoc'
+    from "$buildDir/dokka/javadoc"
+}
+
+dokkaJavadoc.configure {
+    offlineMode.set(true)
+    dokkaSourceSets {
+        named("main") {
+            perPackageOption {
+                skipDeprecated.set(false)
+                reportUndocumented.set(false)
+                skipEmptyPackages.set(true)
+                includeNonPublic.set(false)
+            }
+        }
+    }
+}*/

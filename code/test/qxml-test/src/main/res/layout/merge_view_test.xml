@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:text="i am merge"
+        android:gravity="center"
+        android:background="#af122d"
+        android:layout_marginTop="200dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
+
+    <TextView
+        android:text="i am merge"
+        android:gravity="center"
+        android:background="#af122d"
+        android:layout_marginTop="100dp"
+        android:layout_width="300dp"
+        android:layout_height="100dp"/>
+
+</merge>

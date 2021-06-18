@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#3a123456"
+    android:layout_width="match_parent"
+    android:layout_height="300dp">
+
+    <TextView
+        android:text="i am include"
+        android:gravity="center"
+        android:textColor="#fff"
+        android:background="#111"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"/>
+
+    <include layout="@layout/merge_view_test"/>
+
+</RelativeLayout>

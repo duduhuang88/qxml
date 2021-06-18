@@ -1,0 +1,5 @@
+
+include 'qxml-androidx'
+
+includeBuild('../sdk')
+includeBuild('../codeplugin')

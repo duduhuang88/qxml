@@ -1,0 +1,19 @@
+<resources>
+    <declare-styleable name="View">
+        <attr name="qxml" >
+            <enum name="genIgnore" value="0" />
+            <enum name="genWithUnImplementAttr" value="1" />
+            <enum name="genWithoutUnImplementAttr" value="2" />
+        </attr>
+
+        <attr name="qxml_use_factory" format="boolean"/>
+        <attr name="qxml_debug" format="boolean"/>
+
+        <attr name="qxml_compat" >
+            <enum name="never" value="0" />
+            <enum name="auto" value="1" />
+            <enum name="force" value="2" />
+        </attr>
+    </declare-styleable>
+
+</resources>

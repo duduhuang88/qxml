@@ -1,0 +1,7 @@
+include ':app'
+rootProject.name = "androidx_test"
+
+includeBuild('../code/codeplugin')
+includeBuild('../code/sdk-androidx')
+includeBuild('../code/sdk')
+includeBuild('../code/test')

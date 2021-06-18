@@ -1,0 +1,7 @@
+
+include 'qxml-test'
+include ':module'
+include ':module2'
+
+includeBuild('../codeplugin')
+includeBuild('../sdk')

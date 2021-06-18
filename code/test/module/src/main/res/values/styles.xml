@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="GSH_Model">
+        <attr name="gsh_allow_blank2" format="dimension"/>
+    </declare-styleable>
+</resources>

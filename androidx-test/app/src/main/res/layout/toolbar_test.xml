@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.appcompat.widget.Toolbar
+        app:logo="@mipmap/ic_launcher"
+        app:title="123"
+        app:titleTextColor="@color/sss"
+        app:titleMarginStart="100dp"
+        app:logoDescription="123000"
+        app:collapseIcon="@color/sss"
+        app:subtitle="321"
+        app:buttonGravity="top"
+        app:maxButtonHeight="20dp"
+        app:titleTextAppearance="@style/tabTextAppearance"
+        app:contentInsetEndWithActions="@dimen/dp10"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"/>
+
+</LinearLayout>

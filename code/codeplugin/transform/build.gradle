@@ -1,0 +1,23 @@
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'kotlin'
+
+apply from: '../../gradleScript/dokka.gradle'
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    //implementation "org.gradle:gradle-api:6.1.1"
+    //org.gradle:gradle-api:3.0
+    //implementation("com.android.tools.build:gradle:4.0.2")
+    implementation deps.android.gradlePlugin
+    api deps.javassist
+    implementation deps.javapoet
+
+    implementation project(":constant")
+    implementation project(":qxml-annotations")
+    implementation project(":tools")
+}
+
+repositories {
+    mavenCentral()
+}

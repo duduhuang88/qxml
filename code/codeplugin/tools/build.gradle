@@ -1,0 +1,15 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+
+apply from: '../../gradleScript/dokka.gradle'
+
+group 'io.github.duduhuang88'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation project(":constant")
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"

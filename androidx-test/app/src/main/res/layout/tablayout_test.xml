@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.tabs.TabLayout
+        app:tabInlineLabel="true"
+        app:tabGravity="center"
+        app:tabMinWidth="100dp"
+        app:tabMaxWidth="200dp"
+        app:tabMode="scrollable"
+        app:tabPaddingStart="15dp"
+        app:tabPaddingEnd="10dp"
+        app:tabContentStart="20dp"
+        app:tabPaddingTop="5dp"
+        app:tabPaddingBottom="5dp"
+        app:tabTextAppearance="@style/tabTextAppearance"
+        app:tabIndicatorFullWidth="false"
+        app:tabIndicatorColor="@color/sss"
+        app:tabSelectedTextColor="#000000"
+        app:tabIconTint="#50505050"
+        app:tabIconTintMode="add"
+        app:tabRippleColor="@color/sss2"
+        app:tabIndicatorAnimationDuration="500"
+        app:tabBackground="@drawable/shape_gradient"
+        app:tabIndicatorGravity="stretch"
+        app:tabIndicatorHeight="15dp"
+        app:tabUnboundedRipple="@bool/tt_bool"
+        android:layout_width="match_parent"
+        android:layout_height="150dp">
+
+        <com.google.android.material.tabs.TabItem
+            android:text="123456"
+            android:icon="@mipmap/ic_launcher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:text="123456"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </com.google.android.material.tabs.TabLayout>
+
+</FrameLayout>

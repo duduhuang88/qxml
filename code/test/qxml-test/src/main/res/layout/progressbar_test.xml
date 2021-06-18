@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--<ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:progress="50"
+        android:secondaryProgress="70"
+        android:progressDrawable="@drawable/shape_gradient"
+        android:layout_width="200dp"
+        android:layout_height="20dp"/>-->
+
+    <!--<ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_marginTop="20dp"
+        android:progress="50"
+        android:secondaryProgress="70"
+        android:max="300"
+        android:min="20"
+        android:progressTint="#50505050"
+        android:progressBackgroundTint="#50505050"
+        android:indeterminateTint="#50505050"
+        android:secondaryProgressTint="#50505050"
+        android:layout_width="200dp"
+        android:layout_height="20dp"/>-->
+
+    <!--
+        android:progressTintMode="src_over"
+        TintMode有点问题
+    -->
+
+    <ProgressBar
+        android:progressDrawable="@drawable/shape_gradient"
+        android:minWidth="200dp"
+        android:minHeight="200dp"
+        android:maxWidth="300dp"
+        android:maxHeight="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!--
+        android:max="50"
+        android:indeterminateBehavior="cycle"
+        android:indeterminateDuration="3000"
+        android:interpolator="@android:anim/accelerate_interpolator"
+        -->
+
+    <ProgressBar
+        android:max="50"
+        android:mirrorForRtl="true"
+        android:layoutDirection="rtl"
+        android:indeterminateBehavior="repeat"
+        android:indeterminateDuration="2000"
+        android:indeterminate="false"
+        android:indeterminateOnly="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>

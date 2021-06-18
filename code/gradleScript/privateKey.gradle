@@ -1,0 +1,25 @@
+
+def static getQxmlPrivateKey() {
+    File propFile = new File("../../../maven_config.properties")
+    if (!propFile.exists()) {
+        propFile = new File("../../maven_config.properties")
+    }
+    if (!propFile.exists()) {
+        propFile = new File("../maven_config.properties")
+    }
+    if (!propFile.exists()) {
+        propFile = new File("./maven_config.properties")
+    }
+
+    if (propFile.exists()) {
+        Properties props = new Properties()
+        props.load(new FileInputStream(propFile))
+        return props['RSA_PRIVATE_KEY']
+    } else {
+        return ""
+    }
+}
+
+ext {
+    getQxmlPrivateKey = this.&getQxmlPrivateKey
+}

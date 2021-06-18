@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        app:firstBaselineToTopHeight="50dp"
+        android:text="123456"
+        android:layout_width="200dp"
+        android:layout_height="200dp">
+    </TextView>
+
+    <ImageView
+        app:srcCompat="@mipmap/ic_launcher"
+        app:tint="#33333333"
+        app:tintMode="src_atop"
+        android:layout_marginTop="170dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginStart="50dp"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:layout_marginTop="110dp"
+        android:text="123"
+        android:textStyle="bold"
+        app:fontFamily="cursive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:layout_marginTop="230dp"
+        app:fontFamily="cursive"
+        android:textStyle="bold"
+        android:text="123"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</FrameLayout>

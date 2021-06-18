@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 隐藏的几个imageView在8.0上不同，但暂时看不出来哪里不同 -->
+
+    <ImageView
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="fitXY"
+        android:layout_width="50dp"
+        android:layout_height="100dp"/>
+
+    <ImageView
+        android:src="@mipmap/ic_launcher"
+        android:adjustViewBounds="false"
+        android:scaleType="centerInside"
+        android:visibility="gone"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:src="@drawable/shape_gradient"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
+
+    <ImageView
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="centerInside"
+        android:visibility="gone"
+        android:layout_marginTop="5dp"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="centerCrop"
+        android:paddingTop="15dp"
+        android:visibility="gone"
+        android:cropToPadding="true"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"/>
+
+
+    <ImageView
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="fitXY"
+        android:tint="#50505050"
+        android:visibility="gone"
+        android:layout_width="100dp"
+        android:layout_height="50dp"/>
+
+</LinearLayout>

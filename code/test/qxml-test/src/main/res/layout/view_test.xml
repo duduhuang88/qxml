@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sv_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:id="@+id/ll_content"
+        android:orientation="vertical"
+        android:paddingTop="6dp"
+        android:paddingBottom="50dp"
+        android:paddingVertical="20dp"
+        android:paddingStart="20dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="50dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/view_1"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginHorizontal="100dp"
+            android:alpha="0.8"
+            android:background="#123456"
+            android:layout_width="50dp"
+            android:layout_height="30dp"/>
+
+        <View
+            android:id="@+id/view_2"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginLeft="50dp"
+            android:backgroundTint="#55000000"
+            android:backgroundTintMode="add"
+            android:background="#000000"
+            android:layout_width="60dp"
+            android:layout_height="20dp"/>
+
+        <View
+            android:id="@+id/view_4"
+            android:layout_marginTop="0.1in"
+            android:foreground="@color/colorAccent"
+            android:layout_width="66dp"
+            android:layout_height="20dp"/>
+
+        <View
+            android:id="@+id/view_6"
+            android:layout_marginLeft="11.1pt"
+            android:layout_marginTop="1.1mm"
+            android:background="@color/sss"
+            android:minWidth="70dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"/>
+
+        <View
+            android:id="@+id/view_7"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:background="@color/sss"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
+
+        <View
+            android:id="@+id/view_8"
+            android:background="@color/colorPrimaryDark"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginVertical="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"/>
+
+        <View
+            android:longClickable="true"
+            android:id="@+id/view_9"
+            android:layout_gravity="end"
+            android:background="@color/sss"
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
+
+        <View
+            android:id="@+id/view_10"
+            android:translationX="40dp"
+            android:transformPivotY="20dp"
+            android:transformPivotX="-10dp"
+            android:transitionName="asdf"
+            android:layout_marginLeft="70px"
+            android:layout_marginTop="@dimen/dp10"
+            android:background="#ffffff"
+            android:translationY="-30dp"
+            android:rotation="30"
+            android:elevation="20dp"
+            android:scaleX="0.5"
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
+
+    </LinearLayout>
+
+</ScrollView>

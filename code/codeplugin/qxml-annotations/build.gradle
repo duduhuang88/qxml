@@ -1,0 +1,9 @@
+apply plugin: 'java-library'
+
+//apply from: '../../gradleScript/dokka.gradle'
+
+group 'io.github.duduhuang88'
+
+dependencies {
+    implementation project(":constant")
+}

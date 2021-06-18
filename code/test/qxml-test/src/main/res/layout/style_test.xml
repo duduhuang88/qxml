@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:text="123"
+        style="@style/sizeStyle.s"/>
+
+    <TextView
+        style="@style/testStyle"/>
+
+    <TextView
+        style="@style/buttonStyleSmall"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        />
+
+    <!--style引用时不会设置大小/位置相关的属性，所以需要显式设置-->
+    <TextView
+        style="?actionButtonStyle"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        />
+
+    <TextView
+        style="@style/bgAndSizeStyle"/>
+
+</LinearLayout>

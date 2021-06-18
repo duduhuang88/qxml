@@ -1,0 +1,89 @@
+
+def REMOTE_DEPENDENCE = false
+
+allprojects {
+
+    ext.PUBLISH_VERSION = "0.9.6"
+
+    ext.versions = [
+            'minSdkVersion': 14,
+            'compileSdkVersion': 29,
+
+            'buildToolsVersion': '30.0.3',
+            'kotlin_version': '1.4.10',
+
+            'build_gradle_version': '4.0.2',
+    ]
+
+    ext.deps = [
+            android: [
+                    'gradlePlugin': "com.android.tools.build:gradle:4.0.2",
+            ],
+            'support': [
+                    'v7': 'com.android.support:appcompat-v7:28.0.0',
+                    'constraintLayout': 'com.android.support.constraint:constraint-layout:2.0.4',
+                    'recyclerview': 'com.android.support:recyclerview-v7:28.0.0',
+                    'design': 'com.android.support:design:28.0.0',
+                    'lottie': 'com.airbnb.android:lottie:2.7.0'
+            ],
+            'androidx': [
+                    'core': "androidx.core:core:1.0.0",
+                    'viewpager': "androidx.viewpager:viewpager:1.0.0",
+                    'annotations': "androidx.annotation:annotation:1.0.0",
+                    'material': "com.google.android.material:material:1.2.1",
+                    'constraintlayout': "androidx.constraintlayout:constraintlayout:2.0.4",
+                    'recyclerview': 'androidx.recyclerview:recyclerview:1.2.0',
+                    'compat': 'androidx.appcompat:appcompat:1.2.0',
+                    'viewpager2': 'androidx.viewpager2:viewpager2:1.0.0',
+                    'lottie': 'com.airbnb.android:lottie:3.7.0',
+                    'test': [
+                            'runner': 'androidx.test:runner:1.1.0',
+                            'rules': 'androidx.test:rules:1.1.0',
+                    ],
+            ],
+            'lint': [
+                    'core': "com.android.tools.lint:lint:${versions.buildToolsVersion}",
+                    'api': "com.android.tools.lint:lint-api:${versions.buildToolsVersion}",
+                    'checks': "com.android.tools.lint:lint-checks:${versions.buildToolsVersion}",
+                    'tests': "com.android.tools.lint:lint-tests:${versions.buildToolsVersion}",
+            ],
+            javapoet: 'com.squareup:javapoet:1.11.1',
+            javassist: 'org.javassist:javassist:3.27.0-GA',
+            junit: 'junit:junit:4.12',
+            'auto': [
+                    'service': 'com.google.auto.service:auto-service:1.0-rc6',
+                    'common': 'com.google.auto:auto-common:0.10',
+            ],
+            'test': [
+                    'runner': 'com.android.support.test:runner:1.0.2',
+                    'core': 'com.android.support.test.espresso:espresso-core:3.0.2',
+            ],
+            gson: 'com.google.code.gson:gson:2.8.5',
+            'kotlin': [
+                    'stdLibJdk8': "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
+            ],
+
+            'qxml': [
+                    'processorConstant': 'io.github.duduhuang88:qxml-processor',
+                    'processor': 'io.github.duduhuang88:qxml-processor',
+                    'annotationsConstant': 'io.github.duduhuang88:qxml-annotations',
+                    'remote_annotations': "io.github.duduhuang88:qxml-annotations:${ext.PUBLISH_VERSION}",
+                    'annotations': 'io.github.duduhuang88:qxml-annotations',
+                    'tools': 'io.github.duduhuang88:tools',
+                    'constantConstant': 'io.github.duduhuang88:constant',
+                    'remote_constant': "io.github.duduhuang88:constant:${ext.PUBLISH_VERSION}",
+                    'constant': 'io.github.duduhuang88:constant',
+                    'qxmlTest': 'com.qxml.test:qxml-test',
+                    'baseLib': "com.qxml.sdk:qxml-lib",
+                    'dynamic_androidxLib': REMOTE_DEPENDENCE ? "io.github.duduhuang88:qxml-androidx:${ext.PUBLISH_VERSION}" : "com.qxml.sdk:qxml-androidx",
+                    'dynamic_baseLib': REMOTE_DEPENDENCE ? "io.github.duduhuang88:qxml-base:${ext.PUBLISH_VERSION}" : "com.qxml.sdk:qxml-lib",
+                    'dynamic_supportLib': REMOTE_DEPENDENCE ? "io.github.duduhuang88:qxml-support:${ext.PUBLISH_VERSION}" : "com.qxml.sdk:qxml-support",
+            ],
+    ]
+
+    repositories {
+        google()
+        jcenter()
+    }
+
+}

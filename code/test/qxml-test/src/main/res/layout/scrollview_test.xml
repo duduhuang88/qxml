@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:scrollbars="vertical"
+    android:scrollbarFadeDuration="999999"
+    android:fadingEdgeLength="100dp"
+    android:requiresFadingEdge="vertical"
+    android:overScrollMode="never"
+    android:verticalScrollbarPosition="left"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbarStyle="insideInset">
+    <!--
+    android:scrollbarAlwaysDrawVerticalTrack="true"
+    android:scrollbarThumbVertical="@mipmap/ic_launcher"
+    scrollbarThumbVertical、scrollbarAlwaysDrawVerticalTrack调用反射，性能稍有损耗
+    fadeScrollbars为false（一直显示滚动条）还有问题，先用scrollbarFadeDuration 99999代替
+    -->
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <HorizontalScrollView
+            android:layoutDirection="rtl"
+            android:layout_width="match_parent"
+            android:layout_height="100dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <View
+                    android:background="@color/sss"
+                    android:layout_width="1500dp"
+                    android:layout_height="match_parent"/>
+
+            </LinearLayout>
+
+
+        </HorizontalScrollView>
+
+        <ScrollView
+            android:scrollbars="none"
+            android:fillViewport="true"
+            android:layout_width="match_parent"
+            android:layout_height="100dp">
+
+            <View
+                android:background="@drawable/selector_bg"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"/>
+
+        </ScrollView>
+
+        <View
+            android:background="@color/colorPrimaryDark"
+            android:layout_width="120dp"
+            android:layout_height="1500dp"/>
+
+    </LinearLayout>
+
+</ScrollView>

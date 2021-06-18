@@ -1,0 +1,124 @@
+<resources>
+    <!-- Base application theme. -->
+    <!-- todo android:Theme.Material.Light.NoActionBar -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlHighlight">#2f2e5555</item>
+        <!--<item name="colorAccent">#FFFFFF</item>-->
+        <!--<item name="android:buttonStyle">@android:style/Widget.Holo.Button.Small</item>-->
+        <item name="actionButtonStyle">@style/bgAndSizeStyle</item>
+        <item name="myStyle">@style/paddingTopStyle</item>
+        <!--<item name="android:text">"123456"</item>-->
+
+        <item name="android:minWidth">@dimen/dp10</item>
+
+        <item name="test_int">3</item>
+        <item name="test_string">123456789</item>
+        <item name="test_dimen">5dp</item>
+        <item name="test_float">45</item>
+        <item name="test_boolean">@bool/tt_bool</item>
+        <item name="test_reference">@drawable/selector_bg</item>
+    </style>
+
+    <declare-styleable name="View">
+        <attr name="background2" format="string|reference"/>
+        <attr name="reference_and_enum" format="reference">
+            <enum name="ww2" value="101" />
+        </attr>
+
+        <attr name="myStyle" format="reference"/>
+
+        <attr name="android:color" />
+
+        <attr name="alpha" format="float" />
+
+        <attr name="test_int" format="integer" />
+        <attr name="test_dimen" format="dimension" />
+        <attr name="test_float" format="float" />
+        <attr name="test_string" format="string" />
+        <attr name="test_boolean" format="boolean" />
+        <attr name="test_reference" format="reference" />
+    </declare-styleable>
+
+
+    <style name="buttonStyleSmall">
+        <item name="android:textColor">@android:color/holo_red_light</item>
+        <item name="android:textSize">40sp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">200dp</item>
+        <item name="android:background">#ffff00ff</item>
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="testStyle" >
+        <item name="android:layout_width">150dp</item>
+        <item name="android:layout_height">23dp</item>
+        <item name="android:background">@drawable/selector_bg</item>
+    </style>
+
+    <style name="paddingTopStyle" >
+        <item name="android:paddingTop">20dp</item>
+    </style>
+
+    <style name="marginTopStyle" >
+        <item name="android:layout_marginTop">20dp</item>
+    </style>
+
+    <style name="sizeStyle">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+    </style>
+
+    <style name="bgAndSizeStyle" parent="sizeStyle">
+        <item name="android:background">@drawable/selector_bg</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textSize">25dp</item>
+        <item name="android:text">12333</item>
+    </style>
+
+    <style name="sizeStyle.s" >
+        <item name="android:background">@drawable/selector_bg</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="testReferenceStyle" >
+        <item name="android:layout_marginLeft">10dp</item>
+    </style>
+
+
+    <style name="customStyleTestBase" >
+        <item name="android:layout_width">10dp</item>
+        <item name="android:layout_height">10dp</item>
+    </style>
+
+    <style name="customStyleTestBase.one" >
+        <item name="android:background">@drawable/selector_bg</item>
+    </style>
+
+    <style name="customStyleTestBase.one.two" >
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="customStyleTestBase.one.two.three" >
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="otherStyleTypeTestBase" parent="customStyleTestBase">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="unSupportStyleTest" parent="TextAppearance.AppCompat">
+        <item name="android:layout_width">10dp</item>
+        <item name="android:layout_height">10dp</item>
+    </style>
+
+    <style name="tabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+</resources>
