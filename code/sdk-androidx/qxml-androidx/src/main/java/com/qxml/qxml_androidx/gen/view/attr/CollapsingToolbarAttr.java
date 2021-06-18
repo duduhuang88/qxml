@@ -1,0 +1,28 @@
+package com.qxml.qxml_androidx.gen.view.attr;
+
+import android.view.View;
+
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.qxml.gen.view.lovalVar.ViewLocalVar;
+import com.qxml.qxml_androidx.RS;
+import com.yellow.qxml_annotions.Attr;
+
+public interface CollapsingToolbarAttr extends ViewLocalVar {
+
+    @Attr(RS.attr.layout_collapseMode)
+    default void viewLayoutCollapseMode(View view, int layout_collapseMode) {
+        if (___cur_layout_param instanceof com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) {
+            com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams lp = (com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) ___cur_layout_param;
+            lp.setCollapseMode(layout_collapseMode);
+        }
+    }
+
+    @Attr(RS.attr.layout_collapseParallaxMultiplier)
+    default void viewLayoutCollapseParallaxMultiplier(View view, float layout_collapseParallaxMultiplier) {
+        if (___cur_layout_param instanceof com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) {
+            com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams lp = (com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) ___cur_layout_param;
+            lp.setParallaxMultiplier(layout_collapseParallaxMultiplier);
+        }
+    }
+
+}
