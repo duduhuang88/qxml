@@ -1,23 +1,23 @@
 ﻿# qxml
 
-[English](README_EN.md)
+[中文](README.md)
 
-一个低侵入，可配置的 Android 库，用于将 layout xml 文件转换为 Java 代码以提高性能。
+A low intrusive, configurable android library that converts layout XML files into Java code to improve performance.
 
-# 性能表现
+# Performance
 
-与 inflate 比较可减少 30%+加载时间，随布局复杂度提高而提高，详见 demo。
+Compared with inflate, it can reduce 30% + loading time, which increases with the increase of layout complexity. See demo for details.
 
-# 要求
+# Require
 
-Gradle 3.5.0 以上
+Gradle 3.5.0 above
 
-# 目前支持的组件
+# Currently supported components
 
 ### Base
 
-|     组件     | 支持属性 |     组件     | 支持属性 |         组件         | 支持属性 |
-| :----------: | :------: | :----------: | :------: | :------------------: | :------: |
+|  Component  |  Attr  |  Component   |  Attr  |      Component       |  Attr  |
+| :---------: | :----: | :----------: | :----: | :------------------: | :----: |
 |     View     |  almost  |   TextView   |  almost  |       EditText       |  almost  |
 |    Button    |  almost  |  ImageView   |  almost  |        Button        |  almost  |
 |   CheckBox   |  almost  | ImageButton  |  almost  |      ImageView       |  almost  |
@@ -35,8 +35,8 @@ Gradle 3.5.0 以上
 
 ### Support & Androidx
 
-|       组件        | 支持属性 |     组件     | 支持属性 |          组件           | 支持属性 |
-| :---------------: | :------: | :----------: | :------: | :---------------------: | :------: |
+|     Component     |  Attr  |  Component   |  Attr  |        Component        |  Attr  |
+| :---------------: | :----: | :----------: | :----: | :---------------------: | :----: |
 |   AppBarLayout    |  almost  |   CardView   |  almost  | CollapsingToolbarLayout |  almost  |
 | ConstraintLayout  |  almost  |    Group     |  almost  |        Guideline        |  almost  |
 |    Placeholder    |  almost  |   Barrier    |  almost  |      MotionLayout       |  almost  |
@@ -46,13 +46,13 @@ Gradle 3.5.0 以上
 
 ### Third Part
 
-|       组件        | 支持属性 |     组件     | 支持属性 |          组件           | 支持属性 |
+|     Component     |  Attr  |  Component   |  Attr  |        Component        |  Attr  |
 | :---------------: | :------: | :----------: | :------: | :---------------------: | :------: |
 |   Lottie    |  almost  |      |    |  |    |
 
-# 基础使用
+# Use
 
-### 1. 在 Project `build.gradle` 中添加依赖
+### 1. Add dependency in Project `build.gradle`
 
 ```groovy
 buildscript {
@@ -72,10 +72,10 @@ buildscript {
 
 ```
 
-### 2. 在 module `build.gradle` 中添加依赖
+### 2. Add dependency in module `build.gradle`
 
 ```groovy
-// 于 apply plugin: 'com.android.application' or 'com.android.library' 之后
+// after apply plugin: 'com.android.application' or 'com.android.library'
 apply plugin: 'com.qxml.code.plugin'
 
 compileOptions {
@@ -100,7 +100,7 @@ dependencies {
 
 ```
 
-### 3. 配置
+### 3. config
 
 ```groovy
 android {
@@ -115,16 +115,16 @@ android {
 }
 
 qxml {
-    enable true		//是否开启
-    useFactory false		//是否使用layoutInflater的factory，开启时性能有损耗
-    viewDebug false		//是否在转换的View上显示标志
-    logEnable true		//是否开启log
-    compatMode com.qxml.CompatMode.AUTO  //compat模式
-    acceptReferenceStyle true    //是否接受style引用，仅支持很少部分引用
-    useCreateViewListener true  //使用createViewListener
-    //以上为默认设置
+    enable true		//qxml enable option
+    useFactory false		//whether or not to use the factory of the layoutinflate, there is a loss of performance when it is turned on
+    viewDebug false		//show flag on converted view
+    logEnable true		//log option
+    compatMode com.qxml.CompatMode.AUTO  //compat mode
+    acceptReferenceStyle true    //whether to accept style reference, only a few references are supported
+    useCreateViewListener true  //using createViewListener
+    //default config above
     buildType {
-        debug { //单独配置debug，没有设置的值会使用默认设置
+        debug { //the default option will be used for values that are not set
             viewDebug true
         }
         release {
@@ -134,25 +134,25 @@ qxml {
 }
 ```
 
-### 4. 简单的构建结果的图表显示
+### 4. Simple build result chart
 
-构建结束后，在 build\qxml\report.html 中有简单的结果图表
+After the build, there is a simple result chart in build/qxml/report.html
 
-### 5. 混淆
+### 5. Proguard
 
-暂无需要
+no need
 
-# [扩展使用](EXTENSION.md)
+# [Extended use](EXTENSION_EN.md)
 
-# 缺点
+# Shortcoming
 
-#### 1. 不支持 Android 内置 style
+#### 1. Android system style is not supported
 
-#### 2. 增加编译时间，根据 layout 数量线性增长
+#### 2. Increase the build time and increase linearly according to the number of layouts
 
-#### 3. 增加 apk 体积，在 demo 中 52 个 layout 文件时，release apk 体积增加了约 38K，后续可能会添加重打包移除已转换 layout 文件的选项
+#### 3. Increase the raw size of APK. When there are 52 layout files in the demo, the size of release APK increases by about 38K. The option of repackaging and removing converted layout files may be added later
 
-#### 4. 目前扩展 View 需使用全限定类名，后续可能会改善这种情况
+#### 4. The extension of view needs to use fully qualified class names, which may be improved in the future
 
 # LICENSE
 ```
@@ -170,3 +170,5 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+
