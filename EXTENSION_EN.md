@@ -118,7 +118,7 @@ support `int`, `float`, `boolean`, `String`, `ValueInfo`
 |     reference|   R.x.x  |  
  |   dimension |  int value |
  |       integer       |  int value  |
-|     enum|flag |  int value   | 
+|     enum/flag |  int value   | 
 | @null  | 0  |
 
 ##### 2£º `float`
