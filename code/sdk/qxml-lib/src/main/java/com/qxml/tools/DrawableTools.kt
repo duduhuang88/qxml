@@ -2,6 +2,7 @@ package com.qxml.tools
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -36,6 +37,9 @@ class DrawableTools {
 
         @JvmStatic
         fun getDrawable(context: Context, resources: Resources, resourceId: Int): Drawable? {
+            if (resourceId == 0) {
+                return ColorDrawable(Color.TRANSPARENT)
+            }
             if (Build.VERSION.SDK_INT >= 21) {
                 return resources.getDrawable(resourceId, context.theme)
             } else if (Build.VERSION.SDK_INT >= 16) {

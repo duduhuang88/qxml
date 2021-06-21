@@ -58,12 +58,12 @@ Gradle 3.5.0 以上
 
 ### 1. 在 Project `build.gradle` 中添加依赖
 
-最新版本为 **0.9.7**
+最新版本为 **0.9.8**
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "0.9.7"
+    ext.qxml_version = "0.9.8"
     repositories {
         ...
         mavenCentral()
@@ -140,11 +140,25 @@ qxml {
 }
 ```
 
-### 4. 简单的构建结果的图表显示
+### 4. layout配置选项
+
+在layout.xml根节点中可使用：
+
+`app:qxml` : genIgnore(忽略) genWithUnImplementAttr(生成) genWithoutUnImplementAttr(当没有未实现的属性时才生成)
+
+`app:qxml_use_factory`： 使用 Layoutinflater factory
+
+`app:qxml_debug`：是否显示view的debug标志
+
+`app:qxml_compat`：never(不使用compat)  auto(自动选择)  force(强制使用)
+
+**注：配置对根节点下的全部View都生效，且优先级高于gradle中的配置**
+
+### 5. 简单的构建结果的图表显示
 
 构建结束后，在 build\qxml\report.html 中有简单的结果图表
 
-### 5. 混淆
+### 6. 混淆
 
 暂无需要
 

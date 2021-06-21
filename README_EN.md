@@ -58,12 +58,12 @@ Gradle 3.5.0 above
 
 ### 1. Add dependency in Project `build.gradle`
 
-The newest version code is **0.9.7**
+The newest version code is **0.9.8**
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "0.9.7"
+    ext.qxml_version = "0.9.8"
     repositories {
         ...
         mavenCentral()
@@ -140,11 +140,25 @@ qxml {
 }
 ```
 
-### 4. Simple build result chart
+### 4. Layout configuration options
+
+Attr can be used in the root node of layout xml：
+
+`app:qxml` : genIgnore(ignore) genWithUnImplementAttr(generate all the time) genWithoutUnImplementAttr(generate when all attr implement)
+
+`app:qxml_use_factory`： use Layoutinflater factory
+
+`app:qxml_debug`：display view debug flag
+
+`app:qxml_compat`：never(do not use compat)  auto(auto chose)  force(force use)
+
+**Note: The configuration takes effect for all views under the root node, and the priority is higher than that in gradle**
+
+### 5. Simple build result chart
 
 After the build, there is a simple result chart in build/qxml/report.html
 
-### 5. Proguard
+### 6. Proguard
 
 no need
 
