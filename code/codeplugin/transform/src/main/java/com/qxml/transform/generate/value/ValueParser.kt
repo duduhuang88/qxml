@@ -45,11 +45,12 @@ class ValueParser(private val packageName: String, private val attrInfoMap: Hash
 
 
     fun getValueInfo(attrName: String, attrValue: String): ValueInfo? {
+        var valueWithoutPackageName = ""
         var value: String = attrValue
         var valueType = ValueType.SOURCE_STRING
         var referenceSourceValue = ""
         if (attrValue == "@null") {
-            return ValueInfo(ValueType.NULL, value, attrValue)
+            return ValueInfo(ValueType.NULL, value, valueWithoutPackageName, attrValue)
         }
         if (attrValue.startsWith("@")) {
             val indexSplit = attrValue.indexOf("/")
@@ -163,7 +164,8 @@ class ValueParser(private val packageName: String, private val attrInfoMap: Hash
                 }
             }
             valueType = ValueType.REFERENCE_ATTR
-            return ValueInfo(valueType, value, attrValue, true, referenceSourceValue)
+            valueWithoutPackageName = value.substring(value.indexOf(".R.") + 1)
+            return ValueInfo(valueType, value, valueWithoutPackageName, attrValue, true, referenceSourceValue)
         } else {
             attrInfoMap[attrName]?.also { attrInfoModel ->
                 if (attrInfoModel.isEnum() || attrInfoModel.isFlag()) {
@@ -177,7 +179,7 @@ class ValueParser(private val packageName: String, private val attrInfoMap: Hash
                                 isEnumOrFlag = true
                                 values.add(mapValue)
                             } else {
-                                return ValueInfo(valueType, value, attrValue)
+                                return ValueInfo(valueType, value, valueWithoutPackageName, attrValue)
                             }
                         }
                     }
@@ -195,7 +197,10 @@ class ValueParser(private val packageName: String, private val attrInfoMap: Hash
                 }
             }
         }
-        return ValueInfo(valueType, value, attrValue, false, referenceSourceValue)
+        if (value.contains(".R.", false)) {
+            valueWithoutPackageName = value.substring(value.indexOf(".R.") + 1)
+        }
+        return ValueInfo(valueType, value, valueWithoutPackageName, attrValue, false, referenceSourceValue)
     }
 
 }
@@ -205,6 +210,7 @@ class ValueParser(private val packageName: String, private val attrInfoMap: Hash
  */
 data class ValueInfo(val valueType: ValueType
                      , val value: String    //补全后的值 eg: R.layout.xxx
+                     , val valueWithoutPackageName: String
                      , val sourceValue: String  //源值
                      , val isAttrReference: Boolean = false
                      , val referenceSourceValue: String = "" //为引用时，去除@XX/ 或 ？ 的值

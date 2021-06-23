@@ -10,6 +10,7 @@ public class LocalVarInfoModel {
         this.varName = varName;
         this.changeStr = parentName+".";
         this.replaceStr = parentName+"_";
+        this.fullVarName = this.replaceStr.concat(this.varName);
     }
 
     private String initBlock;
@@ -19,6 +20,7 @@ public class LocalVarInfoModel {
     private String replaceStr;
     private String varType;
     private String varName;
+    private String fullVarName;
 
     public String getResetBlock() {
         return resetBlock;
@@ -74,5 +76,13 @@ public class LocalVarInfoModel {
 
     public void setVarName(String varName) {
         this.varName = varName;
+    }
+
+    public String getFullVarName() {
+        return fullVarName;
+    }
+
+    public void setFullVarName(String fullVarName) {
+        this.fullVarName = fullVarName;
     }
 }

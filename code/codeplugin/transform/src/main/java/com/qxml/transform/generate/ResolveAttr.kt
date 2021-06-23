@@ -2,7 +2,6 @@ package com.qxml.transform.generate
 
 import com.qxml.QxmlConfigExtension
 import com.qxml.constant.Constants
-import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.AttrFuncInfoModel
 import com.qxml.transform.generate.match.AttrMethodValueMatcher
 import com.qxml.transform.generate.match.resolver.MatchType
@@ -22,6 +21,8 @@ interface ResolveAttr {
                     , usedGenInfoMap: HashMap<String, HashMap<String, AttrFuncInfoModel>>
                     , fieldInfo: FieldInfo, dataBindingAttrResolveInfo: DataBindingAttrResolveInfo
                     , attrMethodValueMatcher: AttrMethodValueMatcher
+                    , usedLocalVarMap: HashMap<String, String>
+                    , usedReferenceRMap: HashMap<String, String>
                     , keepAndroidTag : Boolean = true
     ): ViewGenResultInfo? {
 
@@ -71,7 +72,7 @@ interface ResolveAttr {
                 return null
             }
 
-            val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName, layoutType, attrFuncInfo, attrValue, fieldInfo, contextName)
+            val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName, layoutType, attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap)
             when (matchResult.matchType) {
                 MatchType.FAILED -> {
                     return matchResult.ignoreInfo
@@ -84,6 +85,9 @@ interface ResolveAttr {
                 usedGenInfoMap[viewClassName] = viewTypeGenInfoMap
             }
             viewTypeGenInfoMap.putIfAbsent(attrFuncInfo.attrName, attrFuncInfo)
+            attrFuncInfo.usedLocalVarMap?.forEach { fullName, _ ->
+                usedLocalVarMap.putIfAbsent(fullName, "")
+            }
         }
         return null
     }
@@ -99,6 +103,7 @@ interface ResolveAttr {
                          , usedGenInfoMap: HashMap<String, HashMap<String, AttrFuncInfoModel>>
                          , fieldInfo: FieldInfo, dataBindingAttrResolveInfo: DataBindingAttrResolveInfo
                          , attrMethodValueMatcher: AttrMethodValueMatcher
+                         , usedReferenceRMap: HashMap<String, String>
     ): ViewGenResultInfo? {
         //忽略dataBinding属性引用
         if (rootIsDataBinding
@@ -130,7 +135,7 @@ interface ResolveAttr {
             return null
         }
 
-        val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName, layoutType, attrFuncInfo, attrValue, fieldInfo, contextName)
+        val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName, layoutType, attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap)
         when (matchResult.matchType) {
             MatchType.FAILED -> {
                 return matchResult.ignoreInfo

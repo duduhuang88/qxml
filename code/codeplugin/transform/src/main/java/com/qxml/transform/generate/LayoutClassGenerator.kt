@@ -44,22 +44,15 @@ class LayoutClassGenerator(
     private val attrMethodValueMatcher by lazy { AttrMethodValueMatcher(packageName, attrInfoMap) }
     private val gson by lazy { GsonBuilder().disableHtmlEscaping().create() }
 
-    private val idChange: Boolean by lazy {
-        var change = false
-        if (idCacheMap.isEmpty()) {
-            change = true
-        } else {
-            run forEachBreak@{
-                idCacheMap.forEach { (name, value) ->
-                    if (idMap[name] != value) {
-                        println("id change: $name old($value} new(${idMap[name]})")
-                        change = true
-                        return@forEachBreak
-                    }
+    private val idChangeMap by lazy {
+        hashMapOf<String, String>().apply {
+            idCacheMap.forEach { (name, value) ->
+                if (idMap[name] != value) {
+                    println("id change: $name old($value} new(${idMap[name]})")
+                    putIfAbsent(name, "")
                 }
             }
         }
-        change
     }
 
     //layout生成情况, key:layoutName, value: null:还未生成, 反则已生成
@@ -125,7 +118,7 @@ class LayoutClassGenerator(
         }
         LogUtil.pl("unuse cache layouts "+unGenLayoutNameList)
 
-        waitableExecutor.waitForTasksWithQuickFail<Any>(true)
+        //waitableExecutor.waitForTasksWithQuickFail<Any>(true)
 
         cacheQueue.forEach {
             createClassFileWithCache(it.layoutName, it)
@@ -242,10 +235,23 @@ class LayoutClassGenerator(
                             useCacheLayoutNameList.add(layoutName)
 
                             if (!hasInclude) {
-                                if (idChange) {
-                                    waitableExecutor.execute {
-                                        createClassFileWithCache(layoutName, classGenInfo)
+                                var idChange = false
+                                if (generateClassInfo.usedReferenceRMap.isNotEmpty()) {
+                                    run loopBreak@{
+                                        generateClassInfo.usedReferenceRMap.forEach { (rName, _) ->
+                                            if (idChangeMap[rName] != null) {
+                                                LogUtil.pl("$layoutName regen by R change $rName")
+                                                idChange = true
+                                                return@loopBreak
+                                            }
+                                        }
                                     }
+                                }
+                                if (idChange) {
+                                    /*waitableExecutor.execute {
+                                        createClassFileWithCache(layoutName, classGenInfo)
+                                    }*/
+                                    createClassFileWithCache(layoutName, classGenInfo)
                                 } else {
                                     PoolManager.pool.appendClassPath(classGenInfo.cacheRootDir.absolutePath)
                                 }

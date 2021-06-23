@@ -64,7 +64,8 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                 val className = makeGenClassName(layoutName)
                 val cacheClassFile = layoutClassCacheDir.resolve(className.replace(".", File.separator) + SdkConstants.DOT_CLASS)
 
-                waitableExecutor.execute {
+                //waitableExecutor.execute {
+                run execute@{
                     val parser = getXmlParser()
                     var index = 0
 
@@ -89,6 +90,8 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                     val generateFieldInfo = GenerateFieldInfoMap(hashMapOf(), LinkedHashMap())
                     //关联的include layout
                     val relativeIncludeLayoutMap = hashMapOf<String, String>()
+                    //使用的R
+                    val usedReferenceRMap = hashMapOf<String, String>()
 
                     val qxmlConfigMap = hashMapOf<String, QxmlConfigExtension>()
 
@@ -122,7 +125,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 , usedStyleInfoMap, invalidGenInfoMap, fieldInfo
                                 , includeReferenceLayoutNameMap, layoutIsMerge, qxmlConfig
                                 , attrMethodValueMatcher, layoutGenStateMap, relativeIncludeLayoutMap
-                                , viewGenInfoHolder, compatViewInfoMap, styleInfoMap)?.also {
+                                , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap)?.also {
                                 index = 0
                                 if (it.result != GenResult.WAIT_INCLUDE) {
                                     failedLayoutTypeGenInfoList.add(LayoutTypeGenInfo(xmlTypeInfo.type, layoutIsMerge))
@@ -268,7 +271,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                     //LogUtil.pl("final code "+layoutName+" \n"+methodContent)
                     val classGenInfo = ClassGenCacheInfo(false, className, layoutName, layoutClassCacheDir, cacheClassFile, cacheInfoFile
                         , GenerateClassInfo(usedGenInfoMap, usedOnEndInfoMap, usedStyleInfoMap, invalidGenInfoMap
-                            , relativeIncludeLayoutMap, getLayoutGenResultMapFromFinalResultMap(layoutName, finalGenResultMap), getCacheVerifyKey(layoutFileInfoList, qxmlExtension, qxmlConfigMap), methodContent)
+                            , relativeIncludeLayoutMap, usedReferenceRMap, getLayoutGenResultMapFromFinalResultMap(layoutName, finalGenResultMap), getCacheVerifyKey(layoutFileInfoList, qxmlExtension, qxmlConfigMap), methodContent)
                         , generateFieldInfo, successLayoutTypeGenInfoList, failedLayoutTypeGenInfoList, layoutFileInfoList.size)
 
                     try {
@@ -292,7 +295,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                 }
             }
         }
-        waitableExecutor.waitForTasksWithQuickFail<Any>(true)
+        //waitableExecutor.waitForTasksWithQuickFail<Any>(true)
         //没有做排序
         includeReferenceLayoutNameMap.forEach { (layoutName, _) ->
             waitToGenLayoutNameList.add(layoutName)

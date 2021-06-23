@@ -35,7 +35,7 @@ Gradle 3.5.0 以上
 |   ViewFlipper   |  almost  |  ViewSwitcher  |  almost  |  TextSwitcher  |  almost  |
 |              |          |              |          |                      |          |
 |   include    |  almost  |    merge     |  almost  |     DataBinding      |  almost  |
-| custom style |  almost  | system style |   **none**   |                      |          |
+| custom style |  almost  | system style |   **none**   |   layout multi type    |     almost     |
 
 ### Support & Androidx
 
@@ -58,12 +58,12 @@ Gradle 3.5.0 以上
 
 ### 1. 在 Project `build.gradle` 中添加依赖
 
-最新版本为 **0.9.8**
+最新版本为 **1.0.0**
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "0.9.8"
+    ext.qxml_version = "1.0.0"
     repositories {
         ...
         mavenCentral()

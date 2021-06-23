@@ -43,7 +43,7 @@ class ValueInfoTypeResolver: ValueResolver {
         stringBuilder.append("${attrFuncInfoModel.viewParamType} ${attrFuncInfoModel.viewParamName} = $viewFieldName;\n")
         stringBuilder.append("${attrFuncInfoModel.valueParamType} ${attrFuncInfoModel.valueParamName} = ${Constants.GEN_FIELD_VALUE_INFO_NAME};\n")
 
-        stringBuilder.append(VALUE_INFO_CLEAR_SIMPLE)
+        stringBuilder.append(VALUE_INFO_CLEAR)
         stringBuilder.append(makeString(valueInfo.sourceValue))
 
 

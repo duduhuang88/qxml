@@ -51,6 +51,6 @@ internal class IdCollectSymbolListReader {
         if (!id.startsWith("0x")) {
             return
         }
-        layoutIdMap["${name}_$symbolType"] = id.substring(2).toInt(16)
+        layoutIdMap["R.$symbolType.${name}"] = id.substring(2).toInt(16)
     }
 }

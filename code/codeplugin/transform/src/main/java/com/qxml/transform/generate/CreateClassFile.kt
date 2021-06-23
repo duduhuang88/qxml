@@ -31,7 +31,6 @@ interface CreateClassFile {
     fun createClassFile(layoutName: String, classGenCacheInfo: ClassGenCacheInfo, packageName: String, qxmlExtension: QxmlConfigExtension, gson: Gson) {
         if (!classGenCacheInfo.cacheValid) {
             val className = GenClassNameTool.genClassName(layoutName)
-            val ctClass = PoolManager.pool.makeClass(className)
             val methodBuilder = MethodSpec.methodBuilder(Constants.GENERATE_METHOD_NAME)
             val stringBuilder = StringBuilder()
             stringBuilder.append("generate success type: \n")
@@ -105,8 +104,10 @@ interface CreateClassFile {
             //LogUtil.pl("make class suc: "+layoutName)
             //LogUtil.pl("make class "+layoutName +" \n"+methodContent)
             //LogUtil.pl("make class "+layoutName +" \n"+classResult.classCacheFile.absolutePath)
+            val ctClass = PoolManager.pool.makeClass(className)
             try {
-                ctClass.addMethod(CtNewMethod.make(methodContent, ctClass))
+                val method = CtNewMethod.make(methodContent, ctClass)
+                ctClass.addMethod(method)
             } catch (e: Exception) {
                 classGenCacheInfo.generateClassInfo.methodContent = methodContent
                 LogUtil.pl("make class err:\n"+layoutName+"\n"+e)

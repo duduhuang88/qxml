@@ -1,8 +1,7 @@
 package com.qxml.transform.generate.match
 
-import com.google.gson.Gson
 import com.qxml.constant.Constants
-import com.qxml.tools.log.LogUtil
+import com.qxml.constant.ValueType
 import com.qxml.tools.model.AttrFuncInfoModel
 import com.qxml.transform.AttrInfoModel
 import com.qxml.transform.generate.GenResult
@@ -36,7 +35,7 @@ class AttrMethodValueMatcher(private val packageName: String, private val attrIn
      */
     fun match(viewTypeName: String, viewFieldName: String, layoutName: String, layoutType: String
               , attrFuncInfoModel: AttrFuncInfoModel, attrValue: String, fieldInfo: FieldInfo
-              , contextName: String): MatchResult {
+              , contextName: String, usedReferenceRMap: HashMap<String, String>): MatchResult {
 
         val paramType = getMethodParamType(attrFuncInfoModel.valueParamType)
         val valueInfo = valueParser.getValueInfo(attrFuncInfoModel.attrName, attrValue)
@@ -45,6 +44,10 @@ class AttrMethodValueMatcher(private val packageName: String, private val attrIn
             ViewGenResultInfo("$layoutName $layoutType", GenResult.VALUE_MATCH_ERROR
                 , "${viewTypeName}-${attrFuncInfoModel.attrName} the value(${valueInfo.sourceValue})" +
                         " can't parse to ${attrFuncInfoModel.valueParamType} "))
+
+        if (valueInfo.valueType <= ValueType.REFERENCE_ATTR) {
+            usedReferenceRMap.putIfAbsent(valueInfo.valueWithoutPackageName, "")
+        }
 
         when(paramType) {
             ParamType.INT -> {

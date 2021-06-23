@@ -6,7 +6,9 @@ import com.qxml.QxmlConfigExtension
 import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.AttrFuncInfoModel
 import com.qxml.tools.model.GenClassInfoModel
+import com.qxml.tools.model.LocalVarInfoModel
 import com.qxml.tools.model.ViewGenClassModel
+import com.qxml.transform.AttrInfoModel
 import com.qxml.transform.collect.reset_ttr.*
 import com.qxml.transform.generate.model.GenerateClassInfo
 import com.qxml.transform.generate.model.StyleInfo
@@ -24,6 +26,9 @@ interface ViewGenInfoHolder {
     fun cacheLocalVarDefContent()
     fun shouldStyleAttrReset(styleAttrName: String): Boolean
     fun shouldCallOnFinishInflate(viewName: String): Boolean
+
+    fun localVarDefContent(usedLocalVarMap: HashMap<String, String>): String
+    fun localVarResetContent(usedLocalVarMap: HashMap<String, String>): String
 
     fun getLayoutParamInitBloc(parentViewClassName: String): String?
 
@@ -168,30 +173,38 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
         //设置共享变量
         viewGenInfoMap.forEach { (_, viewGenClassModel) ->
             WaitableExecutor.execute {
-                viewGenClassModel.onEndFuncInfoModelMap?.forEach { (_, attrFuncInfoModel) ->
-                    genClassInfoModel.localVarMap.forEach { (_, localVarInfoModel) ->
-                        if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.changeStr)) {
-                            attrFuncInfoModel.funcBodyContent = attrFuncInfoModel.funcBodyContent?.replace(localVarInfoModel.changeStr, localVarInfoModel.replaceStr)
-                        }
-                    }
-                }
-                viewGenClassModel.funcInfoModelHashMap?.forEach { (_, attrFuncInfoModel) ->
-                    genClassInfoModel.localVarMap.forEach { (_, localVarInfoModel) ->
-                        if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.changeStr)) {
-                            attrFuncInfoModel.funcBodyContent = attrFuncInfoModel.funcBodyContent?.replace(localVarInfoModel.changeStr, localVarInfoModel.replaceStr)
-                        }
-                    }
-                }
+                resolveLocalVar(viewGenClassModel.onEndFuncInfoModelMap, genClassInfoModel.localVarMap)
+                resolveLocalVar(viewGenClassModel.funcInfoModelHashMap, genClassInfoModel.localVarMap)
                 viewGenClassModel.overrideFuncInfoModelList?.forEach { attrFuncInfoModel ->
                     genClassInfoModel.localVarMap.forEach { (_, localVarInfoModel) ->
                         if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.changeStr)) {
                             attrFuncInfoModel.funcBodyContent = attrFuncInfoModel.funcBodyContent?.replace(localVarInfoModel.changeStr, localVarInfoModel.replaceStr)
+                        }
+                        if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.fullVarName)) {
+                            attrFuncInfoModel.usedLocalVarMap[localVarInfoModel.fullVarName] = ""
                         }
                     }
                 }
             }
         }
         WaitableExecutor.waitForTasksWithQuickFail<Any>(true)
+    }
+
+    private fun resolveLocalVar(attrFuncInfoModelMap: Map<String, AttrFuncInfoModel>?, localVarInfoModelMap: Map<String, LocalVarInfoModel>) {
+        attrFuncInfoModelMap?.forEach { (_, attrFuncInfoModel) ->
+            //var firstTime = true
+            localVarInfoModelMap.forEach { (_, localVarInfoModel) ->
+                if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.changeStr)) {
+                    attrFuncInfoModel.funcBodyContent = attrFuncInfoModel.funcBodyContent?.replace(localVarInfoModel.changeStr, localVarInfoModel.replaceStr)
+                }
+                if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.fullVarName)) {
+                    if (attrFuncInfoModel.usedLocalVarMap == null) {
+                        attrFuncInfoModel.usedLocalVarMap = hashMapOf()
+                    }
+                    attrFuncInfoModel.usedLocalVarMap[localVarInfoModel.fullVarName] = ""
+                }
+            }
+        }
     }
 
     override fun hasViewGenClass(viewName: String): Boolean = viewGenInfoMap[viewName] != null
@@ -209,7 +222,27 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
     }
 
     override fun localVarDefContent(): String = localVarDefContent
+
     override fun localVarResetContent(): String = localVarResetContent
+
+    override fun localVarDefContent(usedLocalVarMap: HashMap<String, String>): String {
+        return localVarDefContent
+    }
+
+    override fun localVarResetContent(usedLocalVarMap: HashMap<String, String>): String {
+        val stringBuilder = StringBuilder()
+        var index = usedLocalVarMap.size
+        usedLocalVarMap.forEach { (fullName, _) ->
+            genClassInfoModel.localVarMap[fullName]?.apply {
+                stringBuilder.append(resetBlock)
+                index--
+                if (index != 0) {
+                    stringBuilder.append(";\n")
+                }
+            }
+        }
+        return stringBuilder.toString()
+    }
 
     override fun cacheLocalVarDefContent() {
         if (!cacheFile.exists()) {

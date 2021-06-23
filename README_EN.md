@@ -35,7 +35,7 @@ Gradle 3.5.0 above
 |   ViewFlipper   |  almost  |  ViewSwitcher  |  almost  |  TextSwitcher  |  almost  |
 |              |          |              |          |                      |          |
 |   include    |  almost  |    merge     |  almost  |     DataBinding      |  almost  |
-| custom style |  almost  | system style |   **none**   |                      |          |
+| custom style |  almost  | system style |   **none**   |  layout multi type  |  almost |
 
 ### Support & Androidx
 
@@ -58,12 +58,12 @@ Gradle 3.5.0 above
 
 ### 1. Add dependency in Project `build.gradle`
 
-The newest version code is **0.9.8**
+The newest version code is **1.0.0**
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "0.9.8"
+    ext.qxml_version = "1.0.0"
     repositories {
         ...
         mavenCentral()

@@ -1,5 +1,6 @@
 package com.qxml.tools.model;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class AttrFuncInfoModel implements Cloneable {
@@ -17,6 +18,7 @@ public class AttrFuncInfoModel implements Cloneable {
     private String belongViewName;
     private List<String> onEndCondition;
     private boolean afterAdd;
+    private HashMap<String, String> usedLocalVarMap;
 
     public String cacheSignKey;
 
@@ -141,6 +143,14 @@ public class AttrFuncInfoModel implements Cloneable {
         this.onEndCondition = onEndCondition;
     }
 
+    public HashMap<String, String> getUsedLocalVarMap() {
+        return usedLocalVarMap;
+    }
+
+    public void setUsedLocalVarMap(HashMap<String, String> usedLocalVarMap) {
+        this.usedLocalVarMap = usedLocalVarMap;
+    }
+
     @Override
     public String toString() {
         return "AttrFuncInfoModel{" +
@@ -152,6 +162,7 @@ public class AttrFuncInfoModel implements Cloneable {
                 ", funcName='" + funcName + '\'' +
                 ", funcBodyContent='" + funcBodyContent + '\'' +
                 ", attrName='" + attrName + '\'' +
+                ", usedLocalVarMap='" + usedLocalVarMap + '\'' +
                 ", belongViewName='" + belongViewName + '\'' +
                 ", onEndCondition='" + onEndCondition + '\'' +
                 ", key='" + cacheSignKey + '\'' +

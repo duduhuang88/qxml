@@ -181,7 +181,7 @@ publishing{
                 dependencies.append(getDependencyNode('compile', pluginGroupId, 'tools', publicationVersion))
                 dependencies.append(getDependencyNode('compile', pluginGroupId, 'constant', publicationVersion))
                 dependencies.append(getDependencyNode('compile', pluginGroupId, 'qxml-annotations', publicationVersion))
-                dependencies.append(getDependencyNode('compile', 'org.javassist', 'javassist', '3.27.0-GA'))
+                dependencies.append(getDependencyNode('compile', 'org.javassist', 'javassist', '3.28.0-GA'))
                 dependencies.append(getDependencyNode('compile', 'com.squareup', 'javapoet', '1.11.1'))
             }
         }

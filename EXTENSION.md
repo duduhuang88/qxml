@@ -3,6 +3,8 @@
 
 # 扩展自定义View
 
+在gradle.properties中添加 QXML_VALID_CODE=*** (随机字符串)
+
 **注：当前仅支持使用Java且需使用全限定类名**
 
 ### 1. 新建Java类，根据要扩展 View 的继承情况继承特定的Gen类，并添加`ViewParse` 注解，例如TextView继承自View，则TextView继承View支持的所有属性

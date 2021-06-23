@@ -3,7 +3,7 @@ def REMOTE_DEPENDENCE = false
 
 allprojects {
 
-    ext.PUBLISH_VERSION = "0.9.8"
+    ext.PUBLISH_VERSION = "1.0.0"
 
     ext.versions = [
             'minSdkVersion': 14,
@@ -48,7 +48,7 @@ allprojects {
                     'tests': "com.android.tools.lint:lint-tests:${versions.buildToolsVersion}",
             ],
             javapoet: 'com.squareup:javapoet:1.11.1',
-            javassist: 'org.javassist:javassist:3.27.0-GA',
+            javassist: 'org.javassist:javassist:3.28.0-GA',
             junit: 'junit:junit:4.12',
             'auto': [
                     'service': 'com.google.auto.service:auto-service:1.0-rc6',

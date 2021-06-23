@@ -3,6 +3,8 @@
 
 # Extend custom view
 
+Add QXML_VALID_CODE=*** (random string) to gradle.properties
+
 **Note: Currently, only Java is supported and fully qualified class names are required**
 
 ### 1. Create a new Java class, inherit the Specific Gen class according to the inheritance of the view to be extended, and add the 'ViewParse' annotation. For example, textview inherits from view, then textview inherits all the properties supported by view
