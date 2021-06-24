@@ -98,6 +98,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                     var jumpByInclude = false
 
                     run layoutTypeLoopBreak@{
+                        usedReferenceRMap["R.layout.$layoutName"] = ""
                         layoutFileInfoList.forEach layoutTypeLoopContinue@{ xmlTypeInfo ->
                             val qxmlConfig = QxmlConfigExtension("")
                             qxmlConfig.ignoreUnImplementAttr = qxmlExtension.ignoreUnImplementAttr

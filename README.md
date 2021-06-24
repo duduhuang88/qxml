@@ -6,7 +6,7 @@
 
 # 性能表现
 
-与 inflate 比较可减少 30%+加载时间，随布局复杂度提高而提高，详见 demo。
+与 inflate 比较可减少 40%+加载时间，随布局复杂度提高而提高，详见 demo 性能测试。
 
 [support-test-demo.apk](support-test-release.apk)
 
@@ -58,12 +58,12 @@ Gradle 3.5.0 以上
 
 ### 1. 在 Project `build.gradle` 中添加依赖
 
-最新版本为 **1.0.0**
+最新版本为 **1.0.1**
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.0.0"
+    ext.qxml_version = "1.0.1"
     repositories {
         ...
         mavenCentral()
@@ -116,6 +116,13 @@ android {
             ......
             resources.srcDirs += "build/qxml/tempRes"
             ......
+        }
+    }
+    //可选设置，保持资源id不变可以优化缓存使用
+    aaptOptions {
+        File publicTxtFile = new File(buildDir, "qxml/public.txt")
+        if (publicTxtFile.exists()) {
+            additionalParameters "--stable-ids", "${publicTxtFile.absolutePath}"
         }
     }
 }

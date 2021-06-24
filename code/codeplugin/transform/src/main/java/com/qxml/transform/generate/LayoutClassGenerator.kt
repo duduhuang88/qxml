@@ -47,8 +47,9 @@ class LayoutClassGenerator(
     private val idChangeMap by lazy {
         hashMapOf<String, String>().apply {
             idCacheMap.forEach { (name, value) ->
-                if (idMap[name] != value) {
-                    println("id change: $name old($value} new(${idMap[name]})")
+                val curId = idMap[name]
+                if (curId != null && curId != value) {
+                    LogUtil.d("id change: $name old($value} new(${idMap[name]})")
                     putIfAbsent(name, "")
                 }
             }

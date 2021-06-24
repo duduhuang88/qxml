@@ -28,6 +28,13 @@ android {
         }
     }
 
+    aaptOptions {
+        File publicTxtFile = new File(buildDir, "qxml/public.txt")
+        if (publicTxtFile.exists()) {
+            additionalParameters "--stable-ids", "${publicTxtFile.absolutePath}"
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false

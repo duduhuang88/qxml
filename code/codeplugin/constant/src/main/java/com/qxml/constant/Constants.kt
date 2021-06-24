@@ -121,6 +121,7 @@ class Constants {
         val LAYOUT_ID_COLLECT_PATH = "qxml${File.separator}cache${File.separator}"
         const val LAYOUT_ID_COLLECT_FILE_NAME = "layoutIdCollect.txt"
         const val ID_COLLECT_FILE_NAME = "idCollect.txt"
+        const val PUBLIC_FILE_NAME = "public.txt"
         const val ID_COLLECT_CACHE_FILE_NAME = "idCollectCache.txt"
         const val CUR_BUILD_TYPE_FILE_NAME = "curBuildType.txt"
         const val LOCAL_VAR_DEF_CONTENT_CACHE_FILE_NAME = "localVarDefContentCache.txt"

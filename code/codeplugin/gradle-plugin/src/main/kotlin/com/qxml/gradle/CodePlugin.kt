@@ -458,13 +458,19 @@ class CodePlugin: Plugin<Project> {
                         layoutIdCollectorTask.mustRunAfter(variant.mergeResourcesProvider.get())
 
                         val idOutputFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${variant.dirName}").resolve(Constants.ID_COLLECT_FILE_NAME)
+                        val publicROutputFile = project.buildDir.resolve(Constants.LAYOUT_ID_COLLECT_PATH).parentFile.resolve(Constants.PUBLIC_FILE_NAME)
                         Files.createParentDirs(idOutputFile)
                         if (!idOutputFile.exists()) {
                             idOutputFile.createNewFile()
                         }
+                        if (!publicROutputFile.exists()) {
+                            publicROutputFile.createNewFile()
+                        }
                         val idCollectorTask = project.tasks.create("id${variant.name.capitalize()}Collect", IdCollector::class.java) { t->
+                            t.publicROutputFile = publicROutputFile
                             t.outputFile = idOutputFile
                             t.rFile = rFile
+                            t.packageName = rPackage
                         }
                         variant.assembleProvider.get().dependsOn(idCollectorTask)
                         idCollectorTask.mustRunAfter(variant.mergeResourcesProvider.get())

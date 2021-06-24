@@ -6,7 +6,7 @@ A low intrusive, configurable android library that converts layout XML files int
 
 # Performance
 
-Compared with inflate, it can reduce 30% + loading time, which increases with the increase of layout complexity. See demo for details.
+Compared with inflate, it can reduce 40% + loading time, which increases with the increase of layout complexity. See demo for details.
 
 [support-test-demo.apk](support-test-release.apk)
 
@@ -116,6 +116,13 @@ android {
             ......
             resources.srcDirs += "build/qxml/tempRes"
             ......
+        }
+    }
+    //Optional setting, keep resource ID unchanged can optimize cache usage
+    aaptOptions {
+        File publicTxtFile = new File(buildDir, "qxml/public.txt")
+        if (publicTxtFile.exists()) {
+            additionalParameters "--stable-ids", "${publicTxtFile.absolutePath}"
         }
     }
 }
