@@ -15,7 +15,7 @@ import com.yellow.qxml_annotions.ViewParse;
 public class AbsSeekBarGen extends ProgressBarGen {
 
     public static class $$AbsSeekBarLocalVariable {
-        public int thumb = 0;
+        public int thumb = -1;
         public int thumbOffset = 0;
     }
 
@@ -69,13 +69,16 @@ public class AbsSeekBarGen extends ProgressBarGen {
 
     @OnEnd({AndroidRS.attr.thumbOffset, AndroidRS.attr.thumb})
     public void onAbsSeekBarThumbEnd(AbsSeekBar absSeekBar) {
-        if (__absSeekBarLocalVar.thumb != 0) {
-            absSeekBar.setThumb(com.qxml.tools.DrawableTools.getDrawable(__context, ___resources, __absSeekBarLocalVar.thumb));
+        if (__absSeekBarLocalVar.thumb != -1) {
+            if (__absSeekBarLocalVar.thumb == 0) {
+                absSeekBar.setThumb(null);
+            } else {
+                absSeekBar.setThumb(com.qxml.tools.DrawableTools.getDrawable(__context, ___resources, __absSeekBarLocalVar.thumb));
+            }
         }
         if (__absSeekBarLocalVar.thumbOffset != 0) {
             absSeekBar.setThumbOffset(__absSeekBarLocalVar.thumbOffset);
         }
     }
-
 
 }
