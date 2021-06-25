@@ -16,7 +16,6 @@ import com.qxml.transform.generate.match.AttrMethodValueMatcher
 import com.qxml.transform.generate.model.*
 import com.qxml.transform.pool.PoolManager
 import groovy.util.XmlParser
-import org.gradle.internal.impldep.com.google.common.collect.ImmutableSet
 import java.io.File
 import java.lang.StringBuilder
 import java.util.*
@@ -62,8 +61,6 @@ class LayoutClassGenerator(
     private val finalGenResultMap = ConcurrentHashMap<String, HashMap<String, ViewGenResultInfo>>()
 
     private val styleInfoMap by lazy { viewGenInfoHolder.styleInfoMap }
-
-    private val cacheQueue = mutableListOf<ClassGenCacheInfo>()
 
     @Synchronized
     override fun getXmlParser(): XmlParser {
@@ -121,10 +118,6 @@ class LayoutClassGenerator(
 
         //waitableExecutor.waitForTasksWithQuickFail<Any>(true)
 
-        cacheQueue.forEach {
-            createClassFileWithCache(it.layoutName, it)
-        }
-
         /*val content = gson.toJson(viewGenInfoHolder.viewGenInfoMap)
         LogUtil.pl("genInfoMap combine:  "+content)*/
 
@@ -180,7 +173,7 @@ class LayoutClassGenerator(
                               , genClassCacheInfoList: MutableList<ClassGenCacheInfo>, preIncludeLayoutSize: Int = 0): List<String> {
 
         val useCacheLayoutNameList = mutableListOf<String>()
-        val hasIncludeLayoutNameMap = hashMapOf<String, String>()
+        val hasIncludeUnGenLayoutNameMap = hashMapOf<String, String>()
         unGenLayoutNameList.forEach xmlLoopContinue@{ layoutName ->
             layoutInfoMap[layoutName]?.let { xmlTypeInfoMap ->
                 val xmlTypeInfoList = mutableListOf<LayoutFileInfo>()
@@ -222,7 +215,7 @@ class LayoutClassGenerator(
                         generateClassInfo.relativeIncludeLayoutMap.forEach { (includeLayoutName, _) ->
                             if (layoutGenStateMap[includeLayoutName] == null) {
                                 hasIncludeUnGen = true
-                                hasIncludeLayoutNameMap.putIfAbsent(layoutName, "")
+                                hasIncludeUnGenLayoutNameMap.putIfAbsent(layoutName, "")
                                 return@forEach
                             }
                         }
@@ -235,29 +228,25 @@ class LayoutClassGenerator(
                             genClassCacheInfoList.add(classGenInfo)
                             useCacheLayoutNameList.add(layoutName)
 
-                            if (!hasInclude) {
-                                var idChange = false
-                                if (generateClassInfo.usedReferenceRMap.isNotEmpty()) {
-                                    run loopBreak@{
-                                        generateClassInfo.usedReferenceRMap.forEach { (rName, _) ->
-                                            if (idChangeMap[rName] != null) {
-                                                LogUtil.pl("$layoutName regen by R change $rName")
-                                                idChange = true
-                                                return@loopBreak
-                                            }
+                            var idChange = false
+                            if (generateClassInfo.usedReferenceRMap.isNotEmpty()) {
+                                run loopBreak@{
+                                    generateClassInfo.usedReferenceRMap.forEach { (rName, _) ->
+                                        if (idChangeMap[rName] != null) {
+                                            LogUtil.pl("$layoutName regen by R change $rName")
+                                            idChange = true
+                                            return@loopBreak
                                         }
                                     }
                                 }
-                                if (idChange) {
-                                    /*waitableExecutor.execute {
-                                        createClassFileWithCache(layoutName, classGenInfo)
-                                    }*/
+                            }
+                            if (idChange) {
+                                /*waitableExecutor.execute {
                                     createClassFileWithCache(layoutName, classGenInfo)
-                                } else {
-                                    PoolManager.pool.appendClassPath(classGenInfo.cacheRootDir.absolutePath)
-                                }
+                                }*/
+                                createClassFileWithCache(layoutName, classGenInfo)
                             } else {
-                                cacheQueue.add(classGenInfo)
+                                PoolManager.pool.appendClassPath(classGenInfo.cacheRootDir.absolutePath)
                             }
                             getLayoutGenResultMapFromFinalResultMap(layoutName).putAll(generateClassInfo.genReportInfo)
                         }
@@ -275,15 +264,15 @@ class LayoutClassGenerator(
                 }
             }
         }
-        if (hasIncludeLayoutNameMap.isNotEmpty()) {
-            if (hasIncludeLayoutNameMap.size != preIncludeLayoutSize) {
+        if (hasIncludeUnGenLayoutNameMap.isNotEmpty()) {
+            if (hasIncludeUnGenLayoutNameMap.size != preIncludeLayoutSize) {
                 val hasIncludeLayoutNameList = mutableListOf<String>().apply {
-                    addAll(hasIncludeLayoutNameMap.keys)
+                    addAll(hasIncludeUnGenLayoutNameMap.keys)
                 }
                 val resolvedIncludeLayoutNameList = checkGenCache(finalGenCacheInfoMap, hasIncludeLayoutNameList, layoutInfoMap, genClassCacheInfoList, hasIncludeLayoutNameList.size)
                 useCacheLayoutNameList.addAll(resolvedIncludeLayoutNameList)
             } else {
-                hasIncludeLayoutNameMap.forEach { (hasIncludeLayoutName, _) ->
+                hasIncludeUnGenLayoutNameMap.forEach { (hasIncludeLayoutName, _) ->
                     LogUtil.pl("regen by include: $hasIncludeLayoutName")
                     val layoutClassCacheDir = genClassInfoCacheDir.resolve(hasIncludeLayoutName)
                     layoutClassCacheDir.delete()

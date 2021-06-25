@@ -4,6 +4,21 @@
 
 一个低侵入，可配置的 Android 库，用于将 layout xml 文件转换为 Java 代码以提高性能。
 
+# 与X2C的对比
+## X2C：
+
+* 使用注解处理器生成View类，使用时需要在类中添加注解，并替换setContentView方法，侵入性较强；  
+* 对于布局属性的支持不够完美，在生成的类中容易报错；  
+* 自定义属性的拓展不够方便；  
+* 对多layout type、View Compat、LayoutInflate Factory等等的支持不够全面。
+
+## Qxml：
+
+* 使用transform生成View类，生成View的规则通过添加注解类实现，可以做到规则与代码的边界分离，无需改动原有代码即可接入；  
+* 对布局属性支持较好，目标是完全的UI一致性；  
+* 自定义属性可实现复杂的逻辑，拓展方便实现；  
+* 支持多layout type、View Compat、LayoutInflate Factory等等特性，可实现换肤，拓展View等功能。
+
 # 性能表现
 
 与 inflate 比较可减少 40%+加载时间，随布局复杂度提高而提高，详见 demo 性能测试。
@@ -32,10 +47,11 @@ Gradle 3.5.0 以上
 | RadioButton  |  almost  | LinearLayout |  almost  |    RelativeLayout    |  almost  |
 | FrameLayout  |  almost  | TextureView  |  almost  |       WebView        |  almost  |
 |   ListView   |  almost  |  GridLayout  |  almost  |  ExpandableListView  |  almost  |
-|   ViewFlipper   |  almost  |  ViewSwitcher  |  almost  |  TextSwitcher  |  almost  |
+| ViewFlipper  |  almost  | ViewSwitcher |  almost  |     TextSwitcher     |  almost  |
+|  VideoView   |  almost  |              |          |                      |          |
 |              |          |              |          |                      |          |
 |   include    |  almost  |    merge     |  almost  |     DataBinding      |  almost  |
-| custom style |  almost  | system style |   **none**   |   layout multi type    |     almost     |
+| custom style |  almost  | system style | **none** |  layout multi type   |  almost  |
 
 ### Support & Androidx
 
@@ -58,12 +74,12 @@ Gradle 3.5.0 以上
 
 ### 1. 在 Project `build.gradle` 中添加依赖
 
-最新版本为 **1.0.1**
+最新版本为 **1.0.2**，查看 [Releases](https://github.com/duduhuang88/qxml/releases) 获取最新版本信息
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.0.1"
+    ext.qxml_version = "1.0.2"
     repositories {
         ...
         mavenCentral()
@@ -108,6 +124,8 @@ dependencies {
 
 ### 3. 配置
 
+**aaptOptions使用固定资源ID可提高缓存使用**
+
 ```groovy
 android {
     ......
@@ -147,7 +165,7 @@ qxml {
 }
 ```
 
-### 4. layout配置选项
+### 4. layout可选配置
 
 在layout.xml根节点中可使用：
 
@@ -175,7 +193,7 @@ qxml {
 
 #### 1. 不支持 Android 内置 style
 
-#### 2. 增加编译时间，根据 layout 数量线性增长
+#### 2. 增加编译时间，首次编译根据 layout 数量线性增长，而后会使用缓存
 
 #### 3. 增加 apk 体积，在 demo 中 52 个 layout 文件时，release apk 体积增加了约 38K，后续可能会添加重打包移除已转换 layout 文件的选项
 

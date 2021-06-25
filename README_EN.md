@@ -33,6 +33,7 @@ Gradle 3.5.0 above
 | FrameLayout  |  almost  | TextureView  |  almost  |       WebView        |  almost  |
 |   ListView   |  almost  |  GridLayout  |  almost  |  ExpandableListView  |  almost  |
 |   ViewFlipper   |  almost  |  ViewSwitcher  |  almost  |  TextSwitcher  |  almost  |
+|  VideoView   |  almost  |              |          |                      |          |
 |              |          |              |          |                      |          |
 |   include    |  almost  |    merge     |  almost  |     DataBinding      |  almost  |
 | custom style |  almost  | system style |   **none**   |  layout multi type  |  almost |
@@ -58,12 +59,12 @@ Gradle 3.5.0 above
 
 ### 1. Add dependency in Project `build.gradle`
 
-The newest version code is **1.0.0**
+The newest version code is **1.0.2**，check [Releases](https://github.com/duduhuang88/qxml/releases) to get newest version info
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.0.0"
+    ext.qxml_version = "1.0.2"
     repositories {
         ...
         mavenCentral()
@@ -107,6 +108,8 @@ dependencies {
 ```
 
 ### 3. config
+
+**keep resource ID unchanged can optimize cache usage**
 
 ```groovy
 android {
@@ -175,7 +178,7 @@ no need
 
 #### 1. Android system style is not supported
 
-#### 2. Increase the build time and increase linearly according to the number of layouts
+#### 2. Increase the build time and increase linearly according to the number of layouts, after first time, the build will use cache
 
 #### 3. Increase the raw size of APK. When there are 52 layout files in the demo, the size of release APK increases by about 38K. The option of repackaging and removing converted layout files may be added later
 
