@@ -173,6 +173,26 @@ class ValueInfo {
     var referenceType: ValueType = ValueType.SOURCE_STRING //the reference type
 }
 ```
+### 5. 使用createViewListener
+##### 1. 打开配置
+qxml {
+    ...
+    useCreateViewListener true
+    ...
+}
+##### 2. 设置createViewListener
+QxmlInflater.createViewListener = object : CreateViewListener {
+            override fun onCreateView(
+                parentView: View?,
+                view: View,
+                context: Context,
+                viewClassName: String,
+                originViewClassName: String
+            ) {
+
+            }
+        }
+
 
 
 

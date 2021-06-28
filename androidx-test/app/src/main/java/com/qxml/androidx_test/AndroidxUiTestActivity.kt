@@ -7,6 +7,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.qxml.androidx_test.view_test.RecyclerViewTest
 import com.yellow.qxml_test.LogUtil
+import com.yellow.qxml_test.TestLayoutRes
 import com.yellow.qxml_test.presenter.MainPresenter
 import com.yellow.qxml_test.presenter.MainView
 import com.yellow.qxml_test.view_test.ExpandableListViewTest
@@ -17,8 +18,20 @@ import com.yellow.qxml_test.view_test.WebViewTest
 class AndroidxUiTestActivity: AppCompatActivity(), MainView {
 
     companion object {
+        private val BLOCK_LIST = arrayListOf(
+            R.layout.fresco_test
+        )
+
         @JvmStatic
         fun start(context: Context) {
+            val testRes = arrayListOf<Int>()
+            TestLayoutRes.TEST_LAYOUT_RES.forEach {
+                if (!BLOCK_LIST.contains(it)) {
+                    testRes.add(it)
+                }
+            }
+            TestLayoutRes.TEST_LAYOUT_RES.clear()
+            TestLayoutRes.TEST_LAYOUT_RES.addAll(testRes)
             context.startActivity(Intent(context, AndroidxUiTestActivity::class.java))
         }
     }

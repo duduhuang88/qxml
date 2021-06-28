@@ -70,7 +70,7 @@ public class QXmlProcessor extends AbstractProcessor {
 
         trees = Trees.instance(processingEnv);
 
-        methodInfoScanner = new AttrMethodInfoScanner(trees, mTypes);
+        methodInfoScanner = new AttrMethodInfoScanner(trees, mTypes, mMessager);
         localVarScanner = new LocalVarScanner(trees);
     }
 

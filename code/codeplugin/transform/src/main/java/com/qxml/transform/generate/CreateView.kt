@@ -71,6 +71,7 @@ interface CreateView: ResolveAttr {
                          , compatViewInfoMap: Map<String, CompatViewInfoModel>
                          , styleInfoMap: Map<String, Map<String, StyleInfo>>
                          , usedReferenceRMap: HashMap<String, String>
+                         , usedImportPackageMap: HashMap<String, String>
                          , parentThemeItemMap: Map<String, String> = hashMapOf()
                          , parentContextName: String = Constants.GEN_PARAM_CONTEXT_NAME
                          , genLoopInfo: GenLoopInfo = GenLoopInfo()
@@ -129,6 +130,10 @@ interface CreateView: ResolveAttr {
             viewFieldName = viewFieldNameFunc()
 
             nextParentClassName = viewClassName
+
+            viewGenInfoHolder.getImportPackage(viewClassName)?.let {
+                usedImportPackageMap.putAll(it)
+            }
 
             val attributes = node.attributes()
 
@@ -311,7 +316,7 @@ interface CreateView: ResolveAttr {
                         stringBuilder.append("if ($viewFieldName == null) {\n")
                     }
 
-                    stringBuilder.append("${if (qxmlConfig.useFactory) "" else "$viewClassName "}$viewFieldName = new ${viewClassName}($contextName, null${if (styleIsReference && styleRName.isNotEmpty()) ", $styleRName" else ""})")
+                    stringBuilder.append("${if (qxmlConfig.useFactory) "" else "$viewClassName "}$viewFieldName = new ${viewClassName}($contextName, (android.util.AttributeSet) null${if (styleIsReference && styleRName.isNotEmpty()) ", $styleRName" else ""})")
 
                     if (qxmlConfig.useFactory) {
                         stringBuilder.append(";\n}\n")
@@ -525,14 +530,23 @@ interface CreateView: ResolveAttr {
 
             viewGenInfoHolder.getOnEndMethodInfoMap(viewClassName)?.also { onEndMethodMap ->
                 onEndMethodMap.forEach onEndContinue@{ (funcSign, attrFuncInfoModel) ->
-                    attrFuncInfoModel.onEndCondition?.forEach {
-                        if (useAttrs[it] != null) {
-                            if (attrFuncInfoModel.isAfterAdd) {
-                                onEndAttrAfterAddList.add(attrFuncInfoModel)
-                            } else {
-                                onEndAttrBeforeAddList.add(attrFuncInfoModel)
+                    if (attrFuncInfoModel.onEndCondition == null || attrFuncInfoModel.onEndCondition.isEmpty()) {
+                        if (attrFuncInfoModel.isAfterAdd) {
+                            onEndAttrAfterAddList.add(attrFuncInfoModel)
+                        } else {
+                            onEndAttrBeforeAddList.add(attrFuncInfoModel)
+                        }
+                        return@onEndContinue
+                    } else {
+                        attrFuncInfoModel.onEndCondition.forEach {
+                            if (useAttrs[it] != null) {
+                                if (attrFuncInfoModel.isAfterAdd) {
+                                    onEndAttrAfterAddList.add(attrFuncInfoModel)
+                                } else {
+                                    onEndAttrBeforeAddList.add(attrFuncInfoModel)
+                                }
+                                return@onEndContinue
                             }
-                            return@onEndContinue
                         }
                     }
                 }
@@ -585,8 +599,9 @@ interface CreateView: ResolveAttr {
                     , viewFieldNameFunc, genClassFieldCacheMap, usedOnEndInfoMap, usedGenInfoMap
                     , usedStyleInfoMap, invalidGenInfoMap, fieldInfo, includeReferenceLayoutNameMap
                     , rootIsMerge, qxmlConfig, attrMethodValueMatcher, layoutGenStateMap, relativeIncludeLayoutMap
-                    , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap, nextNodeParentThemeItemMap
-                    , nextNodeParentContextName, genLoopInfo, rootIsDataBinding, dataBindingAttrResolveInfo)?.let { ignoreInfo ->
+                    , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap, usedImportPackageMap
+                    , nextNodeParentThemeItemMap, nextNodeParentContextName, genLoopInfo, rootIsDataBinding
+                    , dataBindingAttrResolveInfo)?.let { ignoreInfo ->
                     return ignoreInfo
                 }
             }

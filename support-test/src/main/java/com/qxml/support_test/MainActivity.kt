@@ -10,6 +10,7 @@ class MainActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        //setContentView(t.generate(layoutInflater, this, null, false))
     }
 
     fun onUiTest(v: View?) {

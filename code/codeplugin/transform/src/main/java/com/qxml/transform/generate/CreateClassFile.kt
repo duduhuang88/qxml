@@ -11,6 +11,7 @@ import com.qxml.transform.pool.PoolManager
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
+import javassist.ClassPool
 import javassist.CtMethod
 import javassist.CtNewMethod
 import java.lang.StringBuilder
@@ -28,7 +29,9 @@ interface CreateClassFile {
     /**
      * 生成class文件并缓存
      */
-    fun createClassFile(layoutName: String, classGenCacheInfo: ClassGenCacheInfo, packageName: String, qxmlExtension: QxmlConfigExtension, gson: Gson) {
+    fun createClassFile(layoutName: String, classGenCacheInfo: ClassGenCacheInfo, packageName: String
+                        , usedImportPackageMap: HashMap<String, String>
+                        , qxmlExtension: QxmlConfigExtension, gson: Gson) {
         if (!classGenCacheInfo.cacheValid) {
             val className = GenClassNameTool.genClassName(layoutName)
             val methodBuilder = MethodSpec.methodBuilder(Constants.GENERATE_METHOD_NAME)
@@ -104,7 +107,13 @@ interface CreateClassFile {
             //LogUtil.pl("make class suc: "+layoutName)
             //LogUtil.pl("make class "+layoutName +" \n"+methodContent)
             //LogUtil.pl("make class "+layoutName +" \n"+classResult.classCacheFile.absolutePath)
-            val ctClass = PoolManager.pool.makeClass(className)
+
+            PoolManager.pool.clearImportedPackages()
+            val importPackagePool = PoolManager.pool
+            usedImportPackageMap.forEach { (importPackage, _) ->
+                importPackagePool.importPackage(importPackage)
+            }
+            val ctClass = importPackagePool.makeClass(className)
             try {
                 val method = CtNewMethod.make(methodContent, ctClass)
                 ctClass.addMethod(method)
@@ -140,7 +149,14 @@ interface CreateClassFile {
     fun createClassFileWithCache(layoutName: String, classGenCacheInfo: ClassGenCacheInfo) {
         if (classGenCacheInfo.cacheValid) {
             val className = GenClassNameTool.genClassName(layoutName)
-            val ctClass = PoolManager.pool.makeClass(className)
+
+            PoolManager.pool.clearImportedPackages()
+            val importPackagePool = PoolManager.pool
+            classGenCacheInfo.generateClassInfo.usedImportPackageMap.forEach { (importPackage, _) ->
+                importPackagePool.importPackage(importPackage)
+            }
+
+            val ctClass = importPackagePool.makeClass(className)
 
             //cacheInfoFile.writeText(gson.toJson(classGenInfo))
             val methodContent = classGenCacheInfo.generateClassInfo.methodContent

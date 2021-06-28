@@ -68,18 +68,18 @@ Gradle 3.5.0 以上
 
 |       组件        | 支持属性 |     组件     | 支持属性 |          组件           | 支持属性 |
 | :---------------: | :------: | :----------: | :------: | :---------------------: | :------: |
-|   Lottie    |  almost  |      |    |  |    |
+|   Lottie    |  almost  |  fresco   |  almost |    |    |
 
 # 基础使用
 
 ### 1. 在 Project `build.gradle` 中添加依赖
 
-最新版本为 **1.0.3**，查看 [Releases](https://github.com/duduhuang88/qxml/releases) 获取最新版本信息
+最新版本为 **1.0.4**，查看 [Releases](https://github.com/duduhuang88/qxml/releases) 获取最新版本信息
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.0.3"
+    ext.qxml_version = "1.0.4"
     repositories {
         ...
         mavenCentral()
@@ -197,7 +197,7 @@ qxml {
 
 #### 3. 增加 apk 体积，在 demo 中 52 个 layout 文件时，release apk 体积增加了约 38K，后续可能会添加重打包移除已转换 layout 文件的选项
 
-#### 4. 目前扩展 View 需使用全限定类名，后续可能会改善这种情况
+#### 4. ~~目前扩展 View 需使用全限定类名，后续可能会改善这种情况~~，除定义共享变量外已无需全限定类名
 
 # LICENSE
 ```

@@ -10,7 +10,7 @@ public class ViewGenClassModel {
     private Map<String, AttrFuncInfoModel> funcInfoModelHashMap = new HashMap<>();
     private List<AttrFuncInfoModel> overrideFuncInfoModelList = new ArrayList<>();
     private Map<String, AttrFuncInfoModel> onEndFuncInfoModelMap = new HashMap<>();
-    /*private Map<String, String> importPackageMap = new HashMap<>();
+    private Map<String, String> importPackageMap = new HashMap<>();
 
     public Map<String, String> getImportPackageMap() {
         return importPackageMap;
@@ -18,7 +18,7 @@ public class ViewGenClassModel {
 
     public void setImportPackageMap(Map<String, String> importPackageMap) {
         this.importPackageMap = importPackageMap;
-    }*/
+    }
 
     public Map<String, AttrFuncInfoModel> getFuncInfoModelHashMap() {
         return funcInfoModelHashMap;

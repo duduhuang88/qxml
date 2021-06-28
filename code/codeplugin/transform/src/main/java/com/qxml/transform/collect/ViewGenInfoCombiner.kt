@@ -223,7 +223,7 @@ private class GenInfoHeadNode {
                         val parentAttrName = parentAttrFuncInfo.attrName
                         val split = parentAttrName.split(".attr.").toTypedArray()
                         var attrName = split.last()
-                        if (parentAttrName.startsWith("com.qxml.AndroidRS") || parentAttrName.startsWith("AndroidRS")) {
+                        if (parentAttrName.startsWith("com.qxml.AndroidRS") || parentAttrName.startsWith("AndroidRS") || parentAttrName.contains("AndroidRS")) {
                             attrName = "android:" + split.last()
                         }
                         attrFuncInfoModel.attrName = attrName
@@ -257,11 +257,13 @@ private class GenInfoHeadNode {
 
         if (!isParseType) {
             val curFuncInfoMap = curGenInfo.funcInfoModelHashMap
+            val curImportMap = curGenInfo.importPackageMap
             // 将viewReplace类的funcInfoModelHashMap替换成父类的funcInfoModelHashMap，
             // 相当于把起始viewParse的funcInfoModelHashMap向下传递，后续递归修改时始终修改的是起始viewParse的funcInfoModelHashMap
             curGenInfo.funcInfoModelHashMap = parentGenInfo.funcInfoModelHashMap
             // viewReplace类的方法向上覆盖
             curGenInfo.funcInfoModelHashMap.putAll(curFuncInfoMap)
+            curGenInfo.importPackageMap.putAll(curImportMap)
 
             val curOnEndInfoMap = curGenInfo.onEndFuncInfoModelMap
             curGenInfo.onEndFuncInfoModelMap = parentGenInfo.onEndFuncInfoModelMap
@@ -275,9 +277,14 @@ private class GenInfoHeadNode {
             parentOnEndInfoMap.putAll(parentGenInfo.onEndFuncInfoModelMap)
             parentOnEndInfoMap.putAll(curGenInfo.onEndFuncInfoModelMap)
 
+            val parentImportMap = hashMapOf<String, String>()
+            parentImportMap.putAll(parentGenInfo.importPackageMap)
+            parentImportMap.putAll(curGenInfo.importPackageMap)
+
             // 获得了父类的所有funcInfoModelHashMap，并添加自身attr信息
             curGenInfo.funcInfoModelHashMap = parentInfoMap
             curGenInfo.onEndFuncInfoModelMap = parentOnEndInfoMap
+            curGenInfo.importPackageMap = parentImportMap
         }
 
         val curNode = getTreeNodeByName(curName)!!

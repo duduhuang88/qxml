@@ -58,6 +58,7 @@ dependencies {
     implementation deps.support.design
 
     compileOnly deps.support.lottie
+    compileOnly deps.support.fresco
 
     implementation deps.qxml.baseLib
 

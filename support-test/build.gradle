@@ -105,6 +105,7 @@ dependencies {
     implementation deps.support.design
     implementation deps.support.constraintLayout
     implementation deps.support.lottie
+    implementation deps.support.fresco
 
     testImplementation deps.junit
     androidTestImplementation deps.test.runner

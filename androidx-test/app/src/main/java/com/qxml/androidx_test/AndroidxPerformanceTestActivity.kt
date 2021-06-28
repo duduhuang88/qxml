@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.yellow.qxml_test.TestLayoutRes
 import com.yellow.qxml_test.presenter.PerformancePresenter
 
 class AndroidxPerformanceTestActivity: AppCompatActivity() {
@@ -13,6 +14,15 @@ class AndroidxPerformanceTestActivity: AppCompatActivity() {
         private const val DEFAULT_TEST_COUNT = 50
         @JvmStatic
         fun start(context: Context, testTimes: Int) {
+            var hasFrescoLayout = false
+            TestLayoutRes.TEST_LAYOUT_RES.forEach {
+                if (it == R.layout.fresco_test) {
+                    hasFrescoLayout = true
+                }
+            }
+            if (!hasFrescoLayout) {
+                TestLayoutRes.TEST_LAYOUT_RES.add(R.layout.fresco_test)
+            }
             context.startActivity(Intent(context, AndroidxPerformanceTestActivity::class.java).apply {
                 putExtra(KEY_TEST_TIME, testTimes)
             })

@@ -18,10 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 
 /**
  * 获取类被{@link com.yellow.qxml_annotions.Attr}
@@ -50,12 +52,14 @@ public class AttrMethodInfoScanner extends TreeScanner {
 
     private Trees trees;
     private Types mTypes;
+    private Messager messager;
     private TypeElement curScanElement;
     private boolean curScanIsInterface;
 
-    public AttrMethodInfoScanner(Trees trees, Types mTypes) {
+    public AttrMethodInfoScanner(Trees trees, Types mTypes, Messager messager) {
         this.trees = trees;
         this.mTypes = mTypes;
+        this.messager = messager;
     }
 
     public void setLocalVarInfoModelMap(Map<String, LocalVarInfoModel> localVarInfoModelMap) {
@@ -193,19 +197,30 @@ public class AttrMethodInfoScanner extends TreeScanner {
         } else {
             viewGenClassModelMap.put(curElement.getQualifiedName().toString(), curViewGenClassModel);
         }
-        /*TreePath treePath = trees.getPath(curElement);
+        TreePath treePath = trees.getPath(curElement);
         HashMap<String, String> importPackageMap = new HashMap<>();
         List<?> importTrees = treePath.getCompilationUnit().getImports();
         for (int i = 0; i < importTrees.size(); i++) {
             String importClassOrigStr = importTrees.get(i).toString();
-            String importClass = importClassOrigStr.substring(7, importClassOrigStr.lastIndexOf(";"));
-            if (!importClass.contains(".")) {
-                importPackageMap.putIfAbsent(importClass, "");
-            } else {
-                importPackageMap.putIfAbsent(importClass.substring(0, importClass.lastIndexOf(".")), "");
+            if (importClassOrigStr.startsWith("import")) {
+                if (importClassOrigStr.startsWith("import static")) {
+                    messager.printMessage(Diagnostic.Kind.ERROR, "暂不支持 import static 引用("+curElement.getSimpleName()+")");
+                }
+                String importClass = importClassOrigStr.substring(7, importClassOrigStr.length() - 1);
+                if (!importClass.contains(".")) {
+                    importPackageMap.putIfAbsent(importClass, "");
+                } else {
+                    importPackageMap.putIfAbsent(importClass.substring(0, importClass.lastIndexOf(".")), "");
+                }
             }
-        }*/
-        //curViewGenClassModel.setImportPackageMap(importPackageMap);
+        }
+        String curElementPath = curElement.getQualifiedName().toString();
+        int lastIndexOfDot = curElementPath.lastIndexOf(".");
+        if (lastIndexOfDot > 0) {
+            curElementPath = curElementPath.substring(0, lastIndexOfDot);
+            importPackageMap.putIfAbsent(curElementPath, "");
+        }
+        curViewGenClassModel.setImportPackageMap(importPackageMap);
         jcTree.accept(this);
         if (curScanIsInterface) {
             String belongElementName = belongElement.getQualifiedName().toString();
@@ -216,7 +231,7 @@ public class AttrMethodInfoScanner extends TreeScanner {
                 // TODO: support Interface override
                 genClassModel.getFuncInfoModelHashMap().putAll(curViewGenClassModel.getFuncInfoModelHashMap());
                 genClassModel.getOnEndFuncInfoModelMap().putAll(curViewGenClassModel.getOnEndFuncInfoModelMap());
-                //genClassModel.getImportPackageMap().putAll(curViewGenClassModel.getImportPackageMap());
+                genClassModel.getImportPackageMap().putAll(curViewGenClassModel.getImportPackageMap());
             }
         }
         curViewGenClassModel = null;

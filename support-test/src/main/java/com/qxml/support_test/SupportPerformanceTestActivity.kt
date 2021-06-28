@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.yellow.qxml_test.LogUtil
+import com.yellow.qxml_test.TestLayoutRes
 import com.yellow.qxml_test.presenter.PerformancePresenter
 import com.yellow.qxml_test.presenter.PerformanceView
 
@@ -15,8 +16,18 @@ class SupportPerformanceTestActivity: AppCompatActivity(), PerformanceView {
     companion object {
         private const val KEY_TEST_TIME = "KEY_TEST_TIME"
         private const val DEFAULT_TEST_COUNT = 50
+
         @JvmStatic
         fun start(context: Context, testTimes: Int) {
+            var hasFrescoLayout = false
+            TestLayoutRes.TEST_LAYOUT_RES.forEach {
+                if (it == R.layout.fresco_test) {
+                    hasFrescoLayout = true
+                }
+            }
+            if (!hasFrescoLayout) {
+                TestLayoutRes.TEST_LAYOUT_RES.add(R.layout.fresco_test)
+            }
             context.startActivity(Intent(context, SupportPerformanceTestActivity::class.java).apply {
                 putExtra(KEY_TEST_TIME, testTimes)
             })

@@ -1,6 +1,8 @@
 package com.qxml.transform.pool
 
 import javassist.ClassPool
+import javassist.CtClass
+import javassist.NotFoundException
 
 object PoolManager {
 
@@ -8,25 +10,41 @@ object PoolManager {
 
     @JvmStatic
     fun initPool(): ClassPool {
-        return ClassPool(null).apply {
+        return FixImportPackageClassPool(null).apply {
             appendSystemPath()
-            importPackage("android.app")
-            importPackage("android.content")
-            importPackage("android.util")
-            importPackage("android.os")
-            importPackage("android.graphics.drawable")
-            importPackage("android.view")
-            importPackage("android.widget")
-            importPackage("android.content.res")
-            importPackage("com.qxml.value")
-            importPackage("com.qxml.tools")
-            importPackage("com.qxml.helper")
-
-            importPackage("android.support.v4.content")
-            importPackage("android.support.v4.widget")
-            importPackage("android.support.v4.graphics.drawable")
-            importPackage("android.support.v4.content.res")
         }
+    }
+}
+
+class FixImportPackageClassPool: ClassPool {
+    constructor() : super()
+    constructor(useDefaultPath: Boolean) : super(useDefaultPath)
+    constructor(parent: ClassPool?) : super(parent)
+
+    override fun get(classname: String?): CtClass {
+        if (classname != null) {
+            try {
+                return super.get(classname)
+            } catch (e: NotFoundException) {
+                val orgName = classname!!
+                if (orgName.indexOf('.') < 0) {
+                    val it: Iterator<String> = importedPackages
+                    while (it.hasNext()) {
+                        val pac = it.next()
+                        val fqName = pac.replace("\\.$".toRegex(), "") + "." + orgName
+                        try {
+                            return super.get(fqName)
+                        } catch (e: NotFoundException) {
+                            try {
+                                if (pac.endsWith(".$orgName")) return super.get(pac)
+                            } catch (e2: NotFoundException) {
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        throw NotFoundException(classname)
     }
 
 }

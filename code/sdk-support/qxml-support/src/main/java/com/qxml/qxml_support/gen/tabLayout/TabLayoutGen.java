@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.support.design.widget.TabLayout;
 
 import com.qxml.gen.scrollView.HorizontalScrollViewGen;
+import com.qxml.gen.tabLayout.TabLayoutHelper;
 import com.qxml.qxml_support.RS;
 import com.qxml.value.ValueInfo;
 import com.yellow.qxml_annotions.Attr;
@@ -203,19 +204,19 @@ public class TabLayoutGen extends HorizontalScrollViewGen {
             , RS.attr.tabMode, RS.attr.tabContentStart})
     public void onTabLayoutTabModeEnd(TabLayout tabLayout) {
         if (__tabLayoutLocalVar.tabPaddingStart != 0) {
-            com.qxml.gen.tabLayout.TabLayoutHelper.setTabPaddingStartField(tabLayout, __tabLayoutLocalVar.tabPaddingStart);
+            TabLayoutHelper.setTabPaddingStartField(tabLayout, __tabLayoutLocalVar.tabPaddingStart);
         }
         if (__tabLayoutLocalVar.tabPaddingTop != 0) {
-            com.qxml.gen.tabLayout.TabLayoutHelper.setTabPaddingTopField(tabLayout, __tabLayoutLocalVar.tabPaddingTop);
+            TabLayoutHelper.setTabPaddingTopField(tabLayout, __tabLayoutLocalVar.tabPaddingTop);
         }
         if (__tabLayoutLocalVar.tabPaddingEnd != 0) {
-            com.qxml.gen.tabLayout.TabLayoutHelper.setTabPaddingEndField(tabLayout, __tabLayoutLocalVar.tabPaddingEnd);
+            TabLayoutHelper.setTabPaddingEndField(tabLayout, __tabLayoutLocalVar.tabPaddingEnd);
         }
         if (__tabLayoutLocalVar.tabPaddingBottom != 0) {
-            com.qxml.gen.tabLayout.TabLayoutHelper.setTabPaddingBottomField(tabLayout, __tabLayoutLocalVar.tabPaddingBottom);
+            TabLayoutHelper.setTabPaddingBottomField(tabLayout, __tabLayoutLocalVar.tabPaddingBottom);
         }
         if (__tabLayoutLocalVar.tabContentStart != 0) {
-            com.qxml.gen.tabLayout.TabLayoutHelper.setContentInsetStart(tabLayout, __tabLayoutLocalVar.tabContentStart);
+            TabLayoutHelper.setContentInsetStart(tabLayout, __tabLayoutLocalVar.tabContentStart);
         }
         tabLayout.setTabMode(__tabLayoutLocalVar.tabMode);
     }

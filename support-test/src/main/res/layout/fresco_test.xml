@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        app:actualImageUri="https://bkimg.cdn.bcebos.com/pic/80cb39dbb6fd5266d0160b856a54802bd40735fa9844?x-bce-process=image/resize,m_lfit,w_220,limit_1/format,f_auto"
+        app:retryImageScaleType="fitXY"
+        app:retryImage="@mipmap/ic_launcher"
+        app:failureImage="@mipmap/qxml_debug_icon"
+        app:failureImageScaleType="centerCrop"
+        android:layout_width="150dp"
+        android:layout_height="50dp"/>
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        app:actualImageUri="https://bkimg.cdn.bcebos.com/pic/80cb39dbb6fd5266d0160b856a54802bd40735fa9844?x-bce-process=image/resize,m_lfit,w_220,limit_1/format,f_auto"
+        app:viewAspectRatio="0.5"
+        app:roundAsCircle="true"
+        android:layout_width="150dp"
+        android:layout_height="50dp"/>
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        app:actualImageUri="http://img.daimg.com/uploads/allimg/210626/1-2106261H341.jpg"
+        app:roundAsCircle="true"
+        app:progressBarImage="@mipmap/ic_launcher"
+        app:progressBarAutoRotateInterval="100"
+        app:progressBarImageScaleType="fitXY"
+        app:backgroundImage="@color/sss"
+        app:fadeDuration="1000"
+        app:actualImageScaleType="centerCrop"
+        android:layout_width="150dp"
+        android:layout_height="50dp"/>
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        app:actualImageUri="http://img.daimg.com/uploads/allimg/210626/1-2106261H341.jpg"
+        app:fadeDuration="100"
+        app:actualImageScaleType="centerCrop"
+        app:roundedCornerRadius="20dp"
+        app:roundingBorderColor="@color/sss"
+        app:roundingBorderWidth="2dp"
+        app:roundBottomEnd="true"
+        app:roundBottomStart="true"
+        android:layout_width="150dp"
+        android:layout_height="50dp"/>
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        app:actualImageResource="@mipmap/ic_launcher"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        app:actualImageUri="https://___bkimg.cdn.bcebos.com/pic/80cb39dbb6fd5266d0160b856a54802bd40735fa9844?x-bce-process=image/resize,m_lfit,w_220,limit_1/format,f_auto"
+        app:retryImageScaleType="fitXY"
+        app:retryImage="@mipmap/ic_launcher"
+        app:failureImage="@mipmap/qxml_debug_icon"
+        app:failureImageScaleType="fitXY"
+        android:layout_width="150dp"
+        android:layout_height="50dp"/>
+
+</LinearLayout>

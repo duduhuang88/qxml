@@ -92,6 +92,8 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                     val relativeIncludeLayoutMap = hashMapOf<String, String>()
                     //使用的R
                     val usedReferenceRMap = hashMapOf<String, String>()
+                    //使用的import
+                    val usedImportPackageMap = hashMapOf<String, String>()
 
                     val qxmlConfigMap = hashMapOf<String, QxmlConfigExtension>()
 
@@ -126,7 +128,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 , usedStyleInfoMap, invalidGenInfoMap, fieldInfo
                                 , includeReferenceLayoutNameMap, layoutIsMerge, qxmlConfig
                                 , attrMethodValueMatcher, layoutGenStateMap, relativeIncludeLayoutMap
-                                , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap)?.also {
+                                , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap, usedImportPackageMap)?.also {
                                 index = 0
                                 if (it.result != GenResult.WAIT_INCLUDE) {
                                     failedLayoutTypeGenInfoList.add(LayoutTypeGenInfo(xmlTypeInfo.type, layoutIsMerge))
@@ -272,11 +274,11 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                     //LogUtil.pl("final code "+layoutName+" \n"+methodContent)
                     val classGenInfo = ClassGenCacheInfo(false, className, layoutName, layoutClassCacheDir, cacheClassFile, cacheInfoFile
                         , GenerateClassInfo(usedGenInfoMap, usedOnEndInfoMap, usedStyleInfoMap, invalidGenInfoMap
-                            , relativeIncludeLayoutMap, usedReferenceRMap, getLayoutGenResultMapFromFinalResultMap(layoutName, finalGenResultMap), getCacheVerifyKey(layoutFileInfoList, qxmlExtension, qxmlConfigMap), methodContent)
+                            , relativeIncludeLayoutMap, usedReferenceRMap, usedImportPackageMap, getLayoutGenResultMapFromFinalResultMap(layoutName, finalGenResultMap), getCacheVerifyKey(layoutFileInfoList, qxmlExtension, qxmlConfigMap), methodContent)
                         , generateFieldInfo, successLayoutTypeGenInfoList, failedLayoutTypeGenInfoList, layoutFileInfoList.size)
 
                     try {
-                        createClassFile(layoutName, classGenInfo, packageName, qxmlExtension, gson)
+                        createClassFile(layoutName, classGenInfo, packageName, usedImportPackageMap, qxmlExtension, gson)
                         finalGenCacheInfoMap[layoutName] = classGenInfo
                         genClassCacheInfoList.add(classGenInfo)
                     } catch (e: Exception) {

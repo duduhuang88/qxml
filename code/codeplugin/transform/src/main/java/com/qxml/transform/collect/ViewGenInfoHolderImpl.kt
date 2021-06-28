@@ -27,6 +27,8 @@ interface ViewGenInfoHolder {
     fun shouldStyleAttrReset(styleAttrName: String): Boolean
     fun shouldCallOnFinishInflate(viewName: String): Boolean
 
+    fun getImportPackage(viewClassName: String): Map<String, String>?
+
     fun localVarDefContent(usedLocalVarMap: HashMap<String, String>): String
     fun localVarResetContent(usedLocalVarMap: HashMap<String, String>): String
 
@@ -169,6 +171,13 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
         }
     }
 
+    //import package map
+    private val finalImportPackageMap by lazy { hashMapOf<String, Map<String, String>>().apply {
+        viewGenInfoMap.forEach { (viewClassName, viewGenClassModel) ->
+            put(viewClassName, viewGenClassModel.importPackageMap)
+        }
+    } }
+
     init {
         //设置共享变量
         viewGenInfoMap.forEach { (_, viewGenClassModel) ->
@@ -192,7 +201,6 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
 
     private fun resolveLocalVar(attrFuncInfoModelMap: Map<String, AttrFuncInfoModel>?, localVarInfoModelMap: Map<String, LocalVarInfoModel>) {
         attrFuncInfoModelMap?.forEach { (_, attrFuncInfoModel) ->
-            //var firstTime = true
             localVarInfoModelMap.forEach { (_, localVarInfoModel) ->
                 if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.changeStr)) {
                     attrFuncInfoModel.funcBodyContent = attrFuncInfoModel.funcBodyContent?.replace(localVarInfoModel.changeStr, localVarInfoModel.replaceStr)
@@ -258,6 +266,10 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
 
     override fun shouldCallOnFinishInflate(viewName: String): Boolean {
         return finalCallOnFinishInflateMap[viewName] ?: false
+    }
+
+    override fun getImportPackage(viewClassName: String): Map<String, String>? {
+        return finalImportPackageMap[viewClassName]
     }
 
     override fun getLayoutParamInitBloc(parentViewClassName: String): String? {

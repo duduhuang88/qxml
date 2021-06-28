@@ -53,18 +53,18 @@ Gradle 3.5.0 above
 
 |     Component     |  Attr  |  Component   |  Attr  |        Component        |  Attr  |
 | :---------------: | :------: | :----------: | :------: | :---------------------: | :------: |
-|   Lottie    |  almost  |      |    |  |    |
+|   Lottie    |  almost  |   fresco   |  almost  |  |    |
 
 # Use
 
 ### 1. Add dependency in Project `build.gradle`
 
-The newest version code is **1.0.3**，check [Releases](https://github.com/duduhuang88/qxml/releases) to get newest version info
+The newest version code is **1.0.4**，check [Releases](https://github.com/duduhuang88/qxml/releases) to get newest version info
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.0.3"
+    ext.qxml_version = "1.0.4"
     repositories {
         ...
         mavenCentral()
@@ -182,7 +182,7 @@ no need
 
 #### 3. Increase the raw size of APK. When there are 52 layout files in the demo, the size of release APK increases by about 38K. The option of repackaging and removing converted layout files may be added later
 
-#### 4. The extension of view needs to use fully qualified class names, which may be improved in the future
+#### 4. ~~The extension of view needs to use fully qualified class names, which may be improved in the future~~, There is no need for fully qualified class names other than defining shared variables
 
 # LICENSE
 ```

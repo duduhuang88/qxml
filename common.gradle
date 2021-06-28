@@ -3,7 +3,7 @@ def REMOTE_DEPENDENCE = false
 
 allprojects {
 
-    ext.PUBLISH_VERSION = "1.0.3"
+    ext.PUBLISH_VERSION = "1.0.4"
 
     ext.versions = [
             'minSdkVersion': 14,
@@ -24,7 +24,8 @@ allprojects {
                     'constraintLayout': 'com.android.support.constraint:constraint-layout:2.0.4',
                     'recyclerview': 'com.android.support:recyclerview-v7:28.0.0',
                     'design': 'com.android.support:design:28.0.0',
-                    'lottie': 'com.airbnb.android:lottie:2.7.0'
+                    'lottie': 'com.airbnb.android:lottie:2.7.0',
+                    'fresco':'com.facebook.fresco:fresco:1.13.0'
             ],
             'androidx': [
                     'core': "androidx.core:core:1.0.0",
@@ -36,6 +37,7 @@ allprojects {
                     'compat': 'androidx.appcompat:appcompat:1.2.0',
                     'viewpager2': 'androidx.viewpager2:viewpager2:1.0.0',
                     'lottie': 'com.airbnb.android:lottie:3.7.0',
+                    'fresco':'com.facebook.fresco:fresco:2.5.0',
                     'test': [
                             'runner': 'androidx.test:runner:1.1.0',
                             'rules': 'androidx.test:rules:1.1.0',
