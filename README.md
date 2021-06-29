@@ -74,12 +74,12 @@ Gradle 3.5.0 以上
 
 ### 1. 在 Project `build.gradle` 中添加依赖
 
-最新版本为 **1.0.4**，查看 [Releases](https://github.com/duduhuang88/qxml/releases) 获取最新版本信息
+最新版本为 **1.0.5**，查看 [Releases](https://github.com/duduhuang88/qxml/releases) 获取最新版本信息
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.0.4"
+    ext.qxml_version = "1.0.5"
     repositories {
         ...
         mavenCentral()

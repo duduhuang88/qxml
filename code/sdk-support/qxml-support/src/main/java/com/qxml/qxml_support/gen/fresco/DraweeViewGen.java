@@ -3,6 +3,7 @@ package com.qxml.qxml_support.gen.fresco;
 import android.view.View;
 
 import com.facebook.drawee.drawable.AutoRotateDrawable;
+import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
 import com.facebook.drawee.view.DraweeView;
 import com.qxml.gen.imageView.ImageViewGen;
@@ -48,7 +49,6 @@ public class DraweeViewGen extends ImageViewGen {
         public int roundingBorderWidth = 0;
         public int roundingBorderColor = Integer.MIN_VALUE;
         public int roundingBorderPadding = 0;
-        public com.facebook.drawee.generic.GenericDraweeHierarchyBuilder builder = new com.facebook.drawee.generic.GenericDraweeHierarchyBuilder(___resources);
     }
 
     @LocalVar
@@ -210,57 +210,59 @@ public class DraweeViewGen extends ImageViewGen {
             , RS.attr.roundingBorderPadding
     })
     public void onDraweeViewEnd(DraweeView draweeView) {
+        GenericDraweeHierarchyBuilder builder = new com.facebook.drawee.generic.GenericDraweeHierarchyBuilder(___resources);
+
         if (__draweeViewLocalVar.fadeDuration != 0) {
-            __draweeViewLocalVar.builder.setFadeDuration(__draweeViewLocalVar.fadeDuration);
+            builder.setFadeDuration(__draweeViewLocalVar.fadeDuration);
         }
         if (__draweeViewLocalVar.viewAspectRatio != 0f) {
-            __draweeViewLocalVar.builder.setDesiredAspectRatio(__draweeViewLocalVar.viewAspectRatio);
+            builder.setDesiredAspectRatio(__draweeViewLocalVar.viewAspectRatio);
         }
         if (__draweeViewLocalVar.placeholderImage != 0) {
-            __draweeViewLocalVar.builder.setPlaceholderImage(__draweeViewLocalVar.placeholderImage);
+            builder.setPlaceholderImage(__draweeViewLocalVar.placeholderImage);
         }
         if (__draweeViewLocalVar.placeholderImageScaleType != -2) {
-            __draweeViewLocalVar.builder.setPlaceholderImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.placeholderImageScaleType));
+            builder.setPlaceholderImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.placeholderImageScaleType));
         }
 
         if (__draweeViewLocalVar.retryImage != 0) {
-            __draweeViewLocalVar.builder.setRetryImage(__draweeViewLocalVar.retryImage);
+            builder.setRetryImage(__draweeViewLocalVar.retryImage);
         }
         if (__draweeViewLocalVar.retryImageScaleType != -2) {
-            __draweeViewLocalVar.builder.setRetryImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.retryImageScaleType));
+            builder.setRetryImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.retryImageScaleType));
         }
         if (__draweeViewLocalVar.failureImage != 0) {
-            __draweeViewLocalVar.builder.setFailureImage(__draweeViewLocalVar.failureImage);
+            builder.setFailureImage(__draweeViewLocalVar.failureImage);
         }
         if (__draweeViewLocalVar.failureImageScaleType != -2) {
-            __draweeViewLocalVar.builder.setFailureImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.failureImageScaleType));
+            builder.setFailureImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.failureImageScaleType));
         }
 
         if (__draweeViewLocalVar.progressBarImage != 0) {
-            __draweeViewLocalVar.builder.setProgressBarImage(__draweeViewLocalVar.progressBarImage);
+            builder.setProgressBarImage(__draweeViewLocalVar.progressBarImage);
         }
         if (__draweeViewLocalVar.progressBarImageScaleType != -2) {
-            __draweeViewLocalVar.builder.setProgressBarImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.progressBarImageScaleType));
+            builder.setProgressBarImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.progressBarImageScaleType));
         }
-        if (__draweeViewLocalVar.progressBarAutoRotateInterval > 0 && __draweeViewLocalVar.builder.getProgressBarImage() != null) {
-            __draweeViewLocalVar.builder.setProgressBarImage(new AutoRotateDrawable(__draweeViewLocalVar.builder.getProgressBarImage(), __draweeViewLocalVar.progressBarAutoRotateInterval));
+        if (__draweeViewLocalVar.progressBarAutoRotateInterval > 0 && builder.getProgressBarImage() != null) {
+            builder.setProgressBarImage(new AutoRotateDrawable(builder.getProgressBarImage(), __draweeViewLocalVar.progressBarAutoRotateInterval));
         }
         if (__draweeViewLocalVar.actualImageScaleType != -2) {
-            __draweeViewLocalVar.builder.setActualImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.actualImageScaleType));
+            builder.setActualImageScaleType(FrescoHelper.getScaleTypeFromXml(__draweeViewLocalVar.actualImageScaleType));
         }
 
         if (__draweeViewLocalVar.backgroundImage != 0) {
-            __draweeViewLocalVar.builder.setBackground(DrawableTools.getDrawable(__context, ___resources, __draweeViewLocalVar.backgroundImage));
+            builder.setBackground(DrawableTools.getDrawable(__context, ___resources, __draweeViewLocalVar.backgroundImage));
         }
         if (__draweeViewLocalVar.overlayImage != -2) {
-            __draweeViewLocalVar.builder.setOverlay(DrawableTools.getDrawable(__context, ___resources, __draweeViewLocalVar.overlayImage));
+            builder.setOverlay(DrawableTools.getDrawable(__context, ___resources, __draweeViewLocalVar.overlayImage));
         }
         if (__draweeViewLocalVar.pressedStateOverlayImage != 0) {
-            __draweeViewLocalVar.builder.setPressedStateOverlay(DrawableTools.getDrawable(__context, ___resources, __draweeViewLocalVar.pressedStateOverlayImage));
+            builder.setPressedStateOverlay(DrawableTools.getDrawable(__context, ___resources, __draweeViewLocalVar.pressedStateOverlayImage));
         }
 
         RoundingParams roundingParams = new RoundingParams();
-        __draweeViewLocalVar.builder.setRoundingParams(roundingParams);
+        builder.setRoundingParams(roundingParams);
         if (__draweeViewLocalVar.roundAsCircle) {
             roundingParams.setRoundAsCircle(true);
         }
@@ -299,7 +301,7 @@ public class DraweeViewGen extends ImageViewGen {
                     __draweeViewLocalVar.roundBottomLeft ? (float)__draweeViewLocalVar.roundedCornerRadius : 0f);
         }
 
-        draweeView.setHierarchy(__draweeViewLocalVar.builder.build());
+        draweeView.setHierarchy(builder.build());
     }
 
 }
