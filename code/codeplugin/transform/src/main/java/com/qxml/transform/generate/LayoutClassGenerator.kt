@@ -78,7 +78,7 @@ class LayoutClassGenerator(
     fun generate(): QxmlGenResultProvider {
         //存放gen class的jar
         val layoutGenJarOutputFile = transformOutputProvide.getContentLocation(
-            "\$\$qxml_${Constants.QXML_VERSION_CODE}_layout_gen_jar",
+            "\$\$qxml_${Constants.QXML_VERSION_CODE}_layout_gen_jar_${System.currentTimeMillis()}",
             setOf(QualifiedContent.DefaultContentType.CLASSES),
             mutableSetOf(QualifiedContent.Scope.EXTERNAL_LIBRARIES),
             //ImmutableSet.of(QualifiedContent.Scope.EXTERNAL_LIBRARIES),
