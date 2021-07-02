@@ -22,7 +22,7 @@ class StringTypeValueResolver: ValueResolver {
     ): MatchResult {
         val valueType = valueInfo.valueType
         val value = valueInfo.value
-        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1)
+        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.PARAM_NAME_TEMP, viewFieldName)
 
         val stringBuilder = StringBuilder()
         stringBuilder.append(attrFuncInfoModel.getMethodContentHead(viewFieldName))

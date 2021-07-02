@@ -38,9 +38,8 @@ class ValueInfoTypeResolver: ValueResolver {
         val valueType = valueInfo.valueType
         val value = valueInfo.value
         val stringBuilder = StringBuilder()
-        val lastFuncBody = attrFuncInfoModel.funcBodyContent.substring(1)
+        val lastFuncBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.PARAM_NAME_TEMP, viewFieldName)
         stringBuilder.append("{\n")
-        stringBuilder.append("${attrFuncInfoModel.viewParamType} ${attrFuncInfoModel.viewParamName} = $viewFieldName;\n")
         stringBuilder.append("${attrFuncInfoModel.valueParamType} ${attrFuncInfoModel.valueParamName} = ${Constants.GEN_FIELD_VALUE_INFO_NAME};\n")
 
         stringBuilder.append(VALUE_INFO_CLEAR)

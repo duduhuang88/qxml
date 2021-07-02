@@ -21,8 +21,6 @@ interface ViewGenInfoHolder {
     fun hasAttr(attrName: String): Boolean
     fun getAttrMethodInfoMap(viewName: String): Map<String, AttrFuncInfoModel>?
     fun getOnEndMethodInfoMap(viewName: String): Map<String, AttrFuncInfoModel>?
-    fun localVarDefContent(): String
-    fun localVarResetContent(): String
     fun cacheLocalVarDefContent()
     fun shouldStyleAttrReset(styleAttrName: String): Boolean
     fun shouldCallOnFinishInflate(viewName: String): Boolean
@@ -229,12 +227,19 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
         return viewGenInfoMap[viewName]?.onEndFuncInfoModelMap
     }
 
-    override fun localVarDefContent(): String = localVarDefContent
-
-    override fun localVarResetContent(): String = localVarResetContent
-
     override fun localVarDefContent(usedLocalVarMap: HashMap<String, String>): String {
-        return localVarDefContent
+        val stringBuilder = StringBuilder()
+        var index = usedLocalVarMap.size
+        usedLocalVarMap.forEach { (fullName, _) ->
+            genClassInfoModel.localVarMap[fullName]?.apply {
+                stringBuilder.append(initBlock)
+                index--
+                if (index != 0) {
+                    stringBuilder.append(";\n")
+                }
+            }
+        }
+        return stringBuilder.toString()
     }
 
     override fun localVarResetContent(usedLocalVarMap: HashMap<String, String>): String {
@@ -279,10 +284,10 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
     override fun anyChange(generateClassInfo: GenerateClassInfo): Boolean {
 
         //共享变量有变
-        if (isLocalVarDefChange) {
+        /*if (isLocalVarDefChange) {
             LogUtil.pl("anyChange true by LocalVarDefChange ")
             return true
-        }
+        }*/
         //没用到的attr有了实现
         generateClassInfo.invalidGenInfoMap.forEach { (viewClassName, attrMap) ->
             viewGenInfoMap[viewClassName]?.funcInfoModelHashMap?.also { map ->

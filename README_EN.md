@@ -59,12 +59,12 @@ Gradle 3.5.0 above
 
 ### 1. Add dependency in Project `build.gradle`
 
-The newest version code is **1.0.6**，check [Releases](https://github.com/duduhuang88/qxml/releases) to get newest version info
+check [Releases](https://github.com/duduhuang88/qxml/releases) to get newest version info
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.0.6"
+    ext.qxml_version = "1.1.4"
     repositories {
         ...
         mavenCentral()

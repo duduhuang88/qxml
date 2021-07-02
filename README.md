@@ -74,12 +74,12 @@ Gradle 3.5.0 以上
 
 ### 1. 在 Project `build.gradle` 中添加依赖
 
-最新版本为 **1.0.6**，查看 [Releases](https://github.com/duduhuang88/qxml/releases) 获取最新版本信息
+请查看 [Releases](https://github.com/duduhuang88/qxml/releases) 获取最新版本信息
 
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.0.6"
+    ext.qxml_version = "1.1.4"
     repositories {
         ...
         mavenCentral()
@@ -193,7 +193,7 @@ qxml {
 
 #### 1. 不支持 Android 内置 style
 
-#### 2. 增加编译时间，首次编译根据 layout 数量线性增长，而后会使用缓存
+#### 2. ~~增加编译时间~~，首次编译根据 layout 数量和复杂度增长，而后会使用缓存
 
 #### 3. 增加 apk 体积，在 demo 中 52 个 layout 文件时，release apk 体积增加了约 38K，后续可能会添加重打包移除已转换 layout 文件的选项
 

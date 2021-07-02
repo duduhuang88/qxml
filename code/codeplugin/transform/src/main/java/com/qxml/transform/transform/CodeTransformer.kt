@@ -37,7 +37,7 @@ object CodeTransformer {
             ctClass.defrost()
             ctClass.detach()
         } catch (e: Exception) {
-            e.printStackTrace()
+            //e.printStackTrace()
             if (retryCount < 2) {
                 Thread.sleep(200)
                 transform(input, output, genClassInfoList, packageName, layoutIdMap, retryCount+1)

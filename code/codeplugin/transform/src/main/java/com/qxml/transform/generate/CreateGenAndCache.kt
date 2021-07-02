@@ -46,6 +46,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                           , viewGenInfoHolder: ViewGenInfoHolderImpl
                                           , compatViewInfoMap: Map<String, CompatViewInfoModel>
                                           , styleInfoMap: Map<String, Map<String, StyleInfo>>
+                                          , idMap: Map<String, Int>
     ): MutableList<String> {
 
         val includeReferenceLayoutNameMap = ConcurrentHashMap<String, String>()
@@ -94,8 +95,11 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                     val usedReferenceRMap = hashMapOf<String, String>()
                     //使用的import
                     val usedImportPackageMap = hashMapOf<String, String>()
+                    //用到的localVar
+                    val finalUsedLocalVarMap = hashMapOf<String, String>()
 
                     val qxmlConfigMap = hashMapOf<String, QxmlConfigExtension>()
+
 
                     var jumpByInclude = false
 
@@ -128,10 +132,12 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 , usedStyleInfoMap, invalidGenInfoMap, fieldInfo
                                 , includeReferenceLayoutNameMap, layoutIsMerge, qxmlConfig
                                 , attrMethodValueMatcher, layoutGenStateMap, relativeIncludeLayoutMap
-                                , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap, usedImportPackageMap)?.also {
+                                , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap
+                                , usedImportPackageMap, finalUsedLocalVarMap, idMap)?.also {
                                 index = 0
                                 if (it.result != GenResult.WAIT_INCLUDE) {
                                     failedLayoutTypeGenInfoList.add(LayoutTypeGenInfo(xmlTypeInfo.type, layoutIsMerge))
+                                    finalUsedLocalVarMap.clear()
                                     getLayoutGenResultMapFromFinalResultMap(xmlTypeInfo.name, finalGenResultMap)[xmlTypeInfo.type] = it
                                 } else { //等待include生成的不算入结果中
                                     jumpByInclude = true
@@ -278,7 +284,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                         , generateFieldInfo, successLayoutTypeGenInfoList, failedLayoutTypeGenInfoList, layoutFileInfoList.size)
 
                     try {
-                        createClassFile(layoutName, classGenInfo, packageName, usedImportPackageMap, qxmlExtension, gson)
+                        createClassFile(layoutName, classGenInfo, packageName, finalUsedLocalVarMap, usedImportPackageMap, viewGenInfoHolder, qxmlExtension, gson)
                         finalGenCacheInfoMap[layoutName] = classGenInfo
                         genClassCacheInfoList.add(classGenInfo)
                     } catch (e: Exception) {

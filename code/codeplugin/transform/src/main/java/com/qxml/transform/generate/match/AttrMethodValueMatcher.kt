@@ -35,7 +35,8 @@ class AttrMethodValueMatcher(private val packageName: String, private val attrIn
      */
     fun match(viewTypeName: String, viewFieldName: String, layoutName: String, layoutType: String
               , attrFuncInfoModel: AttrFuncInfoModel, attrValue: String, fieldInfo: FieldInfo
-              , contextName: String, usedReferenceRMap: HashMap<String, String>): MatchResult {
+              , contextName: String, usedReferenceRMap: HashMap<String, String>
+              , idMap: Map<String, Int>): MatchResult {
 
         val paramType = getMethodParamType(attrFuncInfoModel.valueParamType)
         val valueInfo = valueParser.getValueInfo(attrFuncInfoModel.attrName, attrValue)
@@ -47,6 +48,7 @@ class AttrMethodValueMatcher(private val packageName: String, private val attrIn
 
         if (valueInfo.valueType <= ValueType.REFERENCE_ATTR) {
             usedReferenceRMap.putIfAbsent(valueInfo.valueWithoutPackageName, "")
+            //valueInfo.value = idMap[valueInfo.valueWithoutPackageName]?.toString() ?: valueInfo.value
         }
 
         when(paramType) {
@@ -70,8 +72,16 @@ class AttrMethodValueMatcher(private val packageName: String, private val attrIn
         return MatchResult(MatchType.FAILED, "", ViewGenResultInfo("$layoutName $layoutType", GenResult.VALUE_MATCH_ERROR, "${attrFuncInfoModel.viewParamType}-${attrFuncInfoModel.attrName} the value(${valueInfo.sourceValue}) can't parse to ${attrFuncInfoModel.valueParamType}"))
     }
 
-    fun getValueInfo(attrName: String, attrValue: String): ValueInfo {
-        return valueParser.getValueInfo(attrName, attrValue)!!
+    fun getValueInfo(attrName: String, attrValue: String
+                     , usedReferenceRMap: HashMap<String, String>, idMap: Map<String, Int>?): ValueInfo {
+        val valueInfo = valueParser.getValueInfo(attrName, attrValue)!!
+        if (valueInfo.valueType <= ValueType.REFERENCE_ATTR) {
+            usedReferenceRMap.putIfAbsent(valueInfo.valueWithoutPackageName, "")
+            /*idMap?.apply {
+                valueInfo.value = idMap[valueInfo.valueWithoutPackageName]?.toString() ?: valueInfo.value
+            }*/
+        }
+        return valueInfo
     }
 
     private fun getMethodParamType(paramType: String): ParamType {

@@ -7,6 +7,7 @@ import com.qxml.constant.Constants
 import com.qxml.tools.GenClassNameTool
 import com.qxml.tools.LayoutTypeNameCorrect
 import com.qxml.tools.log.LogUtil
+import com.qxml.transform.collect.ViewGenInfoHolderImpl
 import com.qxml.transform.pool.PoolManager
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
@@ -14,6 +15,7 @@ import com.squareup.javapoet.TypeName
 import javassist.ClassPool
 import javassist.CtMethod
 import javassist.CtNewMethod
+import javassist.compiler.Javac
 import java.lang.StringBuilder
 import javax.lang.model.element.Modifier
 
@@ -30,7 +32,9 @@ interface CreateClassFile {
      * 生成class文件并缓存
      */
     fun createClassFile(layoutName: String, classGenCacheInfo: ClassGenCacheInfo, packageName: String
+                        , finalUsedLocalVarMap: HashMap<String, String>
                         , usedImportPackageMap: HashMap<String, String>
+                        , viewGenInfoHolder: ViewGenInfoHolderImpl
                         , qxmlExtension: QxmlConfigExtension, gson: Gson) {
         if (!classGenCacheInfo.cacheValid) {
             val className = GenClassNameTool.genClassName(layoutName)
@@ -90,6 +94,8 @@ interface CreateClassFile {
                 methodBuilder.endControlFlow()
             }
 
+            methodBuilder.addStatement(viewGenInfoHolder.localVarDefContent(finalUsedLocalVarMap))
+
             //用到了size
             if (classGenCacheInfo.generateFieldInfoMap.allSizeMap.isNotEmpty()) {
                 methodBuilder.addStatement("android.util.DisplayMetrics ___displayMetrics = ${Constants.GEN_FIELD_RESOURCE}.getDisplayMetrics()")
@@ -115,7 +121,7 @@ interface CreateClassFile {
             }
             val ctClass = importPackagePool.makeClass(className)
             try {
-                val method = CtNewMethod.make(methodContent, ctClass)
+                val method = CtNewMethod.make(methodContent, ctClass, null, null)
                 ctClass.addMethod(method)
             } catch (e: Exception) {
                 classGenCacheInfo.generateClassInfo.methodContent = methodContent

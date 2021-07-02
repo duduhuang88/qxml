@@ -170,6 +170,6 @@ public class AttrFuncInfoModel implements Cloneable {
     }
 
     public String getMethodContentHead(String viewFieldName) {
-        return "{\n"+viewParamType+" "+viewParamName+" = "/*+"("+viewParamType+")"*/+viewFieldName+";\n"+valueParamType+" "+valueParamName+";\n";
+        return "{\n"+valueParamType+" "+valueParamName+";\n";
     }
 }

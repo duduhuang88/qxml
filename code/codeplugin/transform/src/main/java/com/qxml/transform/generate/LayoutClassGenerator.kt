@@ -77,19 +77,16 @@ class LayoutClassGenerator(
 
     fun generate(): QxmlGenResultProvider {
         //存放gen class的jar
-        val layoutGenJarOutputFile = transformOutputProvide.getContentLocation(
-            "\$\$qxml_${Constants.QXML_VERSION_CODE}_layout_gen_jar_${System.currentTimeMillis()}",
+        val layoutGenDir = transformOutputProvide.getContentLocation(
+            "\$\$qxml_${Constants.QXML_VERSION_CODE}_layout_gen_jar",
             setOf(QualifiedContent.DefaultContentType.CLASSES),
-            mutableSetOf(QualifiedContent.Scope.EXTERNAL_LIBRARIES),
-            //ImmutableSet.of(QualifiedContent.Scope.EXTERNAL_LIBRARIES),
-            Format.JAR
+            mutableSetOf(QualifiedContent.Scope.PROJECT),
+            Format.DIRECTORY
         )
 
         if (!genClassInfoCacheDir.exists()) {
             genClassInfoCacheDir.mkdirs()
         }
-
-        layoutGenJarOutputFile.delete()
 
         //LogUtil.pl("layout gen file " + layoutGenJarOutputFile.absolutePath+" "+qxmlExtension.compatMode)
 
@@ -136,7 +133,7 @@ class LayoutClassGenerator(
             val unResolveLayoutNameList = createGenContentAndGenInfoResult(isAndroidx, finalGenInfoMap, layoutInfoMap
                 , unGenLayoutNameList, classGenInfoList, waitableExecutor, layoutGenStateMap, genClassInfoCacheDir
                 , packageName, gson, finalGenResultMap, qxmlExtension, attrMethodValueMatcher, viewGenInfoHolder
-                , compatViewInfoMap, styleInfoMap)
+                , compatViewInfoMap, styleInfoMap, idMap)
             unGenLayoutNameList.clear()
             unGenLayoutNameList.addAll(unResolveLayoutNameList)
         }
@@ -148,7 +145,7 @@ class LayoutClassGenerator(
         LogUtil.pl("layout parse and generate code time cost: " + spend +"ms")
         timeStart = System.currentTimeMillis()
 
-        makeGenJar(layoutGenJarOutputFile, classGenInfoList)
+        makeGenJar(layoutGenDir, classGenInfoList)
 
         spend = System.currentTimeMillis() - timeStart
         LogUtil.pl("wirte class time cost: " + spend + "ms")

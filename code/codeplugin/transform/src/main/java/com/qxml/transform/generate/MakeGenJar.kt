@@ -1,23 +1,21 @@
 package com.qxml.transform.generate
 
-import com.android.SdkConstants
+import com.qxml.constant.Constants
 import java.io.File
-import java.io.FileOutputStream
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 
 interface MakeGenJar {
 
     fun makeGenJar(layoutGenJarOutputFile: File, classGenCacheInfoList: List<ClassGenCacheInfo>) {
-        FileOutputStream(layoutGenJarOutputFile).use { fos ->
-            ZipOutputStream(fos).use { zos ->
-                classGenCacheInfoList.forEach { classGenResult ->
-                    val entry = ZipEntry(classGenResult.name.replace(".", File.separator) + SdkConstants.DOT_CLASS)
-                    entry.time = -1L
-                    zos.putNextEntry(entry)
-                    zos.write(classGenResult.classCacheFile.readBytes())
-                }
-            }
+        if (layoutGenJarOutputFile.exists()) {
+            layoutGenJarOutputFile.delete()
+        }
+        layoutGenJarOutputFile.mkdirs()
+        val layoutGenParentDir = File(layoutGenJarOutputFile, "com${File.separator}qxml_${Constants.QXML_VERSION_CODE}${File.separator}_qxml__layout_gen")
+        layoutGenParentDir.mkdirs()
+        classGenCacheInfoList.forEach { classGenResult ->
+            val classFile = File(layoutGenParentDir, classGenResult.classCacheFile.name)
+            classFile.createNewFile()
+            classFile.writeBytes(classGenResult.classCacheFile.readBytes())
         }
     }
 

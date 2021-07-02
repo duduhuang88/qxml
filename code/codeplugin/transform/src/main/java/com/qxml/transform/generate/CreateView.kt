@@ -72,6 +72,8 @@ interface CreateView: ResolveAttr {
                          , styleInfoMap: Map<String, Map<String, StyleInfo>>
                          , usedReferenceRMap: HashMap<String, String>
                          , usedImportPackageMap: HashMap<String, String>
+                         , finalUsedLocalVarMap: HashMap<String, String>
+                         , idMap: Map<String, Int>
                          , parentThemeItemMap: Map<String, String> = hashMapOf()
                          , parentContextName: String = Constants.GEN_PARAM_CONTEXT_NAME
                          , genLoopInfo: GenLoopInfo = GenLoopInfo()
@@ -100,7 +102,7 @@ interface CreateView: ResolveAttr {
                 isInclude = true
                 val attributes = node.attributes()
                 val layoutIdStr = attributes[Constants.LAYOUT_LAYOUT] as? String ?: return null
-                val valueInfo = attrMethodValueMatcher.getValueInfo("", layoutIdStr)
+                val valueInfo = attrMethodValueMatcher.getValueInfo("", layoutIdStr, usedReferenceRMap, null)
                 if (valueInfo.valueType != ValueType.REFERENCE_LAYOUT) {//只处理layout
                     return null
                 }
@@ -152,7 +154,7 @@ interface CreateView: ResolveAttr {
                     tagValue = "\"$tagValue\""
                 }
                 if (idQName != null) {
-                    idValue = attrMethodValueMatcher.getValueInfo("", idQName.toString()).value
+                    idValue = attrMethodValueMatcher.getValueInfo("", idQName.toString(), usedReferenceRMap, idMap).value
                 }
                 codeBlockBuilder.addStatement("${Constants.ANDROID_VIEW_CLASS_NAME} $viewFieldName = null")
                 codeBlockBuilder.beginControlFlow("")
@@ -202,7 +204,7 @@ interface CreateView: ResolveAttr {
             var themeStyleInfo: StyleInfo? = null
 
             if (themeName != null) {
-                val themeValueInfo = attrMethodValueMatcher.getValueInfo("", themeName.toString())
+                val themeValueInfo = attrMethodValueMatcher.getValueInfo("", themeName.toString(), usedReferenceRMap, idMap)
                 val themeWrapField = ContextWrapTool.makeContextField(themeValueInfo.value, themeValueInfo.valueType == ValueType.REFERENCE_ATTR)
 
                 if (themeValueInfo.valueType == ValueType.REFERENCE_ATTR && !qxmlConfig.acceptReferenceStyle) {
@@ -223,7 +225,7 @@ interface CreateView: ResolveAttr {
             }
 
             if (styleAttr != null && !isInclude && !curNodeIsFragment) {//include 忽略 style
-                val valueInfo = attrMethodValueMatcher.getValueInfo("", styleAttr.toString())
+                val valueInfo = attrMethodValueMatcher.getValueInfo("", styleAttr.toString(), usedReferenceRMap, idMap)
                 styleIsReference = valueInfo.valueType == ValueType.REFERENCE_ATTR
                 if (styleIsReference) {
                     val contextThemeWrapField = ContextWrapTool.makeContextField(valueInfo.value, true)
@@ -394,7 +396,7 @@ interface CreateView: ResolveAttr {
                         , rootIsDataBinding, viewGenInfoMap, invalidGenInfoMap
                         , viewClassName, viewFieldName, methodCodeBlockBuilder, qxmlConfig
                         , usedGenInfoMap, fieldInfo, dataBindingAttrResolveInfo, attrMethodValueMatcher
-                        , usedLocalVarMap, usedReferenceRMap)?.also {
+                        , usedLocalVarMap, finalUsedLocalVarMap, usedReferenceRMap, idMap)?.also {
                         return it
                     }
                     attributes.remove(idQName)
@@ -421,7 +423,7 @@ interface CreateView: ResolveAttr {
                     , rootIsDataBinding, viewGenInfoMap, invalidGenInfoMap
                     , viewClassName, viewFieldName, methodCodeBlockBuilder, qxmlConfig
                     , usedGenInfoMap, fieldInfo, dataBindingAttrResolveInfo, attrMethodValueMatcher
-                    , usedLocalVarMap, usedReferenceRMap, false)?.also {
+                    , usedLocalVarMap, finalUsedLocalVarMap, usedReferenceRMap, idMap, false)?.also {
                     return it
                 }
                 val finalAttrName = if (nameNode.prefix == Constants.ATTR_PREFIX_ANDROID) nameNode.qualifiedName else nameNode.localPart
@@ -490,7 +492,8 @@ interface CreateView: ResolveAttr {
                                     , layoutType, contextName, rootIsDataBinding, viewGenInfoMap, invalidGenInfoMap
                                     , fieldInfo, qxmlConfig, attrMethodValueMatcher, viewClassName, viewFieldName
                                     , methodCodeBlockBuilder, usedGenInfoMap, dataBindingAttrResolveInfo, styleName
-                                    , layoutType, styleInfo, usedStyleInfoMap, false, usedReferenceRMap)?.also { errInfo ->
+                                    , layoutType, styleInfo, usedStyleInfoMap, false, usedReferenceRMap
+                                    , usedLocalVarMap, finalUsedLocalVarMap, idMap)?.also { errInfo ->
                                     return errInfo
                                 }
                             }
@@ -507,7 +510,8 @@ interface CreateView: ResolveAttr {
                     , layoutType, contextName, rootIsDataBinding, viewGenInfoMap, invalidGenInfoMap
                     , fieldInfo, qxmlConfig, attrMethodValueMatcher, viewClassName, viewFieldName
                     , methodCodeBlockBuilder, usedGenInfoMap, dataBindingAttrResolveInfo, styleName
-                    , layoutType, themeStyleInfo, usedStyleInfoMap, true, usedReferenceRMap)?.also { errInfo ->
+                    , layoutType, themeStyleInfo, usedStyleInfoMap, true, usedReferenceRMap
+                    , usedLocalVarMap, finalUsedLocalVarMap, idMap)?.also { errInfo ->
                     return errInfo
                 }
             }
@@ -519,7 +523,7 @@ interface CreateView: ResolveAttr {
                     , rootIsDataBinding, viewGenInfoMap, invalidGenInfoMap
                     , viewClassName, viewFieldName, methodCodeBlockBuilder, qxmlConfig
                     , usedGenInfoMap, fieldInfo, dataBindingAttrResolveInfo, attrMethodValueMatcher
-                    , usedLocalVarMap, usedReferenceRMap)?.also {
+                    , usedLocalVarMap, finalUsedLocalVarMap, usedReferenceRMap, idMap)?.also {
                     return it
                 }
                 useAttrs[dataBindingAttrResolveInfo.tagNode!!.qualifiedName] = true
@@ -553,7 +557,7 @@ interface CreateView: ResolveAttr {
             }
 
             onEndAttrBeforeAddList.forEach {
-                callOnEndMethod(it, viewFieldName, methodCodeBlockBuilder, usedOnEndInfoMap, viewClassName, it.funcSignInfo, usedLocalVarMap)
+                callOnEndMethod(it, viewFieldName, methodCodeBlockBuilder, usedOnEndInfoMap, viewClassName, it.funcSignInfo, usedLocalVarMap, finalUsedLocalVarMap)
             }
 
             if (isInclude) {
@@ -577,11 +581,11 @@ interface CreateView: ResolveAttr {
             }
 
             onEndAttrAfterAddList.forEach {
-                callOnEndMethod(it, viewFieldName, methodCodeBlockBuilder, usedOnEndInfoMap, viewClassName, it.funcSignInfo, usedLocalVarMap)
+                callOnEndMethod(it, viewFieldName, methodCodeBlockBuilder, usedOnEndInfoMap, viewClassName, it.funcSignInfo, usedLocalVarMap, finalUsedLocalVarMap)
             }
 
             if (genLoopInfo.viewCount == 0) {
-                codeBlockBuilder.addStatement(viewGenInfoHolder.localVarDefContent())
+                //codeBlockBuilder.addStatement(viewGenInfoHolder.localVarDefContent())
             } else {
                 codeBlockBuilder.addStatement(viewGenInfoHolder.localVarResetContent(usedLocalVarMap))
             }
@@ -600,8 +604,8 @@ interface CreateView: ResolveAttr {
                     , usedStyleInfoMap, invalidGenInfoMap, fieldInfo, includeReferenceLayoutNameMap
                     , rootIsMerge, qxmlConfig, attrMethodValueMatcher, layoutGenStateMap, relativeIncludeLayoutMap
                     , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap, usedImportPackageMap
-                    , nextNodeParentThemeItemMap, nextNodeParentContextName, genLoopInfo, rootIsDataBinding
-                    , dataBindingAttrResolveInfo)?.let { ignoreInfo ->
+                    , finalUsedLocalVarMap, idMap, nextNodeParentThemeItemMap, nextNodeParentContextName, genLoopInfo
+                    , rootIsDataBinding, dataBindingAttrResolveInfo)?.let { ignoreInfo ->
                     return ignoreInfo
                 }
             }
@@ -631,7 +635,10 @@ interface CreateView: ResolveAttr {
                                  , dataBindingAttrResolveInfo: DataBindingAttrResolveInfo, styleName: String
                                  , finalType: String, styleInfo: StyleInfo?
                                  , usedStyleInfoMap: HashMap<String, HashMap<String, StyleInfo>>
-                                 , isTheme: Boolean, usedReferenceRMap: HashMap<String, String>): ViewGenResultInfo?  {
+                                 , isTheme: Boolean, usedReferenceRMap: HashMap<String, String>
+                                 , usedLocalVarMap: HashMap<String, String>
+                                 , finalUsedLocalVarMap: HashMap<String, String>
+                                 , idMap: Map<String, Int>): ViewGenResultInfo?  {
         for (entry in itemMap) {
             val itemName = entry.key
             val value = entry.value
@@ -646,7 +653,8 @@ interface CreateView: ResolveAttr {
                     , layoutName, layoutType, contextName
                     , rootIsDataBinding, viewGenInfoMap, invalidGenInfoMap
                     , viewClassName, viewFieldName, codeBlockBuilder, qxmlConfig
-                    , usedGenInfoMap, fieldInfo, dataBindingAttrResolveInfo, attrMethodValueMatcher, usedReferenceRMap)?.also {
+                    , usedGenInfoMap, fieldInfo, dataBindingAttrResolveInfo, attrMethodValueMatcher, usedReferenceRMap
+                    , usedLocalVarMap, finalUsedLocalVarMap, idMap)?.also {
                     return it
                 }
                 if (Constants.ATTR_TAG != itemName) {//tag放在后面
@@ -667,11 +675,11 @@ interface CreateView: ResolveAttr {
 
     private fun callOnEndMethod(attrFuncInfoModel: AttrFuncInfoModel, viewFieldName: String,  codeBlockBuilder: CodeBlock.Builder
                                 , usedOnEndInfoMap: HashMap<String, HashMap<String, AttrFuncInfoModel>>, viewClassName: String
-                                , funcSign: String, usedLocalVarMap: HashMap<String, String>) {
-        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1)
+                                , funcSign: String, usedLocalVarMap: HashMap<String, String>, finalUsedLocalVarMap: HashMap<String, String>) {
+        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.PARAM_NAME_TEMP, viewFieldName)
         val stringBuilder = StringBuilder()
         stringBuilder.append("{\n")
-        stringBuilder.append("${attrFuncInfoModel.viewParamType} ${attrFuncInfoModel.viewParamName} = $viewFieldName;\n")
+        //stringBuilder.append("${attrFuncInfoModel.viewParamType} ${attrFuncInfoModel.viewParamName} = $viewFieldName;\n")
         stringBuilder.append(funcBody)
         codeBlockBuilder.addStatement(stringBuilder.toString())
         var viewTypeOnEndInfoMap = usedOnEndInfoMap[viewClassName]
@@ -683,6 +691,7 @@ interface CreateView: ResolveAttr {
         attrFuncInfoModel.usedLocalVarMap?.forEach { fullName, _ ->
             usedLocalVarMap.putIfAbsent(fullName, "")
         }
+        finalUsedLocalVarMap.putAll(usedLocalVarMap)
     }
 
     private fun getLayoutParam(parentView: String, parentViewClassName: String, viewFieldName: String

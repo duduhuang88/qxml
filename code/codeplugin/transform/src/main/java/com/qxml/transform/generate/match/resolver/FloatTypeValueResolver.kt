@@ -27,7 +27,7 @@ class FloatTypeValueResolver: ValueResolver {
         val valueType = valueInfo.valueType
         var value = valueInfo.value
 
-        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1)
+        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.PARAM_NAME_TEMP, viewFieldName)
 
         val stringBuilder = StringBuilder()
         stringBuilder.append(attrFuncInfoModel.getMethodContentHead(viewFieldName))

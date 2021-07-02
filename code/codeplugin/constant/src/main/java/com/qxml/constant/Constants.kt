@@ -149,6 +149,7 @@ class Constants {
         const val QXML_LOG_ENABLE = "QXML_LOG_ENABLE"
         const val QXML_PROJECT_BUILD_TEMP_RES_PATH = "tempRes"
 
+        const val PARAM_NAME_TEMP = "鼕"
 
         const val SUPPORT_FRAGMENT_HELPER = "com.qxml.qxml_support.helper.FragmentHelper"
         const val ANDROIDX_FRAGMENT_HELPER = "com.qxml.qxml_androidx.helper.FragmentHelper"

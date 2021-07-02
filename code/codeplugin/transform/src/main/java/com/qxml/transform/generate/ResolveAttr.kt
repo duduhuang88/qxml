@@ -22,7 +22,9 @@ interface ResolveAttr {
                     , fieldInfo: FieldInfo, dataBindingAttrResolveInfo: DataBindingAttrResolveInfo
                     , attrMethodValueMatcher: AttrMethodValueMatcher
                     , usedLocalVarMap: HashMap<String, String>
+                    , finalUsedLocalVarMap: HashMap<String, String>
                     , usedReferenceRMap: HashMap<String, String>
+                    , idMap: Map<String, Int>
                     , keepAndroidTag : Boolean = true
     ): ViewGenResultInfo? {
 
@@ -72,7 +74,8 @@ interface ResolveAttr {
                 return null
             }
 
-            val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName, layoutType, attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap)
+            val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName
+                , layoutType, attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap, idMap)
             when (matchResult.matchType) {
                 MatchType.FAILED -> {
                     return matchResult.ignoreInfo
@@ -88,6 +91,7 @@ interface ResolveAttr {
             attrFuncInfo.usedLocalVarMap?.forEach { fullName, _ ->
                 usedLocalVarMap.putIfAbsent(fullName, "")
             }
+            finalUsedLocalVarMap.putAll(usedLocalVarMap)
         }
         return null
     }
@@ -104,6 +108,9 @@ interface ResolveAttr {
                          , fieldInfo: FieldInfo, dataBindingAttrResolveInfo: DataBindingAttrResolveInfo
                          , attrMethodValueMatcher: AttrMethodValueMatcher
                          , usedReferenceRMap: HashMap<String, String>
+                         , usedLocalVarMap: HashMap<String, String>
+                         , finalUsedLocalVarMap: HashMap<String, String>
+                         , idMap: Map<String, Int>
     ): ViewGenResultInfo? {
         //忽略dataBinding属性引用
         if (rootIsDataBinding
@@ -135,7 +142,8 @@ interface ResolveAttr {
             return null
         }
 
-        val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName, layoutType, attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap)
+        val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName, layoutType
+            , attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap, idMap)
         when (matchResult.matchType) {
             MatchType.FAILED -> {
                 return matchResult.ignoreInfo
@@ -148,6 +156,10 @@ interface ResolveAttr {
             usedGenInfoMap[viewClassName] = viewTypeGenInfoMap
         }
         viewTypeGenInfoMap.putIfAbsent(attrFuncInfo.attrName, attrFuncInfo)
+        attrFuncInfo.usedLocalVarMap?.forEach { fullName, _ ->
+            usedLocalVarMap.putIfAbsent(fullName, "")
+        }
+        finalUsedLocalVarMap.putAll(usedLocalVarMap)
         return null
     }
 

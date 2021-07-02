@@ -1,7 +1,6 @@
 package com.qxml.annotationprocess.scanner;
 
 import com.qxml.constant.Constants;
-import com.qxml.tools.log.LogUtil;
 import com.qxml.tools.model.AttrFuncInfoModel;
 import com.qxml.tools.model.CompatViewInfoModel;
 import com.qxml.tools.model.LocalVarInfoModel;
@@ -309,6 +308,8 @@ public class AttrMethodInfoScanner extends TreeScanner {
                     valueParamType = valueParamVar.vartype.type.toString();
                 }
 
+                bodyContent = replaceViewParamNameByTemp(bodyContent, viewParamName);
+
                 if (Constants.ATTR_ANNOTATION_CLASS_NAME.equals(methodAnnotationName)) {
                     String attrValue = ((JCTree.JCAssign)jcAnnotation.args.get(0)).rhs.toString();
                     attrFuncInfoModel = new AttrFuncInfoModel();
@@ -363,7 +364,7 @@ public class AttrMethodInfoScanner extends TreeScanner {
                 attrFuncInfoModel.setViewParamName(viewParamName);
                 attrFuncInfoModel.setAttrName(attrValue);
                 attrFuncInfoModel.setFuncName(funcName);
-                attrFuncInfoModel.setFuncBodyContent(bodyContent);
+                attrFuncInfoModel.setFuncBodyContent(replaceViewParamNameByTemp(bodyContent, viewParamName));
                 attrFuncInfoModel.setType(AttrFuncInfoModel.ON_END_TYPE);
                 attrFuncInfoModel.setAfterAdd(afterAdd);
                 if (arg != null && arg.length() > 2) {//忽略 "", {}
@@ -380,6 +381,23 @@ public class AttrMethodInfoScanner extends TreeScanner {
             super.visitAnnotation(jcAnnotation);
         }
 
+        private String replaceViewParamNameByTemp(String funcBody, String viewParamName) {
+            return funcBody
+                    .replace(" "+viewParamName+" ", " "+Constants.PARAM_NAME_TEMP+" ")
+                    .replace(" "+viewParamName+".", " "+Constants.PARAM_NAME_TEMP+".")
+                    .replace(" "+viewParamName+",", " "+Constants.PARAM_NAME_TEMP+",")
+                    .replace(" "+viewParamName+")", " "+Constants.PARAM_NAME_TEMP+")")
+                    .replace(" "+viewParamName+";", " "+Constants.PARAM_NAME_TEMP+";")
+                    .replace("("+viewParamName+" ", "("+Constants.PARAM_NAME_TEMP+" ")
+                    .replace("("+viewParamName+")", "("+Constants.PARAM_NAME_TEMP+")")
+                    .replace("("+viewParamName+",", "("+Constants.PARAM_NAME_TEMP+",")
+                    .replace("("+viewParamName+".", "("+Constants.PARAM_NAME_TEMP+".")
+                    .replace(")"+viewParamName+" ", ")"+Constants.PARAM_NAME_TEMP+" ")
+                    .replace(")"+viewParamName+")", ")"+Constants.PARAM_NAME_TEMP+")")
+                    .replace(")"+viewParamName+".", ")"+Constants.PARAM_NAME_TEMP+".")
+                    .replace(")"+viewParamName+",", ")"+Constants.PARAM_NAME_TEMP+",")
+                    .replace(")"+viewParamName+";", ")"+Constants.PARAM_NAME_TEMP+";");
+        }
     }
 
     private static String getRealAttrName(String originAttrName) {
