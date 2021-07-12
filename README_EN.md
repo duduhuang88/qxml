@@ -64,7 +64,7 @@ check [Releases](https://github.com/duduhuang88/qxml/releases) to get newest ver
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.1.4"
+    ext.qxml_version = "1.1.5"
     repositories {
         ...
         mavenCentral()
@@ -109,8 +109,6 @@ dependencies {
 
 ### 3. config
 
-**keep resource ID unchanged can optimize cache usage**
-
 ```groovy
 android {
     ......
@@ -119,13 +117,6 @@ android {
             ......
             resources.srcDirs += "build/qxml/tempRes"
             ......
-        }
-    }
-    //Optional setting, keep resource ID unchanged can optimize cache usage
-    aaptOptions {
-        File publicTxtFile = new File(buildDir, "qxml/public.txt")
-        if (publicTxtFile.exists()) {
-            additionalParameters "--stable-ids", "${publicTxtFile.absolutePath}"
         }
     }
 }
@@ -150,7 +141,15 @@ qxml {
 }
 ```
 
-### 4. Layout configuration options
+### 4. gradle.properties configuration options
+
+QXML_VALID_CODE = ***   : use when custom view
+
+QXML_LOG_ENABLE = true/false  : annotationProcesser log enable
+
+QXML_USING_STABLE_ID = true/false  : using resource stable Id，default value is true
+
+### 5. Layout configuration options
 
 Attr can be used in the root node of layout xml：
 
@@ -164,11 +163,11 @@ Attr can be used in the root node of layout xml：
 
 **Note: The configuration takes effect for all views under the root node, and the priority is higher than that in gradle**
 
-### 5. Simple build result chart
+### 6. Simple build result chart
 
 After the build, there is a simple result chart in build/qxml/report.html
 
-### 6. Proguard
+### 7. Proguard
 
 no need
 

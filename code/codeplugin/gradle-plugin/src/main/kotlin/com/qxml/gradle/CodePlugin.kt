@@ -20,7 +20,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
 import java.lang.IllegalStateException
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.jar.JarFile
 
@@ -30,16 +29,19 @@ class CodePlugin: Plugin<Project> {
 
     private lateinit var qxmlValidCode: String
     private lateinit var qxmlLogEnable: String
+    private lateinit var qxmlUsingStableId: String
 
     private val waitableExecutor = WaitableExecutor.useGlobalSharedThreadPool()
     private val gson by lazy { GsonBuilder().disableHtmlEscaping().create() }
     private lateinit var qxmlConfig: QxmlExtension
+    private lateinit var publicROutputFile: File
 
     override fun apply(project: Project) {
         qxmlValidCode = project.properties[Constants.QXML_VALID_CODE]?.toString() ?: ""
         qxmlLogEnable = project.properties[Constants.QXML_LOG_ENABLE]?.toString() ?: "false"
+        qxmlUsingStableId = project.properties[Constants.QXML_USING_STABLE_ID]?.toString() ?: "true"
         qxmlConfig = project.extensions.create("qxml", QxmlExtension::class.java, project)
-
+        publicROutputFile = project.buildDir.resolve(Constants.LAYOUT_ID_COLLECT_PATH).parentFile.resolve(Constants.PUBLIC_FILE_NAME)
         try {
             project.plugins.all {
                 when (it) {
@@ -85,6 +87,19 @@ class CodePlugin: Plugin<Project> {
             }
 
             configureSourceSet(project)
+
+            if (qxmlUsingStableId.equals("true", true)) {
+                val androidApp = project.extensions.findByType(AppExtension::class.java)
+                androidApp?.apply {
+                    val aaptParams = androidApp.aaptOptions.additionalParameters ?: mutableListOf()
+                    val publicFilePath = project.buildDir.resolve("qxml/public.txt").absolutePath
+                    if (!aaptParams.contains(publicFilePath)) {
+                        aaptParams.add("--stable-ids")
+                        aaptParams.add(publicFilePath)
+                        androidApp.aaptOptions.additionalParameters = aaptParams
+                    }
+                }
+            }
 
             project.afterEvaluate {
 
@@ -379,7 +394,7 @@ class CodePlugin: Plugin<Project> {
      * 依赖apt生成的qxml_config文件作为res资源
      */
     private fun configureSourceSet(project: Project, variants: DomainObjectSet<out BaseVariant>, isApp: Boolean) {
-
+        val once = AtomicBoolean()
         variants.all { variant ->
             variant.sourceSets.forEach { sourceProvider ->
                 val type = variant.name
@@ -387,15 +402,44 @@ class CodePlugin: Plugin<Project> {
                 //sourceSet.srcDir(project.buildDir.resolve("generated${File.separator}ap_generated_sources${File.separator}${type}${File.separator}out").resolve(Constants.QXML_CONIFG_PATH))
                 //sourceSet.srcDir(project.buildDir.resolve("generated${File.separator}source${File.separator}kapt${File.separator}${type}").resolve(Constants.QXML_CONIFG_PATH))
                 if (isApp) {
-                    val finalConfigFile = project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH).resolve(Constants.QXML_PARSE_FINAL_CONFIG_FILE_NAME)
-                    Files.createParentDirs(finalConfigFile)
-                    if (!finalConfigFile.exists()) {
-                        finalConfigFile.createNewFile()
-                    }
-                    finalConfigFile.writeText("{\"versionCode\":${Constants.QXML_VERSION_CODE},\"viewParseList\":[],\"viewReplaceList\":[],\"viewGenClassModelMap\":{},\"interfaceModelMap\":{},\"genClassNameMap\":{},\"parentClassMap\":{},\"localVarMap\":{},\"compatViewInfoModelMap\":{},\"layoutParamInitMap\":{},\"validCode\":\"${qxmlValidCode}\"}")
+                    createFileWhenBuildStart(once, project, type, variant)
                     //sourceSet.srcDir(finalConfigFile.parentFile)
                 }
                 sourceSet.srcDir(project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH).absolutePath)
+            }
+        }
+    }
+
+    /**
+     * 构建开始时再创建需要的文件， 避免运行 gradlew clean assembleDebug 这种命令时文件被删除
+     * @param once AtomicBoolean
+     * @param project Project
+     * @param type String
+     * @param variant BaseVariant
+     */
+    private fun createFileWhenBuildStart(once: AtomicBoolean, project: Project, type: String, variant: BaseVariant) {
+        project.tasks.findByName("pre${type.capitalize()}Build")?.doFirst {
+            if (once.compareAndSet(false, true)) {
+                val finalConfigFile = project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH).resolve(Constants.QXML_PARSE_FINAL_CONFIG_FILE_NAME)
+                Files.createParentDirs(finalConfigFile)
+                if (!finalConfigFile.exists()) {
+                    finalConfigFile.createNewFile()
+                }
+                finalConfigFile.writeText("{\"versionCode\":${Constants.QXML_VERSION_CODE},\"viewParseList\":[],\"viewReplaceList\":[],\"viewGenClassModelMap\":{},\"interfaceModelMap\":{},\"genClassNameMap\":{},\"parentClassMap\":{},\"localVarMap\":{},\"compatViewInfoModelMap\":{},\"layoutParamInitMap\":{},\"validCode\":\"${qxmlValidCode}\"}")
+                val idOutputFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${variant.dirName}").resolve(Constants.ID_COLLECT_FILE_NAME)
+                publicROutputFile
+                Files.createParentDirs(idOutputFile)
+                if (!idOutputFile.exists()) {
+                    idOutputFile.createNewFile()
+                }
+                if (!publicROutputFile.exists()) {
+                    publicROutputFile.createNewFile()
+                }
+                val layoutIdOutputFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${variant.dirName}").resolve(Constants.LAYOUT_ID_COLLECT_FILE_NAME)
+                Files.createParentDirs(layoutIdOutputFile)
+                if (!layoutIdOutputFile.exists()) {
+                    layoutIdOutputFile.createNewFile()
+                }
             }
         }
     }
@@ -446,10 +490,6 @@ class CodePlugin: Plugin<Project> {
                     if (isApplication) {
                         //application时收集layout对应的id值
                         val layoutIdOutputFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${variant.dirName}").resolve(Constants.LAYOUT_ID_COLLECT_FILE_NAME)
-                        Files.createParentDirs(layoutIdOutputFile)
-                        if (!layoutIdOutputFile.exists()) {
-                            layoutIdOutputFile.createNewFile()
-                        }
                         val layoutIdCollectorTask = project.tasks.create("layoutId${variant.name.capitalize()}Collect", LayoutIdCollector::class.java) { t->
                             t.outputFile = layoutIdOutputFile
                             t.rFile = rFile
@@ -459,13 +499,6 @@ class CodePlugin: Plugin<Project> {
 
                         val idOutputFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${variant.dirName}").resolve(Constants.ID_COLLECT_FILE_NAME)
                         val publicROutputFile = project.buildDir.resolve(Constants.LAYOUT_ID_COLLECT_PATH).parentFile.resolve(Constants.PUBLIC_FILE_NAME)
-                        Files.createParentDirs(idOutputFile)
-                        if (!idOutputFile.exists()) {
-                            idOutputFile.createNewFile()
-                        }
-                        if (!publicROutputFile.exists()) {
-                            publicROutputFile.createNewFile()
-                        }
                         val idCollectorTask = project.tasks.create("id${variant.name.capitalize()}Collect", IdCollector::class.java) { t->
                             t.publicROutputFile = publicROutputFile
                             t.outputFile = idOutputFile

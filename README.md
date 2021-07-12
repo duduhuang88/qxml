@@ -79,7 +79,7 @@ Gradle 3.5.0 以上
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.1.4"
+    ext.qxml_version = "1.1.5"
     repositories {
         ...
         mavenCentral()
@@ -106,7 +106,7 @@ compileOptions {
 }
 
 dependencies {
-	...
+    ...
 
 	kapt "io.github.duduhuang88:qxml-processor:$qxml_version"
 		or
@@ -124,8 +124,6 @@ dependencies {
 
 ### 3. 配置
 
-**aaptOptions使用固定资源ID可提高缓存使用**
-
 ```groovy
 android {
     ......
@@ -134,13 +132,6 @@ android {
             ......
             resources.srcDirs += "build/qxml/tempRes"
             ......
-        }
-    }
-    //可选设置，保持资源id不变可以优化缓存使用
-    aaptOptions {
-        File publicTxtFile = new File(buildDir, "qxml/public.txt")
-        if (publicTxtFile.exists()) {
-            additionalParameters "--stable-ids", "${publicTxtFile.absolutePath}"
         }
     }
 }
@@ -165,7 +156,15 @@ qxml {
 }
 ```
 
-### 4. layout可选配置
+### 4. gradle.properties可选配置
+
+QXML_VALID_CODE = ***   : 自定义View时使用，用于本地验签
+
+QXML_LOG_ENABLE = true/false  : 是否开启annotationProcesser的log
+
+QXML_USING_STABLE_ID = true/false  : 是否使用固定资源Id，默认使用
+
+### 5. layout可选配置
 
 在layout.xml根节点中可使用：
 
@@ -179,11 +178,11 @@ qxml {
 
 **注：配置对根节点下的全部View都生效，且优先级高于gradle中的配置**
 
-### 5. 简单的构建结果的图表显示
+### 6. 简单的构建结果的图表显示
 
 构建结束后，在 build\qxml\report.html 中有简单的结果图表
 
-### 6. 混淆
+### 7. 混淆
 
 暂无需要
 

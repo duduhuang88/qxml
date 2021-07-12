@@ -147,6 +147,7 @@ class Constants {
 
         const val QXML_VALID_CODE = "QXML_VALID_CODE"
         const val QXML_LOG_ENABLE = "QXML_LOG_ENABLE"
+        const val QXML_USING_STABLE_ID = "QXML_USING_STABLE_ID"
         const val QXML_PROJECT_BUILD_TEMP_RES_PATH = "tempRes"
 
         const val PARAM_NAME_TEMP = "鼕"
