@@ -28,6 +28,7 @@ class QXmlTransform(private val project: Project): BaseTransform() {
 
     var packageName: String = ""
     private lateinit var curBuildType: String
+    private lateinit var curBuildTypeCapitalize: String
 
     private val layoutFileInfoCollector by lazy { LayoutFileInfoCollector(layoutPaths) }
 
@@ -70,7 +71,7 @@ class QXmlTransform(private val project: Project): BaseTransform() {
         curBuildType = project.buildDir.resolve(Constants.QXML_CACHE_PATH).resolve(Constants.CUR_BUILD_TYPE_FILE_NAME).readText()
 
         qxmlConfig = project.extensions.getByType(QxmlExtension::class.java).getConfigByBuildType(curBuildType)
-        curBuildType = curBuildType.capitalize()
+        curBuildTypeCapitalize = curBuildType.capitalize()
 
         val layoutIdMapFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${curBuildType}").resolve(Constants.LAYOUT_ID_COLLECT_FILE_NAME)
         val layoutIdMapJsonStr = if (layoutIdMapFile.exists()) layoutIdMapFile.readText() else ""
@@ -87,16 +88,16 @@ class QXmlTransform(private val project: Project): BaseTransform() {
         LogUtil.pl("transform start $packageName")
 
         //收集attr信息
-        val attrsXmlParser = AttrsXmlParser(project, curBuildType)
+        val attrsXmlParser = AttrsXmlParser(project, curBuildTypeCapitalize)
         val attrInfoMap = attrsXmlParser.parse()
         LogUtil.pl("attr collect time cost: " + (System.currentTimeMillis() - time) + "ms")
         time = System.currentTimeMillis()
 
         //收集layout信息
-        val layoutFileInfoList = LayoutFileCollector(project, curBuildType).collect()
+        val layoutFileInfoList = LayoutFileCollector(project, curBuildTypeCapitalize).collect()
 
         //收集style信息
-        val styleInfoMap = StyleCollector(project, curBuildType).collect()
+        val styleInfoMap = StyleCollector(project, curBuildTypeCapitalize).collect()
 
         layoutFileInfoMap = layoutFileInfoCollector.collect(layoutFileInfoList)
         layoutFileInfoList.forEach {
@@ -164,6 +165,10 @@ class QXmlTransform(private val project: Project): BaseTransform() {
 
             GenReportTool.genReport(project.buildDir.resolve("qxml").resolve("report.html"), result.getGenReport())
 
+            if (!idMapCacheFile.exists()) {
+                Files.createParentDirs(idMapCacheFile)
+                idMapCacheFile.createNewFile()
+            }
             idMapCacheFile.writeText(idMapJsonStr)
         }
     }
