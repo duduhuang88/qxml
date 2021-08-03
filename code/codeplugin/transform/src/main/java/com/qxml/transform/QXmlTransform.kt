@@ -27,7 +27,7 @@ import java.util.zip.ZipEntry
 class QXmlTransform(private val project: Project): BaseTransform() {
 
     var packageName: String = ""
-    private lateinit var curBuildType: String
+    var curBuildType: String = ""
     private lateinit var curBuildTypeCapitalize: String
 
     private val layoutFileInfoCollector by lazy { LayoutFileInfoCollector(layoutPaths) }
@@ -67,8 +67,6 @@ class QXmlTransform(private val project: Project): BaseTransform() {
     override fun initTransform(transformInvocation: TransformInvocation) {
         ClassPool.cacheOpenedJarFile = false
         PoolManager.pool = PoolManager.initPool()
-
-        curBuildType = project.buildDir.resolve(Constants.QXML_CACHE_PATH).resolve(Constants.CUR_BUILD_TYPE_FILE_NAME).readText()
 
         qxmlConfig = project.extensions.getByType(QxmlExtension::class.java).getConfigByBuildType(curBuildType)
         curBuildTypeCapitalize = curBuildType.capitalize()

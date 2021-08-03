@@ -42,116 +42,114 @@ class CodePlugin: Plugin<Project> {
         qxmlUsingStableId = project.properties[Constants.QXML_USING_STABLE_ID]?.toString() ?: "true"
         qxmlConfig = project.extensions.create("qxml", QxmlExtension::class.java, project)
         publicROutputFile = project.buildDir.resolve(Constants.LAYOUT_ID_COLLECT_PATH).parentFile.resolve(Constants.PUBLIC_FILE_NAME)
-        try {
-            project.plugins.all {
-                when (it) {
-                    is AppPlugin -> {
-                        val extension = project.extensions.getByName("android") as BaseExtension
-                        extension.packagingOptions.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-                        val transform = QXmlTransform(project)
-                        extension.registerTransform(transform)
-                        val app = project.extensions.findByType(AppExtension::class.java)!!
-                        app.run {
-                            generateRsAndLayoutId(project, applicationVariants, true)
-                        }
 
-                        app.defaultConfig.javaCompileOptions.annotationProcessorOptions.arguments.apply {
+        project.plugins.all {
+            when (it) {
+                is AppPlugin -> {
+                    val extension = project.extensions.getByName("android") as BaseExtension
+                    extension.packagingOptions.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+                    val transform = QXmlTransform(project)
+                    extension.registerTransform(transform)
+                    val app = project.extensions.findByType(AppExtension::class.java)!!
+                    app.run {
+                        generateRsAndLayoutId(project, applicationVariants, true)
+                    }
+
+                    app.defaultConfig.javaCompileOptions.annotationProcessorOptions.arguments.apply {
+                        putIfAbsent(Constants.QXML_VALID_CODE, qxmlValidCode)
+                        putIfAbsent(Constants.QXML_LOG_ENABLE, qxmlLogEnable)
+                    }
+
+                    project.afterEvaluate {
+                        app.applicationVariants.forEach { v ->
+                            project.tasks.findByName("transformClassesAndResourcesWithQXmlTransformFor${v.name.capitalize()}")?.doFirst {
+                                transform.packageName = getPackageName(v)
+                                transform.curBuildType = v.name
+                            }
+                        }
+                    }
+
+                }
+                is LibraryPlugin -> {
+                    project.extensions.findByType(LibraryExtension::class.java)?.run {
+                        defaultConfig.javaCompileOptions.annotationProcessorOptions.arguments.apply {
                             putIfAbsent(Constants.QXML_VALID_CODE, qxmlValidCode)
                             putIfAbsent(Constants.QXML_LOG_ENABLE, qxmlLogEnable)
                         }
-
-                        project.afterEvaluate {
-                            app.applicationVariants.forEach { v ->
-                                project.tasks.findByName("transformClassesAndResourcesWithQXmlTransformFor${v.name.capitalize()}")?.doFirst {
-                                    transform.packageName = getPackageName(v)
-                                }
-                            }
-                        }
-
+                        packagingOptions.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+                        generateRsAndLayoutId(project, libraryVariants, false)
                     }
+                }
+            }
+        }
+
+        if (!System.getenv().containsKey("ANDROID_HOME")) {
+            throw java.lang.RuntimeException("请先设置ANDROID_HOME环境变量")
+        }
+
+        configureSourceSet(project)
+
+        if (qxmlUsingStableId.equals("true", true)) {
+            val androidApp = project.extensions.findByType(AppExtension::class.java)
+            androidApp?.apply {
+                val aaptParams = androidApp.aaptOptions.additionalParameters ?: mutableListOf()
+                val publicFilePath = project.buildDir.resolve("qxml${File.separator}public.txt").absolutePath
+                if (!aaptParams.contains(publicFilePath)) {
+                    aaptParams.add("--stable-ids")
+                    aaptParams.add(publicFilePath)
+                    androidApp.aaptOptions.additionalParameters = aaptParams
+                }
+            }
+        }
+
+        project.afterEvaluate {
+
+            qxmlConfig.fixBuildTypeUnSetParam()
+
+            project.plugins.all {
+                when (it) {
                     is LibraryPlugin -> {
-                        project.extensions.findByType(LibraryExtension::class.java)?.run {
-                            defaultConfig.javaCompileOptions.annotationProcessorOptions.arguments.apply {
-                                putIfAbsent(Constants.QXML_VALID_CODE, qxmlValidCode)
-                                putIfAbsent(Constants.QXML_LOG_ENABLE, qxmlLogEnable)
+                        val library = project.extensions.findByType(LibraryExtension::class.java)
+                        library?.packagingOptions?.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+                        library?.libraryVariants?.forEach { v ->
+                            addProcessorOption(v, Constants.QXML_VALID_CODE, qxmlValidCode)
+                            addProcessorOption(v, Constants.QXML_LOG_ENABLE, if (qxmlConfig.getConfigByBuildType(v.name.capitalize()).logEnable) "true" else "false")
+
+                            setPreBuildConfig(project, v)
+                            deleteQxmlConfig(project, v)
+                            changeTaskOrder(project, v)
+                        }
+                    }
+                    is AppPlugin -> {
+                        val androidApp = project.extensions.findByType(AppExtension::class.java)!!
+
+                        androidApp.packagingOptions.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+                        androidApp.applicationVariants.all { v ->
+                            deleteQxmlConfig(project, v)
+                            val type = v.name.capitalize()
+                            val outputDir = project.buildDir.resolve(Constants.QXML_CACHE_PATH)
+                            if (!outputDir.exists()) {
+                                outputDir.mkdirs()
                             }
-                            packagingOptions.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-                            generateRsAndLayoutId(project, libraryVariants, false)
+
+                            val task = project.tasks.create("generate${type}XmlCode", XmlCodeBuilder::class.java) { t->
+                                t.packageName = getPackageName(v)
+                                t.outputDir = outputDir
+                                t.buildType = v.name
+                                t.allRawAndroidResourcesFiles = v.allRawAndroidResources.files
+                            }
+
+                            v.assembleProvider.get().dependsOn(task)
+                            task.mustRunAfter(v.mergeResourcesProvider.get())
+                            //v.registerJavaGeneratingTask(task, outputDir)
+
+                            setPreBuildConfig(project, v)
+                            mergeQxmlConfig(project, type, qxmlValidCode)
+                            changeTaskOrder(project, v)
                         }
                     }
                 }
             }
-
-            if (!System.getenv().containsKey("ANDROID_HOME")) {
-                throw java.lang.RuntimeException("请先设置ANDROID_HOME环境变量")
-            }
-
-            configureSourceSet(project)
-
-            if (qxmlUsingStableId.equals("true", true)) {
-                val androidApp = project.extensions.findByType(AppExtension::class.java)
-                androidApp?.apply {
-                    val aaptParams = androidApp.aaptOptions.additionalParameters ?: mutableListOf()
-                    val publicFilePath = project.buildDir.resolve("qxml/public.txt").absolutePath
-                    if (!aaptParams.contains(publicFilePath)) {
-                        aaptParams.add("--stable-ids")
-                        aaptParams.add(publicFilePath)
-                        androidApp.aaptOptions.additionalParameters = aaptParams
-                    }
-                }
-            }
-
-            project.afterEvaluate {
-
-                qxmlConfig.fixBuildTypeUnSetParam()
-
-                project.plugins.all {
-                    when (it) {
-                        is LibraryPlugin -> {
-                            val library = project.extensions.findByType(LibraryExtension::class.java)
-                            library?.packagingOptions?.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-                            library?.libraryVariants?.forEach { v ->
-                                addProcessorOption(v, Constants.QXML_VALID_CODE, qxmlValidCode)
-                                addProcessorOption(v, Constants.QXML_LOG_ENABLE, if (qxmlConfig.getConfigByBuildType(v.name.capitalize()).logEnable) "true" else "false")
-
-                                setPreBuildConfig(project, v)
-                                deleteQxmlConfig(project, v)
-                                changeTaskOrder(project, v)
-                            }
-                        }
-                        is AppPlugin -> {
-                            val androidApp = project.extensions.findByType(AppExtension::class.java)!!
-
-                            androidApp.packagingOptions.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-                            androidApp.applicationVariants.all { v ->
-                                deleteQxmlConfig(project, v)
-                                val type = v.name.capitalize()
-                                val outputDir = project.buildDir.resolve(Constants.QXML_CACHE_PATH)
-                                if (!outputDir.exists()) {
-                                    outputDir.mkdirs()
-                                }
-
-                                val task = project.tasks.create("generate${type}XmlCode", XmlCodeBuilder::class.java) { t->
-                                    t.packageName = getPackageName(v)
-                                    t.outputDir = outputDir
-                                    t.buildType = v.name
-                                    t.allRawAndroidResourcesFiles = v.allRawAndroidResources.files
-                                }
-
-                                v.assembleProvider.get().dependsOn(task)
-                                task.mustRunAfter(v.mergeResourcesProvider.get())
-                                //v.registerJavaGeneratingTask(task, outputDir)
-
-                                setPreBuildConfig(project, v)
-                                mergeQxmlConfig(project, type, qxmlValidCode)
-                                changeTaskOrder(project, v)
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-
         }
     }
 
@@ -162,33 +160,6 @@ class CodePlugin: Plugin<Project> {
             LogUtil.enable = curQxmlConfig.logEnable
         }
     }
-
-    //获取依赖的project
-    /*private fun resolveDependencyProject(project: Project, dependencyProjectNameMap: MutableMap<String, String>
-                                         , projectList: MutableList<String>, buildType: String) {
-        project.configurations.all {
-            it.dependencies.forEach { dependency ->
-                if (dependency.group == project.group.toString()
-                    && !it.name.endsWith("compileOnly")
-                    && (it.name == "implementation"
-                            || it.name == "api"
-                            || it.name == "${buildType}Api"
-                            || it.name == "${buildType}Implementation")
-                ) {
-                    //logUtil.pl("de $project "+dependency.name+" "+dependency.group)
-                    val dependencyProjectName = dependency.name
-                    if (dependencyProjectNameMap[dependencyProjectName] == null) {
-                        dependencyProjectNameMap[dependencyProjectName] = dependencyProjectName
-                        val dependencyProject = project.rootProject.findProject(":$dependencyProjectName")
-                        if (dependencyProject != null) {
-                            resolveDependencyProject(dependencyProject, dependencyProjectNameMap, projectList, buildType)
-                        }
-                        projectList.add(dependencyProjectName)
-                    }
-                }
-            }
-        }
-    }*/
 
     /**
      * application时合并所有qxml_config资源，在transform中解析
@@ -321,15 +292,6 @@ class CodePlugin: Plugin<Project> {
     private fun changeTaskOrder(project: Project, variant : BaseVariant) {
         val type = variant.name
         val typeCap = type.capitalize()
-
-        /*val copyTask = project.tasks.create("copy${typeCap}ProcessQxmlConfigFile") {
-            println("f start ssss")
-        }.doLast {
-
-            val aptConfigFile = project.buildDir.resolve("generated${File.separator}ap_generated_sources${File.separator}${type}${File.separator}out").resolve(Constants.QXML_CONIFG_PATH).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-            val kaptConfigFile = project.buildDir.resolve("generated${File.separator}source${File.separator}kapt${File.separator}${type}").resolve(Constants.QXML_CONIFG_PATH).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-            println("f xxxxxxx "+" "+kaptConfigFile+" "+kaptConfigFile.exists())
-        }*/
 
         val outputDir = project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH)
 

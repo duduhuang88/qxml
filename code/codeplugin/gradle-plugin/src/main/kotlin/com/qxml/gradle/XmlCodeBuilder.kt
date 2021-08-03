@@ -83,13 +83,6 @@ open class XmlCodeBuilder: DefaultTask() {
         }
         bufferWriter.flush()
         bufferWriter.close()
-
-        //当前buildType
-        val curBuildTypeFile = outputDir!!.resolve(Constants.CUR_BUILD_TYPE_FILE_NAME)
-        if (!curBuildTypeFile.exists()) {
-            curBuildTypeFile.createNewFile()
-        }
-        curBuildTypeFile.writeText(buildType!!)
     }
 
 }
