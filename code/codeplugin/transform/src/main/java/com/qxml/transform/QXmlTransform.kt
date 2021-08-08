@@ -116,35 +116,35 @@ class QXmlTransform(private val project: Project): BaseTransform() {
         LogUtil.pl("qxml config combine time cost: " + spend + "ms")
         time = System.currentTimeMillis()
 
-        val genInfoHolder = ViewGenInfoHolderImpl(genInfoMap, genClassInfoModel
-            , project.buildDir.resolve(Constants.QXML_CACHE_PATH).resolve(Constants.LOCAL_VAR_DEF_CONTENT_CACHE_FILE_NAME)
-            , qxmlConfig, waitableExecutor, styleInfoMap)
-
-
-        spend = (System.currentTimeMillis() - time)
-        LogUtil.pl("qxml config holder time cost: " + spend + "ms")
-        time = System.currentTimeMillis()
-
-        val content = gson.toJson(genInfoMap)
-        val cache = project.buildDir.resolve(Constants.QXML_CACHE_PATH).resolve(Constants.QXML_VIEW_GEN_INFO_CACHE_FILE_NAME)
-        Files.createParentDirs(cache)
-        if (!cache.exists()) {
-            cache.createNewFile()
-        }
-        cache.writeText(content)
-
-        classPathList.forEach {
-            PoolManager.pool.appendClassPath(it)
-            //cpList.add(PoolManager.pool.appendClassPath(it))
-        }
-        time = System.currentTimeMillis()
-
         reTransformQxmlJarFound = false
 
 
         val isAndroidx = (project.properties["android.useAndroidX"] as? String)?.toBoolean() ?: false
 
         if (qxmlConfig.enable) {
+
+            val genInfoHolder = ViewGenInfoHolderImpl(genInfoMap, genClassInfoModel
+                , project.buildDir.resolve(Constants.QXML_CACHE_PATH).resolve(Constants.LOCAL_VAR_DEF_CONTENT_CACHE_FILE_NAME)
+                , qxmlConfig, waitableExecutor, styleInfoMap)
+
+
+            spend = (System.currentTimeMillis() - time)
+            LogUtil.pl("qxml config holder time cost: " + spend + "ms")
+            time = System.currentTimeMillis()
+
+            val content = gson.toJson(genInfoMap)
+            val cache = project.buildDir.resolve(Constants.QXML_CACHE_PATH).resolve(Constants.QXML_VIEW_GEN_INFO_CACHE_FILE_NAME)
+            Files.createParentDirs(cache)
+            if (!cache.exists()) {
+                cache.createNewFile()
+            }
+            cache.writeText(content)
+
+            classPathList.forEach {
+                PoolManager.pool.appendClassPath(it)
+                //cpList.add(PoolManager.pool.appendClassPath(it))
+            }
+            time = System.currentTimeMillis()
 
             val idMapCacheFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${curBuildType}").resolve(Constants.ID_COLLECT_CACHE_FILE_NAME)
             val idMapCacheJsonStr = if (idMapCacheFile.exists()) idMapCacheFile.readText() else ""

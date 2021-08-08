@@ -79,7 +79,7 @@ Gradle 3.5.0 以上
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.1.8"
+    ext.qxml_version = "1.2.1"
     repositories {
         ...
         mavenCentral()

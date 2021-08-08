@@ -2,47 +2,37 @@ package com.qxml.gradle
 
 import com.qxml.constant.Constants
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import java.io.File
 
 /**
  * 将processor生成的配置文件挪到tempRes文件夹
  * @property outputDir File?
- * @property aptConfigFile File?
- * @property kaptConfigFile File?
+ * @property configFile File?
+ * see https://github.com/gradle/gradle/issues/2919
  */
-//@CacheableTask
+@CacheableTask
 open class CopyConfigFileTask : DefaultTask() {
 
-    //@get:OutputDirectory
+    @get:OutputDirectory
     var outputDir: File? = null
 
-    //@get:Input
-    var aptConfigFile: File? = null
-
-    //@get:Input
-    var kaptConfigFile: File? = null
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    var configFile: File? = null
 
     @TaskAction
     fun copy() {
-        val configFile = outputDir!!.resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-        if (!configFile.parentFile.exists()) {
-            configFile.parentFile.mkdirs()
+        val configOutputFile = outputDir!!.resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+        if (!configOutputFile.parentFile.exists()) {
+            configOutputFile.parentFile.mkdirs()
         }
-        if (!configFile.exists()) {
-            configFile.createNewFile()
+        if (!configOutputFile.exists()) {
+            configOutputFile.createNewFile()
         }
-        aptConfigFile?.apply {
+        configFile?.apply {
             if (exists()) {
-                configFile.writeText(readText())
-            }
-        }
-        kaptConfigFile?.apply {
-            if (exists()) {
-                configFile.writeText(readText())
+                configOutputFile.writeText(readText())
             }
         }
     }

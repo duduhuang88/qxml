@@ -64,7 +64,7 @@ check [Releases](https://github.com/duduhuang88/qxml/releases) to get newest ver
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.1.8"
+    ext.qxml_version = "1.2.1"
     repositories {
         ...
         mavenCentral()

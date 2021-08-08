@@ -3,7 +3,7 @@ def REMOTE_DEPENDENCE = false
 
 allprojects {
 
-    ext.PUBLISH_VERSION = "1.1.8"
+    ext.PUBLISH_VERSION = "1.2.1"
 
     ext.versions = [
             'minSdkVersion': 14,

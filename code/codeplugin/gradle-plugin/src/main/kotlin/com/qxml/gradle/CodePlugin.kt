@@ -295,24 +295,36 @@ class CodePlugin: Plugin<Project> {
 
         val outputDir = project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH)
 
-        val copyTask = project.tasks.create("copy${typeCap}ProcessQxmlConfigFile", CopyConfigFileTask::class.java) {
+        val aptConfigFile = project.buildDir.resolve("generated${File.separator}ap_generated_sources${File.separator}${type}${File.separator}out").resolve(Constants.QXML_CONIFG_PATH).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+        val kaptConfigFile = project.buildDir.resolve("generated${File.separator}source${File.separator}kapt${File.separator}${type}").resolve(Constants.QXML_CONIFG_PATH).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+
+        val copyKaptTask = project.tasks.create("copy${typeCap}KaptProcessQxmlConfigFile", CopyConfigFileTask::class.java) {
             it.outputDir = outputDir
-            it.aptConfigFile = project.buildDir.resolve("generated${File.separator}ap_generated_sources${File.separator}${type}${File.separator}out").resolve(Constants.QXML_CONIFG_PATH).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-            it.kaptConfigFile = project.buildDir.resolve("generated${File.separator}source${File.separator}kapt${File.separator}${type}").resolve(Constants.QXML_CONIFG_PATH).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+            it.configFile = kaptConfigFile
         }
+        copyKaptTask.onlyIf { kaptConfigFile.exists() }
+
+        val copyAptTask = project.tasks.create("copy${typeCap}AptProcessQxmlConfigFile", CopyConfigFileTask::class.java) {
+            it.outputDir = outputDir
+            it.configFile = aptConfigFile
+        }
+        copyAptTask.onlyIf { aptConfigFile.exists() }
 
         val processJavaResTask = project.tasks.getByName("process${typeCap}JavaRes")
-        processJavaResTask.dependsOn(copyTask)
+        processJavaResTask.dependsOn(copyKaptTask)
+        processJavaResTask.dependsOn(copyAptTask)
 
         val kaptTask = project.tasks.findByName("kapt${typeCap}Kotlin")
         kaptTask?.let {
             processJavaResTask.dependsOn(it)
-            copyTask.dependsOn(kaptTask)
+            copyKaptTask.dependsOn(kaptTask)
+            copyKaptTask.mustRunAfter(kaptTask)
         }
         val compileJavacTask = project.tasks.findByName("compile${typeCap}JavaWithJavac")
         compileJavacTask?.let {
             processJavaResTask.dependsOn(it)
-            copyTask.dependsOn(compileJavacTask)
+            copyAptTask.dependsOn(compileJavacTask)
+            copyAptTask.mustRunAfter(compileJavacTask)
         }
     }
 

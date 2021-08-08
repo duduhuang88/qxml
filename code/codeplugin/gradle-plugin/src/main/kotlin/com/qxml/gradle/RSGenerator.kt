@@ -20,7 +20,8 @@ open class RSGenerator : DefaultTask() {
     @get:Input
     var className: String? = null
 
-    @get:Input
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
     var androidJarFile: File? = null
 
     @TaskAction
