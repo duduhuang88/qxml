@@ -18,6 +18,7 @@ object AndroidxTestLayoutRes {
         R.layout.collapsingtoolbarlayout_test,
         R.layout.coordinatorlayout_test,
         R.layout.lottie_test,
+        R.layout.swiperefreshlayout_test,
 
 
         //以下不常用

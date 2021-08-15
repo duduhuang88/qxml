@@ -149,7 +149,8 @@ class Constants {
         const val QXML_USING_STABLE_ID = "QXML_USING_STABLE_ID"
         const val QXML_PROJECT_BUILD_TEMP_RES_PATH = "tempRes"
 
-        const val PARAM_NAME_TEMP = "鼕"
+        const val VIEW_PARAM_NAME_TEMP = "鼕"
+        const val VALUE_INFO_PARAM_NAME_TEMP = "鬵"
 
         const val SUPPORT_FRAGMENT_HELPER = "com.qxml.qxml_support.helper.FragmentHelper"
         const val ANDROIDX_FRAGMENT_HELPER = "com.qxml.qxml_androidx.helper.FragmentHelper"

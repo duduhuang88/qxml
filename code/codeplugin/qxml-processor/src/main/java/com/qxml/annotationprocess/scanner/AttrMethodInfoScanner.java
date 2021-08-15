@@ -1,6 +1,7 @@
 package com.qxml.annotationprocess.scanner;
 
 import com.qxml.constant.Constants;
+import com.qxml.tools.log.LogUtil;
 import com.qxml.tools.model.AttrFuncInfoModel;
 import com.qxml.tools.model.CompatViewInfoModel;
 import com.qxml.tools.model.LocalVarInfoModel;
@@ -310,26 +311,28 @@ public class AttrMethodInfoScanner extends TreeScanner {
 
                 bodyContent = replaceViewParamNameByTemp(bodyContent, viewParamName);
 
+                attrFuncInfoModel = new AttrFuncInfoModel();
+                if (valueParamName != null && Constants.QXML_VALUE_INFO_CLASS_NAME.equals(valueParamType)) {
+                    attrFuncInfoModel.setFuncBodyContent(replaceValueInfoParamNameByTemp(bodyContent, valueParamName));
+                } else {
+                    attrFuncInfoModel.setFuncBodyContent(bodyContent);
+                }
                 if (Constants.ATTR_ANNOTATION_CLASS_NAME.equals(methodAnnotationName)) {
                     String attrValue = ((JCTree.JCAssign)jcAnnotation.args.get(0)).rhs.toString();
-                    attrFuncInfoModel = new AttrFuncInfoModel();
                     attrFuncInfoModel.setViewParamType(viewParamType);
                     attrFuncInfoModel.setViewParamName(viewParamName);
                     attrFuncInfoModel.setValueParamType(valueParamType);
                     attrFuncInfoModel.setValueParamName(valueParamName);
                     attrFuncInfoModel.setAttrName(attrValue);
                     attrFuncInfoModel.setFuncName(funcName);
-                    attrFuncInfoModel.setFuncBodyContent(bodyContent);
                     attrFuncInfoModel.setType(AttrFuncInfoModel.ATTR_TYPE);
                 } else {
-                    attrFuncInfoModel = new AttrFuncInfoModel();
                     attrFuncInfoModel.setViewParamType(viewParamType);
                     attrFuncInfoModel.setViewParamName(viewParamName);
                     attrFuncInfoModel.setValueParamType(valueParamType);
                     attrFuncInfoModel.setValueParamName(valueParamName);
                     attrFuncInfoModel.setAttrName(attrValue);
                     attrFuncInfoModel.setFuncName(funcName);
-                    attrFuncInfoModel.setFuncBodyContent(bodyContent);
                     attrFuncInfoModel.setType(AttrFuncInfoModel.OVERRIDE_TYPE);
                 }
                 return;
@@ -381,22 +384,70 @@ public class AttrMethodInfoScanner extends TreeScanner {
             super.visitAnnotation(jcAnnotation);
         }
 
+        private static final String REPLACE_1 = " "+Constants.VIEW_PARAM_NAME_TEMP +" ";
+        private static final String REPLACE_2 = " "+Constants.VIEW_PARAM_NAME_TEMP +".";
+        private static final String REPLACE_3 = " "+Constants.VIEW_PARAM_NAME_TEMP +",";
+        private static final String REPLACE_4 = " "+Constants.VIEW_PARAM_NAME_TEMP +")";
+        private static final String REPLACE_5 = " "+Constants.VIEW_PARAM_NAME_TEMP +";";
+        private static final String REPLACE_6 = "("+Constants.VIEW_PARAM_NAME_TEMP +" ";
+        private static final String REPLACE_7 = "("+Constants.VIEW_PARAM_NAME_TEMP +")";
+        private static final String REPLACE_8 = "("+Constants.VIEW_PARAM_NAME_TEMP +",";
+        private static final String REPLACE_9 = "("+Constants.VIEW_PARAM_NAME_TEMP +".";
+        private static final String REPLACE_10 = ")"+Constants.VIEW_PARAM_NAME_TEMP +" ";
+        private static final String REPLACE_11 = ")"+Constants.VIEW_PARAM_NAME_TEMP +")";
+        private static final String REPLACE_12 = ")"+Constants.VIEW_PARAM_NAME_TEMP +".";
+        private static final String REPLACE_13 = ")"+Constants.VIEW_PARAM_NAME_TEMP +",";
+        private static final String REPLACE_14 = ")"+Constants.VIEW_PARAM_NAME_TEMP +";";
+
         private String replaceViewParamNameByTemp(String funcBody, String viewParamName) {
             return funcBody
-                    .replace(" "+viewParamName+" ", " "+Constants.PARAM_NAME_TEMP+" ")
-                    .replace(" "+viewParamName+".", " "+Constants.PARAM_NAME_TEMP+".")
-                    .replace(" "+viewParamName+",", " "+Constants.PARAM_NAME_TEMP+",")
-                    .replace(" "+viewParamName+")", " "+Constants.PARAM_NAME_TEMP+")")
-                    .replace(" "+viewParamName+";", " "+Constants.PARAM_NAME_TEMP+";")
-                    .replace("("+viewParamName+" ", "("+Constants.PARAM_NAME_TEMP+" ")
-                    .replace("("+viewParamName+")", "("+Constants.PARAM_NAME_TEMP+")")
-                    .replace("("+viewParamName+",", "("+Constants.PARAM_NAME_TEMP+",")
-                    .replace("("+viewParamName+".", "("+Constants.PARAM_NAME_TEMP+".")
-                    .replace(")"+viewParamName+" ", ")"+Constants.PARAM_NAME_TEMP+" ")
-                    .replace(")"+viewParamName+")", ")"+Constants.PARAM_NAME_TEMP+")")
-                    .replace(")"+viewParamName+".", ")"+Constants.PARAM_NAME_TEMP+".")
-                    .replace(")"+viewParamName+",", ")"+Constants.PARAM_NAME_TEMP+",")
-                    .replace(")"+viewParamName+";", ")"+Constants.PARAM_NAME_TEMP+";");
+                    .replace(" "+viewParamName+" ", REPLACE_1)
+                    .replace(" "+viewParamName+".", REPLACE_2)
+                    .replace(" "+viewParamName+",", REPLACE_3)
+                    .replace(" "+viewParamName+")", REPLACE_4)
+                    .replace(" "+viewParamName+";", REPLACE_5)
+                    .replace("("+viewParamName+" ", REPLACE_6)
+                    .replace("("+viewParamName+")", REPLACE_7)
+                    .replace("("+viewParamName+",", REPLACE_8)
+                    .replace("("+viewParamName+".", REPLACE_9)
+                    .replace(")"+viewParamName+" ", REPLACE_10)
+                    .replace(")"+viewParamName+")", REPLACE_11)
+                    .replace(")"+viewParamName+".", REPLACE_12)
+                    .replace(")"+viewParamName+",", REPLACE_13)
+                    .replace(")"+viewParamName+";", REPLACE_14);
+        }
+
+        private static final String VALUE_INFO_REPLACE_1 = " "+Constants.VALUE_INFO_PARAM_NAME_TEMP +" ";
+        private static final String VALUE_INFO_REPLACE_2 = " "+Constants.VALUE_INFO_PARAM_NAME_TEMP +".";
+        private static final String VALUE_INFO_REPLACE_3 = " "+Constants.VALUE_INFO_PARAM_NAME_TEMP +",";
+        private static final String VALUE_INFO_REPLACE_4 = " "+Constants.VALUE_INFO_PARAM_NAME_TEMP +")";
+        private static final String VALUE_INFO_REPLACE_5 = " "+Constants.VALUE_INFO_PARAM_NAME_TEMP +";";
+        private static final String VALUE_INFO_REPLACE_6 = "("+Constants.VALUE_INFO_PARAM_NAME_TEMP +" ";
+        private static final String VALUE_INFO_REPLACE_7 = "("+Constants.VALUE_INFO_PARAM_NAME_TEMP +")";
+        private static final String VALUE_INFO_REPLACE_8 = "("+Constants.VALUE_INFO_PARAM_NAME_TEMP +",";
+        private static final String VALUE_INFO_REPLACE_9 = "("+Constants.VALUE_INFO_PARAM_NAME_TEMP +".";
+        private static final String VALUE_INFO_REPLACE_10 = ")"+Constants.VALUE_INFO_PARAM_NAME_TEMP +" ";
+        private static final String VALUE_INFO_REPLACE_11 = ")"+Constants.VALUE_INFO_PARAM_NAME_TEMP +")";
+        private static final String VALUE_INFO_REPLACE_12 = ")"+Constants.VALUE_INFO_PARAM_NAME_TEMP +".";
+        private static final String VALUE_INFO_REPLACE_13 = ")"+Constants.VALUE_INFO_PARAM_NAME_TEMP +",";
+        private static final String VALUE_INFO_REPLACE_14 = ")"+Constants.VALUE_INFO_PARAM_NAME_TEMP +";";
+
+        private String replaceValueInfoParamNameByTemp(String funcBody, String valueInfoParamName) {
+            return funcBody
+                    .replace(" "+valueInfoParamName+" ", VALUE_INFO_REPLACE_1)
+                    .replace(" "+valueInfoParamName+".", VALUE_INFO_REPLACE_2)
+                    .replace(" "+valueInfoParamName+",", VALUE_INFO_REPLACE_3)
+                    .replace(" "+valueInfoParamName+")", VALUE_INFO_REPLACE_4)
+                    .replace(" "+valueInfoParamName+";", VALUE_INFO_REPLACE_5)
+                    .replace("("+valueInfoParamName+" ", VALUE_INFO_REPLACE_6)
+                    .replace("("+valueInfoParamName+")", VALUE_INFO_REPLACE_7)
+                    .replace("("+valueInfoParamName+",", VALUE_INFO_REPLACE_8)
+                    .replace("("+valueInfoParamName+".", VALUE_INFO_REPLACE_9)
+                    .replace(")"+valueInfoParamName+" ", VALUE_INFO_REPLACE_10)
+                    .replace(")"+valueInfoParamName+")", VALUE_INFO_REPLACE_11)
+                    .replace(")"+valueInfoParamName+".", VALUE_INFO_REPLACE_12)
+                    .replace(")"+valueInfoParamName+",", VALUE_INFO_REPLACE_13)
+                    .replace(")"+valueInfoParamName+";", VALUE_INFO_REPLACE_14);
         }
     }
 

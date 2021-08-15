@@ -33,14 +33,14 @@ class ValueInfoTypeResolver: ValueResolver {
         valueInfo: ValueInfo,
         attrInfoModel: AttrInfoModel,
         fieldInfo: FieldInfo,
-        contextName: String
+        contextName: String,
+        usedTempVarMap: HashMap<String, String>,
+        shouldWrapScope: Boolean
     ): MatchResult {
         val valueType = valueInfo.valueType
         val value = valueInfo.value
         val stringBuilder = StringBuilder()
-        val lastFuncBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.PARAM_NAME_TEMP, viewFieldName)
-        stringBuilder.append("{\n")
-        stringBuilder.append("${attrFuncInfoModel.valueParamType} ${attrFuncInfoModel.valueParamName} = ${Constants.GEN_FIELD_VALUE_INFO_NAME};\n")
+        val lastFuncBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName).replace(Constants.VALUE_INFO_PARAM_NAME_TEMP, Constants.GEN_FIELD_VALUE_INFO_NAME)
 
         stringBuilder.append(VALUE_INFO_CLEAR)
         stringBuilder.append(makeString(valueInfo.sourceValue))
@@ -56,7 +56,7 @@ class ValueInfoTypeResolver: ValueResolver {
             stringBuilder.append(getAttrReferenceResolveState(contextName, valueInfo))
             stringBuilder.append("${Constants.REFERENCE_ATTR_RESOLVER}.resolveValueInfo(${Constants.GEN_PARAM_CONTEXT_NAME}, ${Constants.GEN_FIELD_TYPED_VALUE_NAME}, ${Constants.GEN_FIELD_VALUE_INFO_NAME}, ${value});\n")
             stringBuilder.append(lastFuncBody)
-            return makeResolverSucStateInfo(stringBuilder)
+            return makeResolverSucStateInfo(stringBuilder, false)
         }
 
         typeResolverArray.forEach {  resolver->

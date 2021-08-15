@@ -90,6 +90,7 @@ dependencies {
     implementation deps.androidx.constraintlayout
     implementation deps.androidx.viewpager2
     implementation deps.androidx.material
+    implementation deps.androidx.swiperefreshLayout
 
     implementation deps.androidx.lottie
     implementation deps.androidx.fresco

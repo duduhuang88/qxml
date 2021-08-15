@@ -168,8 +168,4 @@ public class AttrFuncInfoModel implements Cloneable {
                 ", key='" + cacheSignKey + '\'' +
                 '}';
     }
-
-    public String getMethodContentHead(String viewFieldName) {
-        return "{\n"+valueParamType+" "+valueParamName+";\n";
-    }
 }

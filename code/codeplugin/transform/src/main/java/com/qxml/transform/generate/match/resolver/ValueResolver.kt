@@ -13,22 +13,25 @@ interface ValueResolver {
 
     fun resolve(viewTypeName: String, viewFieldName: String, layoutName: String, layoutType: String
                 , attrFuncInfoModel: AttrFuncInfoModel, valueInfo: ValueInfo, attrInfoModel: AttrInfoModel
-                , fieldInfo: FieldInfo, contextName: String
+                , fieldInfo: FieldInfo, contextName: String, usedTempVarMap: HashMap<String, String>
+                , shouldWrapScope: Boolean
     ): MatchResult
     fun type(): String
 
     fun makeResolverErrInfo(layoutName: String, layoutType: String, attrFuncInfoModel: AttrFuncInfoModel, valueInfo: ValueInfo) = MatchResult(MatchType.FAILED, "", ViewGenResultInfo("$layoutName $layoutType", GenResult.VALUE_MATCH_ERROR, "${attrFuncInfoModel.viewParamType}-${attrFuncInfoModel.attrName} the value(${valueInfo.sourceValue}) can't parse to ${type()}"))
     fun makeResolverSucInfo(result: String) = MatchResult(MatchType.SUCCESS_VALUE, result)
-    fun makeResolverSucStateInfo(stringBuilder: StringBuilder): MatchResult {
-        return MatchResult(MatchType.SUCCESS_ATTR_REFERENCE, stringBuilder.toString())
+    fun makeResolverSucStateInfo(stringBuilder: StringBuilder, shouldWrapScope: Boolean): MatchResult {
+        val result = stringBuilder.toString()
+        return MatchResult(MatchType.SUCCESS_ATTR_REFERENCE, result.substring(0, result.length - 1), null, shouldWrapScope)
     }
 
-    fun makeResolverSucStateInfo(stringBuilder: StringBuilder, lastBodyContent: String): MatchResult {
-        return MatchResult(MatchType.SUCCESS_ATTR_REFERENCE, stringBuilder.append(lastBodyContent).toString())
+    fun makeResolverSucStateInfo(stringBuilder: StringBuilder, lastBodyContent: String, shouldWrapScope: Boolean): MatchResult {
+        return MatchResult(MatchType.SUCCESS_ATTR_REFERENCE, stringBuilder.append(lastBodyContent.substring(0, lastBodyContent.length - 1)).toString(), null, shouldWrapScope)
     }
 
     fun makeResolverNullInfo(stringBuilder: StringBuilder): MatchResult{
-        return MatchResult(MatchType.SUCCESS_NULL, stringBuilder.toString())
+        val result = stringBuilder.toString()
+        return MatchResult(MatchType.SUCCESS_NULL, result.substring(0, result.length - 1))
     }
 
     fun getAttrReferenceResolveState(contextName: String, valueInfo: ValueInfo): String {
@@ -54,9 +57,17 @@ interface ValueResolver {
     private fun callAttrReferenceMethod(contextName: String, attrId: String, methodName: String): String {
         return "${Constants.REFERENCE_ATTR_RESOLVER}.${methodName}(${contextName}, ${Constants.GEN_FIELD_TYPED_VALUE_NAME}, ${attrId})"
     }
+
+    fun makeParamInit(attrFuncInfoModel: AttrFuncInfoModel, value: String, usedTempVarMap: HashMap<String, String>): String {
+        /*if (usedTempVarMap[attrFuncInfoModel.valueParamName] == attrFuncInfoModel.valueParamType) {
+            return "${attrFuncInfoModel.valueParamName} = $value;"
+        }
+        usedTempVarMap[attrFuncInfoModel.valueParamName] = attrFuncInfoModel.valueParamType*/
+        return "${attrFuncInfoModel.valueParamType} ${attrFuncInfoModel.valueParamName} = $value;"
+    }
 }
 
-data class MatchResult(val matchType: MatchType, val result: String, val ignoreInfo: ViewGenResultInfo? = null)
+data class MatchResult(val matchType: MatchType, val result: String, val ignoreInfo: ViewGenResultInfo? = null, val shouldWrapScope: Boolean = false)
 
 enum class MatchType {
     FAILED, SUCCESS_VALUE, SUCCESS_TYPE_VALUE, SUCCESS_ATTR_REFERENCE, SUCCESS_NULL

@@ -106,6 +106,8 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                     run layoutTypeLoopBreak@{
                         usedReferenceRMap["R.layout.$layoutName"] = ""
                         layoutFileInfoList.forEach layoutTypeLoopContinue@{ xmlTypeInfo ->
+                            //用到的临时变量
+                            val usedTempVarMap = hashMapOf<String, String>()
                             val qxmlConfig = QxmlConfigExtension("")
                             qxmlConfig.ignoreUnImplementAttr = qxmlExtension.ignoreUnImplementAttr
                             qxmlConfig.useFactory = qxmlExtension.useFactory
@@ -133,7 +135,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 , includeReferenceLayoutNameMap, layoutIsMerge, qxmlConfig
                                 , attrMethodValueMatcher, layoutGenStateMap, relativeIncludeLayoutMap
                                 , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap
-                                , usedImportPackageMap, finalUsedLocalVarMap, idMap)?.also {
+                                , usedImportPackageMap, finalUsedLocalVarMap, idMap, usedTempVarMap)?.also {
                                 index = 0
                                 if (it.result != GenResult.WAIT_INCLUDE) {
                                     failedLayoutTypeGenInfoList.add(LayoutTypeGenInfo(xmlTypeInfo.type, layoutIsMerge))

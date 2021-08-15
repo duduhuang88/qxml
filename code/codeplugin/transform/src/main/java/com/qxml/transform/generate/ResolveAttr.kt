@@ -25,6 +25,7 @@ interface ResolveAttr {
                     , finalUsedLocalVarMap: HashMap<String, String>
                     , usedReferenceRMap: HashMap<String, String>
                     , idMap: Map<String, Int>
+                    , usedTempVarMap: HashMap<String, String>
                     , keepAndroidTag : Boolean = true
     ): ViewGenResultInfo? {
 
@@ -75,13 +76,18 @@ interface ResolveAttr {
             }
 
             val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName
-                , layoutType, attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap, idMap)
+                , layoutType, attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap, idMap, usedTempVarMap)
             when (matchResult.matchType) {
                 MatchType.FAILED -> {
                     return matchResult.ignoreInfo
                 }
-                else -> codeBlockBuilder.addStatement(matchResult.result)
+                else -> {
+                    codeBlockBuilder.beginControlFlow("")
+                    codeBlockBuilder.add(matchResult.result)
+                    codeBlockBuilder.endControlFlow()
+                }
             }
+
             var viewTypeGenInfoMap = usedGenInfoMap[viewClassName]
             if (viewTypeGenInfoMap == null) {
                 viewTypeGenInfoMap = hashMapOf()
@@ -111,6 +117,7 @@ interface ResolveAttr {
                          , usedLocalVarMap: HashMap<String, String>
                          , finalUsedLocalVarMap: HashMap<String, String>
                          , idMap: Map<String, Int>
+                         , usedTempVarMap: HashMap<String, String>
     ): ViewGenResultInfo? {
         //忽略dataBinding属性引用
         if (rootIsDataBinding
@@ -143,7 +150,7 @@ interface ResolveAttr {
         }
 
         val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName, layoutType
-            , attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap, idMap)
+            , attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap, idMap, usedTempVarMap)
         when (matchResult.matchType) {
             MatchType.FAILED -> {
                 return matchResult.ignoreInfo

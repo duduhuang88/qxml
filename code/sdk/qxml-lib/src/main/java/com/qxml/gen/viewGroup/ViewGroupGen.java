@@ -7,7 +7,7 @@ import com.qxml.gen.view.ViewGen;
 import com.yellow.qxml_annotions.Attr;
 import com.yellow.qxml_annotions.ViewParse;
 
-@ViewParse(ViewGroup.class)
+@ViewParse(value = ViewGroup.class, layoutParamInit = "new android.view.ViewGroup.LayoutParams(-2, -2)")
 public class ViewGroupGen extends ViewGen {
 
     @Attr(AndroidRS.attr.clipChildren)

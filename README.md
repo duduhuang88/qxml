@@ -15,7 +15,7 @@
 ## Qxml：
 
 * 使用transform生成View类，生成View的规则通过添加注解类实现，可以做到规则与代码的边界分离，无需改动原有代码即可接入；  
-* 对布局属性支持较好，目标是完全的UI一致性；  
+* 对布局属性支持较好，目标是完全的UI一致性（详见 demo UI测试）；  
 * 自定义属性可实现复杂的逻辑，拓展方便实现；  
 * 支持多layout type、View Compat、LayoutInflate Factory等等特性，可实现换肤，拓展View等功能。
 
@@ -62,7 +62,8 @@ Gradle 3.5.0 以上
 |    Placeholder    |  almost  |   Barrier    |  almost  |      MotionLayout       |  almost  |
 | CoordinatorLayout |  almost  | DrawerLayout |  almost  |      RecyclerView       |  almost  |
 | NestedScrollView  |  almost  |  TabLayout   |  almost  |         TabItem         |  almost  |
-|      Toolbar      |  almost  |  ViewPager   |  almost  |        Fragment         |  almost  |
+|      Toolbar      |  almost  |  ViewPager   |    all   |        Fragment         |  almost  |
+|SwipeRefreshLayout |    all   |              |          |                         |          |
 
 ### Third Part
 
@@ -79,7 +80,7 @@ Gradle 3.5.0 以上
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.2.1"
+    ext.qxml_version = "1.3.0"
     repositories {
         ...
         mavenCentral()

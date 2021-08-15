@@ -130,7 +130,7 @@ interface AttrTypeResolver {
     fun makeResolverSucStateInfo(stringBuilder: StringBuilder, lastFuncBodyContent: String): MatchResult{
         return MatchResult(
             MatchType.SUCCESS_TYPE_VALUE,
-            stringBuilder.append(lastFuncBodyContent).toString()
+            stringBuilder.append(lastFuncBodyContent.substring(0, lastFuncBodyContent.length - 1)).toString()
         )
     }
 

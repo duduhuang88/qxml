@@ -47,7 +47,8 @@ Gradle 3.5.0 above
 |    Placeholder    |  almost  |   Barrier    |  almost  |      MotionLayout       |  almost  |
 | CoordinatorLayout |  almost  | DrawerLayout |  almost  |      RecyclerView       |  almost  |
 | NestedScrollView  |  almost  |  TabLayout   |  almost  |         TabItem         |  almost  |
-|      Toolbar      |  almost  |  ViewPager   |  almost  |        Fragment         |  almost  |
+|      Toolbar      |  almost  |  ViewPager   |    all   |        Fragment         |  almost  |
+|SwipeRefreshLayout |    all   |              |          |                         |          |
 
 ### Third Part
 
@@ -64,7 +65,7 @@ check [Releases](https://github.com/duduhuang88/qxml/releases) to get newest ver
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.2.1"
+    ext.qxml_version = "1.3.0"
     repositories {
         ...
         mavenCentral()

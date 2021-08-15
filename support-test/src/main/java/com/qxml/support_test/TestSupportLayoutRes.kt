@@ -20,6 +20,7 @@ object TestSupportLayoutRes {
         R.layout.collapsingtoolbarlayout_test,
         R.layout.coordinatorlayout_test,
         R.layout.constrainlayout_test,
+        R.layout.swiperefreshlayout_test,
 
 
         //以下不常用

@@ -18,33 +18,34 @@ class BooleanTypeValueResolver: ValueResolver {
         valueInfo: ValueInfo,
         attrInfoModel: AttrInfoModel,
         fieldInfo: FieldInfo,
-        contextName: String
+        contextName: String,
+        usedTempVarMap: HashMap<String, String>,
+        shouldWrapScope: Boolean
     ): MatchResult {
         val valueType = valueInfo.valueType
         val value = valueInfo.value
-        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.PARAM_NAME_TEMP, viewFieldName)
+        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName)
 
         val stringBuilder = StringBuilder()
-        stringBuilder.append(attrFuncInfoModel.getMethodContentHead(viewFieldName))
 
         if (attrInfoModel.isBoolean()) {
             if (valueInfo.isAttrReference) {
                 stringBuilder.append(getAttrReferenceResolveState(contextName, valueInfo))
-                stringBuilder.append("${attrFuncInfoModel.valueParamName} = ${callAttrBooleanReferenceMethod(contextName, value)};\n")
-                return makeResolverSucStateInfo(stringBuilder, funcBody)
+                stringBuilder.append(makeParamInit(attrFuncInfoModel, callAttrBooleanReferenceMethod(contextName, value), usedTempVarMap))
+                return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
             } else {
                 if (valueType == ValueType.REFERENCE_STRING) {
-                    stringBuilder.append("${attrFuncInfoModel.valueParamName} = \"true\".equals(${Constants.GEN_PARAM_CONTEXT_NAME}.getString($value));\n")
-                    return makeResolverSucStateInfo(stringBuilder, funcBody)
+                    stringBuilder.append(makeParamInit(attrFuncInfoModel, "\"true\".equals(${Constants.GEN_PARAM_CONTEXT_NAME}.getString($value))", usedTempVarMap))
+                    return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
                 } else if (valueType == ValueType.SOURCE_STRING) {
-                    stringBuilder.append("${attrFuncInfoModel.valueParamName} = ${value.equals("true", true)};\n")
-                    return makeResolverSucStateInfo(stringBuilder, funcBody)
+                    stringBuilder.append(makeParamInit(attrFuncInfoModel, "${value.equals("true", true)}", usedTempVarMap))
+                    return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
                 } else if (valueType == ValueType.REFERENCE_BOOLEAN) {
-                    stringBuilder.append("${attrFuncInfoModel.valueParamName} = ${Constants.GEN_FIELD_RESOURCE}.getBoolean($value);\n")
-                    return makeResolverSucStateInfo(stringBuilder, funcBody)
+                    stringBuilder.append(makeParamInit(attrFuncInfoModel, "${Constants.GEN_FIELD_RESOURCE}.getBoolean($value)", usedTempVarMap))
+                    return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
                 } else if (valueType == ValueType.NULL) {
-                    stringBuilder.append("${attrFuncInfoModel.valueParamName} = true;\n")
-                    return makeResolverSucStateInfo(stringBuilder, funcBody)
+                    stringBuilder.append(makeParamInit(attrFuncInfoModel, "true", usedTempVarMap))
+                    return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
                 }
             }
         }
