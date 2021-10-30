@@ -48,7 +48,7 @@ Gradle 3.5.0 以上
 | FrameLayout  |  almost  | TextureView  |  almost  |       WebView        |  almost  |
 |   ListView   |  almost  |  GridLayout  |  almost  |  ExpandableListView  |  almost  |
 | ViewFlipper  |  almost  | ViewSwitcher |  almost  |     TextSwitcher     |  almost  |
-|  VideoView   |  almost  |              |          |                      |          |
+|  VideoView   |  almost  | ToggleButton | almost  |                      |          |
 |              |          |              |          |                      |          |
 |   include    |  almost  |    merge     |  almost  |     DataBinding      |  almost  |
 | custom style |  almost  | system style | **none** |  layout multi type   |  almost  |
@@ -80,7 +80,7 @@ Gradle 3.5.0 以上
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.3.0"
+    ext.qxml_version = "1.3.1"
     repositories {
         ...
         mavenCentral()

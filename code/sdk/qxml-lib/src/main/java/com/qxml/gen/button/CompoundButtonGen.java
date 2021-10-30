@@ -37,12 +37,12 @@ public class CompoundButtonGen extends ButtonGen {
     }
 
     @Attr(AndroidRS.attr.buttonTintMode)
-    public void onCompoundButtonButtonTint(CompoundButton compoundButton, int buttonTintMode) {
+    public void onCompoundButtonButtonTintMode(CompoundButton compoundButton, int buttonTintMode) {
         __compoundButtonLocalVar.buttonTintMode = buttonTintMode;
     }
 
     @Attr(AndroidRS.attr.checked)
-    public void onCompoundButtonButtonTint(CompoundButton compoundButton, boolean checked) {
+    public void onCompoundButtonChecked(CompoundButton compoundButton, boolean checked) {
         compoundButton.setChecked(checked);
     }
 

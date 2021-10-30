@@ -4,7 +4,7 @@ object TestLayoutRes {
 
     val TEST_LAYOUT_RES = arrayListOf(
 
-        R.layout.tablelayout_test,
+        //R.layout.tablelayout_test,
         R.layout.module_test,
         R.layout.module_test_2,
         R.layout.layout_type_version_test,
@@ -29,6 +29,7 @@ object TestLayoutRes {
         R.layout.radiogroup_test,
         R.layout.switch_test,
         R.layout.viewstub_test,
+        R.layout.toggle_button_test,
 
 
         //以下不常用
