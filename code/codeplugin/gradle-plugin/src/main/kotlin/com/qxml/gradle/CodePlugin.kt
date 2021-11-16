@@ -83,10 +83,6 @@ class CodePlugin: Plugin<Project> {
             }
         }
 
-        if (!System.getenv().containsKey("ANDROID_HOME")) {
-            throw java.lang.RuntimeException("请先设置ANDROID_HOME环境变量")
-        }
-
         configureSourceSet(project)
 
         if (qxmlUsingStableId.equals("true", true)) {
