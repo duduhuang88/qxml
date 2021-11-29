@@ -31,7 +31,6 @@ class CodePlugin: Plugin<Project> {
     private lateinit var qxmlLogEnable: String
     private lateinit var qxmlUsingStableId: String
 
-    private val waitableExecutor = WaitableExecutor.useGlobalSharedThreadPool()
     private val gson by lazy { GsonBuilder().disableHtmlEscaping().create() }
     private lateinit var qxmlConfig: QxmlExtension
     private lateinit var publicROutputFile: File

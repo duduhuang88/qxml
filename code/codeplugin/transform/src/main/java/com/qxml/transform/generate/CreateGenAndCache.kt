@@ -235,7 +235,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 failedNormalTypes.forEachIndexed { index, failedType ->
                                     sb.append("${Constants.GEN_FIELD_LAYOUT_TYPE_HASHCODE_NAME} == ${failedType.hashCode()}")
                                     commentSb.append(" ${LayoutTypeNameCorrect.toDisplayText(failedType)} ")
-                                    if (index < failedLayoutTypeGenInfoList.size - 1) {
+                                    if (index < failedNormalTypes.size - 1) {
                                         sb.append(" || ")
                                     }
                                 }
@@ -252,7 +252,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 failedMergeTypes.forEachIndexed { index, failedType ->
                                     sb.append("${Constants.GEN_FIELD_LAYOUT_TYPE_HASHCODE_NAME} == ${failedType.hashCode()}")
                                     commentSb.append(" ${LayoutTypeNameCorrect.toDisplayText(failedType)} ")
-                                    if (index < failedLayoutTypeGenInfoList.size - 1) {
+                                    if (index < failedMergeTypes.size - 1) {
                                         sb.append(" || ")
                                     }
                                 }

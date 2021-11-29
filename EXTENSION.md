@@ -36,7 +36,7 @@ public @interface ViewParse {
 @ViewParse(TextView.class)
 public class TextViewGen extends ViewGen {
 
-	//扩展android:gravity属性
+    //扩展android:gravity属性
 	@Attr(AndroidRS.attr.gravity)
     public void textViewGravity(TextView textView, int gravityFlag) {
         textView.setGravity(gravityFlag);
@@ -175,12 +175,15 @@ class ValueInfo {
 ```
 ### 5. 使用createViewListener
 ##### 1. 打开配置
+```gradle
 qxml {
     ...
     useCreateViewListener true
     ...
 }
+```
 ##### 2. 设置createViewListener
+```java
 QxmlInflater.createViewListener = object : CreateViewListener {
             override fun onCreateView(
                 parentView: View?,
@@ -192,6 +195,7 @@ QxmlInflater.createViewListener = object : CreateViewListener {
 
             }
         }
+```
 
 
 
