@@ -14,9 +14,11 @@ import com.yellow.qxml_annotions.LocalVar;
 import com.yellow.qxml_annotions.ViewParse;
 
 import java.io.Writer;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.CRC32;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -96,7 +98,13 @@ public class QXmlProcessor extends AbstractProcessor {
             String infos = gson.toJson(genClassInfoModel);
             if (rsaPrivateKey != null && !rsaPrivateKey.isEmpty()) {
                 try {
-                    String sign = RSAUtils.encryptByPrivateKey(infos, rsaPrivateKey);
+                    CRC32 crc32 = new CRC32();
+                    byte[] infoBytes = infos.getBytes();
+                    crc32.update(infoBytes);
+                    String crc32Str = Long.toHexString(crc32.getValue());
+                    String md5Str = new String(MessageDigest.getInstance("md5").digest(infoBytes));
+                    String signStr = crc32Str + "_" + md5Str + "_" + infos.length();
+                    String sign = RSAUtils.encryptByPrivateKey(signStr, rsaPrivateKey);
                     genClassInfoModel.setSign(sign);
                     if (genClassInfoModel.getSign() == null || genClassInfoModel.getSign().isEmpty()) {
                         throw new RuntimeException("签名错误");

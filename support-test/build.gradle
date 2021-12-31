@@ -80,6 +80,7 @@ qxml {
     useFactory false
     viewDebug true
     logEnable true
+    debugEnable false
     compatMode com.qxml.CompatMode.AUTO
     acceptReferenceStyle true
     useCreateViewListener false

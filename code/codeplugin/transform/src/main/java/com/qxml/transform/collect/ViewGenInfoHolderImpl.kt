@@ -1,7 +1,9 @@
 package com.qxml.transform.collect
 
 import com.android.ide.common.internal.WaitableExecutor
+import com.google.common.io.Files
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.qxml.QxmlConfigExtension
 import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.AttrFuncInfoModel
@@ -14,6 +16,9 @@ import com.qxml.transform.generate.model.GenerateClassInfo
 import com.qxml.transform.generate.model.StyleInfo
 import java.io.File
 import java.lang.StringBuilder
+import java.util.*
+import java.util.zip.CRC32
+import kotlin.collections.HashMap
 
 
 interface ViewGenInfoHolder {
@@ -35,17 +40,21 @@ interface ViewGenInfoHolder {
     fun anyChange(generateClassInfo: GenerateClassInfo): Boolean
 }
 
-class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClassModel>
+class ViewGenInfoHolderImpl(private val viewGenInfoMap: HashMap<String, ViewGenClassModel>
                             , private val genClassInfoModel: GenClassInfoModel
                             , private val cacheFile: File
                             , private val newQxmlExtension: QxmlConfigExtension
                             , private val WaitableExecutor: WaitableExecutor
-                            , val styleInfoMap: Map<String, Map<String, StyleInfo>>)
+                            , val styleInfoMap: Map<String, Map<String, StyleInfo>>
+                            , private val genClassInfoModelJsonStr: String
+                            , private val cacheDir: File
+                            , private val gson: Gson)
     : ViewGenInfoHolder {
 
     // 由于new出来的view无法在添加进ViewGroup时将位置attr传递，所以
     // 在设置了style时，需要重新设置的style里的部分attr
     // 大多数为布局相关
+    // TODO 动态添加
     private val styleResetAttrMap = mutableMapOf<String, String>().apply {
         putAll(CommonResetAttr.map)
         putAll(LinearLayoutResetAttr.map)
@@ -96,7 +105,7 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
     } }
 
     private val finalCallOnFinishInflateMap by lazy { hashMapOf<String, Boolean>().apply {
-        viewGenInfoMap.forEach { (viewClassName, viewGenClassModel) ->
+        viewGenInfoMap.forEach { (viewClassName, _) ->
             val call = genClassInfoModel.callOnFinishInflateMap[viewClassName]
             if (call != null) {
                 put(viewClassName, call)
@@ -136,28 +145,6 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
         stringBuilder.toString()
     }
 
-    //重置共享变量
-    private val localVarResetContent by lazy {
-        val stringBuilder = StringBuilder()
-        var index = 0
-        genClassInfoModel.localVarMap.forEach { (_, localVarInfoModel) ->
-            stringBuilder.append(localVarInfoModel.resetBlock)
-            index++
-            if (index != genClassInfoModel.localVarMap.size) {
-                stringBuilder.append(";").append("\n")
-            }
-        }
-        stringBuilder.toString()
-    }
-
-    private val isLocalVarDefChange by lazy {
-        if (cacheFile.exists() && cacheFile.isFile) {
-            cacheFile.readText() != localVarDefContent
-        } else {
-            false
-        }
-    }
-
     /**
      * attr 是否存在
      */
@@ -177,24 +164,39 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: Map<String, ViewGenClass
     } }
 
     init {
-        //设置共享变量
-        viewGenInfoMap.forEach { (_, viewGenClassModel) ->
-            WaitableExecutor.execute {
-                resolveLocalVar(viewGenClassModel.onEndFuncInfoModelMap, genClassInfoModel.localVarMap)
-                resolveLocalVar(viewGenClassModel.funcInfoModelHashMap, genClassInfoModel.localVarMap)
-                viewGenClassModel.overrideFuncInfoModelList?.forEach { attrFuncInfoModel ->
-                    genClassInfoModel.localVarMap.forEach { (_, localVarInfoModel) ->
-                        if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.changeStr)) {
-                            attrFuncInfoModel.funcBodyContent = attrFuncInfoModel.funcBodyContent?.replace(localVarInfoModel.changeStr, localVarInfoModel.replaceStr)
-                        }
-                        if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.fullVarName)) {
-                            attrFuncInfoModel.usedLocalVarMap[localVarInfoModel.fullVarName] = ""
+        val crc32 = CRC32()
+        crc32.update(genClassInfoModelJsonStr.toByteArray())
+        val genClassInfoModelJsonCrc32 = java.lang.Long.toHexString(crc32.value)
+        val modelInfoCacheFile = cacheDir.resolve("${genClassInfoModelJsonStr.length}_${genClassInfoModelJsonCrc32}.txt")
+        if (modelInfoCacheFile.exists()) {
+            val cacheViewGenInfoMap: Map<String, ViewGenClassModel> = gson.fromJson(modelInfoCacheFile.readText(), object : TypeToken<Map<String, ViewGenClassModel>>() {}.type)
+            viewGenInfoMap.clear()
+            viewGenInfoMap.putAll(cacheViewGenInfoMap)
+        } else {
+            cacheDir.delete()
+            //设置共享变量
+            viewGenInfoMap.forEach { (_, viewGenClassModel) ->
+                WaitableExecutor.execute {
+                    resolveLocalVar(viewGenClassModel.onEndFuncInfoModelMap, genClassInfoModel.localVarMap)
+                    resolveLocalVar(viewGenClassModel.funcInfoModelHashMap, genClassInfoModel.localVarMap)
+                    viewGenClassModel.overrideFuncInfoModelList?.forEach { attrFuncInfoModel ->
+                        genClassInfoModel.localVarMap.forEach { (_, localVarInfoModel) ->
+                            if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.changeStr)) {
+                                attrFuncInfoModel.funcBodyContent = attrFuncInfoModel.funcBodyContent?.replace(localVarInfoModel.changeStr, localVarInfoModel.replaceStr)
+                            }
+                            if (attrFuncInfoModel.funcBodyContent.contains(localVarInfoModel.fullVarName)) {
+                                attrFuncInfoModel.usedLocalVarMap[localVarInfoModel.fullVarName] = ""
+                            }
                         }
                     }
                 }
             }
+            WaitableExecutor.waitForTasksWithQuickFail<Any>(true)
+
+            Files.createParentDirs(modelInfoCacheFile)
+            modelInfoCacheFile.createNewFile()
+            modelInfoCacheFile.writeText(gson.toJson(viewGenInfoMap))
         }
-        WaitableExecutor.waitForTasksWithQuickFail<Any>(true)
     }
 
     private fun resolveLocalVar(attrFuncInfoModelMap: Map<String, AttrFuncInfoModel>?, localVarInfoModelMap: Map<String, LocalVarInfoModel>) {

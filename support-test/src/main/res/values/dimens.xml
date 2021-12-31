@@ -21,4 +21,40 @@
 
 
 
+
+
+    <item name="test.dot.item.integer" type="integer">1</item>
+    <item name="test.dot.item.fraction" type="fraction">20%p</item>
+    <item name="test.dot.item.int" type="integer">2</item>
+    <item name="test.dot.item.bool" type="bool">true</item>
+
+
+    <integer name="test.dot.integer">2</integer>
+    <dimen name="test.dot.dimen">20</dimen>
+    <string name="test.dot.string">ttt</string>
+    <fraction name="test.dot.fraction">5%</fraction>
+    <color name="test.dot.color">#123456</color>
+    <bool name="test.dot.bool">false</bool>
+    <attr name="test.dot.attr" format="integer">1</attr>
+    <drawable name="test.dot.drawable">#654321</drawable>
+
+    <array name="test.dot.array">
+        <item>1</item>
+        <item>asdf</item>
+    </array>
+
+    <integer-array name="test.dot.int.array">
+        <item>1</item>
+        <item>2</item>
+    </integer-array>
+
+    <string-array name="test.dot.string.array">
+        <item>hh</item>
+        <item>yy</item>
+    </string-array>
+
+    <declare-styleable name="test.dot.style">
+        <attr name="test.dot.style.attr" format="dimension"/>
+    </declare-styleable>
+
 </resources>

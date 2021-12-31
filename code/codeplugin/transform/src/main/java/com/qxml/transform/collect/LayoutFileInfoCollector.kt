@@ -5,7 +5,7 @@ import com.qxml.transform.generate.model.LayoutFileInfo
 /**
  * 收集merger.xml 的 layout信息
  */
-class LayoutFileInfoCollector(private val layoutPaths: List<String>) {
+class LayoutFileInfoCollector {
 
     /**
      * key: layout name

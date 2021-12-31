@@ -77,3 +77,9 @@
     android.graphics.drawable.Drawable mCollapseIcon;
     java.lang.CharSequence mCollapseDescription;
 }
+
+
+-keep class com.google.android.material.textfield.TextInputLayout {
+    int boxCollapsedPaddingTopPx;
+    com.google.android.material.internal.CollapsingTextHelper collapsingTextHelper;
+}

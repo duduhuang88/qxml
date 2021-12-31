@@ -1,7 +1,12 @@
 package com.qxml.gradle
 
 import com.google.gson.GsonBuilder
+import com.qxml.constant.Constants
+import com.qxml.tools.log.LogUtil
+import groovy.util.Node
+import groovy.util.XmlParser
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.*
 import java.io.File
@@ -23,9 +28,13 @@ open class IdCollector: DefaultTask() {
     @get:Input
     var packageName: String? = null
 
+    @get:Input
+    var curBuildType: String? = null
+
     @TaskAction
     fun collect() {
-        val reader = IdCollectSymbolListReader(packageName!!)
+        val exactIdMap = ExactIdCollector(project, curBuildType!!).exactCollect()
+        val reader = IdCollectSymbolListReader(packageName!!, exactIdMap)
         val content = reader.readSymbolTable(rFile!!.singleFile)
         outputFile!!.writeText(content)
         val stringBuilder = StringBuilder()
@@ -36,7 +45,7 @@ open class IdCollector: DefaultTask() {
     }
 }
 
-internal class IdCollectSymbolListReader(private val packageName: String) {
+internal class IdCollectSymbolListReader(private val packageName: String, private val exactIdMap: Map<String, String>) {
 
     private val layoutIdMap: HashMap<String, Int> = hashMapOf()
     val publicIdList: MutableList<String> = mutableListOf()
@@ -63,9 +72,90 @@ internal class IdCollectSymbolListReader(private val packageName: String) {
         if (!id.startsWith("0x")) {
             return
         }
-        //todo 这里的.会被替换为_ 所以有一些ID会不准确
-        publicIdList.add("$packageName:$symbolType/$name = $id")
+
+        val idName = "$symbolType/$name"
+        val finalIdName = exactIdMap[idName] ?: idName
+        publicIdList.add("$packageName:$finalIdName = $id")
 
         layoutIdMap["R.$symbolType.${name}"] = id.substring(2).toInt(16)
+    }
+}
+
+internal class ExactIdCollector(private val project: Project, private val curBuildType: String) {
+
+    companion object {
+        private const val TAG_NAME = "name"
+
+        private const val TAG_TYPE = "type"
+
+        private const val TAG_ITEM = "item"
+
+        private const val TAG_PROJECT_MERGER_ROOT = "merger"
+        private const val TAG_PROJECT_DATA_SET = "dataSet"
+        private const val TAG_PROJECT_SOURCE = "source"
+        private const val TAG_PROJECT_FILE = "file"
+        private const val TAG_DECLARE_STYLEABLE = "declare-styleable"
+    }
+
+    private val transferMap = hashMapOf<String, String>().apply {
+        put(TAG_ITEM, "")
+        put("integer", "")
+        put("dimen", "")
+        put("string", "")
+        put("fraction", "")
+        put("color", "")
+        put("bool", "")
+        put("attr", "")
+        put("drawable", "")
+        put("style", "")
+
+        put("declare-styleable", "styleable")
+        put("array", "array")
+        put("string-array", "array")
+        put("integer-array", "array")
+    }
+
+    private val rootNode by lazy {
+        XmlParser().parse(
+            project.buildDir.resolve(Constants.INTERMEDIATES)
+                .resolve(Constants.INCREMENTAL).resolve("merge${curBuildType}Resources")
+                .resolve(Constants.MERGER_XML)
+        )
+    }
+
+    fun exactCollect(): Map<String, String> {
+        val exactIdMap = hashMapOf<String, String>()
+        processNode(rootNode, exactIdMap)
+        return exactIdMap
+    }
+
+    private fun processNode(node: Node, exactIdMap: HashMap<String, String>) {
+        val nodeName = node.name().toString()
+        if (nodeName == TAG_PROJECT_MERGER_ROOT || nodeName == TAG_PROJECT_SOURCE
+            || nodeName == TAG_PROJECT_FILE || nodeName == TAG_PROJECT_DATA_SET) {
+            node.children().forEach {
+                (it as? Node)?.let { node ->
+                    processNode(node, exactIdMap)
+                }
+            }
+        } else {
+            transferMap[nodeName]?.let { transferMiddleName ->
+                val name = node.attribute(TAG_NAME) as? String
+                if (name != null && name.contains(".")) {
+                    val symbolType =
+                        if (nodeName == TAG_ITEM) node.attribute(TAG_TYPE) as String else {
+                            if (transferMiddleName.isEmpty()) nodeName else transferMiddleName
+                        }
+                    exactIdMap["$symbolType/${name.replace(".", "_")}"] = "$symbolType/$name"
+                }
+            }
+            if (nodeName == TAG_DECLARE_STYLEABLE) {
+                node.children().forEach {
+                    (it as? Node)?.let { node ->
+                        processNode(node, exactIdMap)
+                    }
+                }
+            }
+        }
     }
 }

@@ -19,4 +19,9 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
+    <style name="testTextAppearance" >
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">#555666</item>
+    </style>
+
 </resources>

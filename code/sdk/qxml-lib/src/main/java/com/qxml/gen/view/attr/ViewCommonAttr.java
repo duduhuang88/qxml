@@ -126,7 +126,9 @@ public interface ViewCommonAttr extends ViewLocalVar {
 
     @Attr(AndroidRS.attr.isScrollContainer)
     default void viewIsScrollContainer(View view, boolean isScrollContainer) {
-        view.setScrollContainer(isScrollContainer);
+        if (isScrollContainer) {
+            view.setScrollContainer(true);
+        }
     }
 
     @Attr(AndroidRS.attr.hapticFeedbackEnabled)
@@ -178,7 +180,7 @@ public interface ViewCommonAttr extends ViewLocalVar {
     @Attr(AndroidRS.attr.nextClusterForward)
     default void viewNextClusterForward(View view, ValueInfo valueInfo) {
         if (android.os.Build.VERSION.SDK_INT >= 26) {
-            if (valueInfo.isReference() && valueInfo.referenceType == com.qxml.constant.ValueType.REFERENCE_ID) {
+            if (valueInfo.referenceType == com.qxml.constant.ValueType.REFERENCE_ID && valueInfo.isReference()) {
                 view.setNextClusterForwardId(valueInfo.resourceId);
             }
         }

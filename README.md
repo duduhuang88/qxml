@@ -2,6 +2,8 @@
 
 [English](README_EN.md)
 
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/duduhuang88/qxml?include_prereleases)  ![GitHub](https://img.shields.io/github/license/duduhuang88/qxml)
+
 一个低侵入，可配置的 Android 库，用于将 layout xml 文件转换为 Java 代码以提高性能。
 
 # 与X2C的对比
@@ -63,7 +65,7 @@ Gradle 3.5.0 以上
 | CoordinatorLayout |  almost  | DrawerLayout |  almost  |      RecyclerView       |  almost  |
 | NestedScrollView  |  almost  |  TabLayout   |  almost  |         TabItem         |  almost  |
 |      Toolbar      |  almost  |  ViewPager   |    all   |        Fragment         |  almost  |
-|SwipeRefreshLayout |    all   |              |          |                         |          |
+|SwipeRefreshLayout |    all   |  TextInputLayout  |  almost  |                         |          |
 
 ### Third Part
 
@@ -75,12 +77,10 @@ Gradle 3.5.0 以上
 
 ### 1. 在 Project `build.gradle` 中添加依赖
 
-请查看 [Releases](https://github.com/duduhuang88/qxml/releases) 获取最新版本信息
-
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.3.4"
+    ext.qxml_version = "2.0.0"
     repositories {
         ...
         mavenCentral()
@@ -138,13 +138,15 @@ android {
 }
 
 qxml {
-    enable true		//是否开启
-    useFactory false		//是否使用layoutInflater的factory，开启时性能有损耗
-    viewDebug false		//是否在转换的View上显示标志
-    logEnable true		//是否开启log
-    compatMode com.qxml.CompatMode.AUTO  //compat模式
-    acceptReferenceStyle true    //是否接受style引用，仅支持很少部分引用
-    useCreateViewListener true  //使用createViewListener
+    enable true		 //是否开启，默认true
+    useFactory false		 //是否使用layoutInflater的factory，开启时性能有损耗，默认false
+    viewDebug false		 //是否在转换的View上显示标志，默认false
+    logEnable true		 //是否开启log，默认false
+    debugEnable false	 //是否开启debug，默认false，开启时会输出一些调试信息和文件
+    compatMode com.qxml.CompatMode.AUTO  //compat模式，默认AUTO
+    acceptReferenceStyle true     //是否接受style引用，仅支持很少部分引用，默认true
+    ignoreUnImplementAttr true //是否忽略未实现的属性，默认true
+    useCreateViewListener true   //使用createViewListener，默认false
     //以上为默认设置
     buildType {
         debug { //单独配置debug，没有设置的值会使用默认设置

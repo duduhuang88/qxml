@@ -77,3 +77,10 @@
     android.graphics.drawable.Drawable mCollapseIcon;
     java.lang.CharSequence mCollapseDescription;
 }
+
+-keep class android.support.design.widget.TextInputLayout {
+    int counterTextAppearance;
+    int counterOverflowTextAppearance;
+    int boxCollapsedPaddingTopPx;
+    android.support.design.widget.CollapsingTextHelper collapsingTextHelper;
+}

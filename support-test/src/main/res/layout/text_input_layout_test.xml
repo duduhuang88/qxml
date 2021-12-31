@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.design.widget.TextInputLayout
+        android:hint="aaaa"
+        app:hintAnimationEnabled="true"
+        app:hintEnabled="true"
+        app:boxCollapsedPaddingTop="10dp"
+        app:boxCornerRadiusBottomEnd="20dp"
+        app:boxCornerRadiusTopStart="10dp"
+        app:helperTextEnabled="false"
+        app:helperText="help"
+        app:boxBackgroundColor="#123123"
+        app:boxStrokeColor="#321321"
+        app:errorEnabled="true"
+        app:counterEnabled="true"
+        app:counterMaxLength="10"
+        android:textColorHint="@color/colorPrimary"
+        app:hintTextAppearance="@style/testTextAppearance"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusBottomStart="30dp"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopEnd="33dp"
+        app:counterOverflowTextAppearance="@style/testTextAppearance"
+        app:counterTextAppearance="@style/testTextAppearance"
+        app:helperTextTextAppearance="@style/testTextAppearance"
+        app:errorTextAppearance="@style/testTextAppearance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:hint="bbbb"
+        app:passwordToggleContentDescription="12344"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTintMode="src_over"
+        app:passwordToggleTint="@color/colorPrimary"
+        app:passwordToggleDrawable="@mipmap/qxml_debug_icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+</LinearLayout>

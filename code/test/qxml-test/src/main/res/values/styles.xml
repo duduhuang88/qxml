@@ -102,4 +102,12 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <style name="moduleBgAndSizeStyle" >
+        <item name="android:layout_width">150dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:textSize">25dp</item>
+        <item name="android:text">style of qxml-test</item>
+        <item name="android:background">#123456</item>
+    </style>
+
 </resources>

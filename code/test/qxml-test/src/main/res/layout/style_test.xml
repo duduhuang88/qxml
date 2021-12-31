@@ -28,4 +28,7 @@
     <TextView
         style="@style/bgAndSizeStyle"/>
 
+    <TextView
+        style="@style/moduleBgAndSizeStyle"/>
+
 </LinearLayout>

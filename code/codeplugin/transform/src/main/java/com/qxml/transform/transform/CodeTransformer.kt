@@ -8,6 +8,7 @@ import com.qxml.transform.converter.method.DialogSetContentViewMethodConverter
 import com.qxml.transform.converter.qxml.QxmlInitConverter
 import com.qxml.transform.pool.PoolManager
 import java.io.DataOutputStream
+import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -21,6 +22,8 @@ object CodeTransformer {
         )
     }
 
+    lateinit var qxmlInitContentCacheFile: File
+
     fun transform(input: InputStream, output: OutputStream, genClassInfoList: List<String>, packageName: String, layoutIdMap: Map<String, Int>, retryCount: Int = 0) {
         /*val ctClass = synchronized(this@CodeTransformer) {
             PoolManager.pool.makeClass(input, false)
@@ -31,7 +34,7 @@ object CodeTransformer {
             if (className != Constants.QXML_INFLATER_CLASS_NAME) {
                 MethodCallManager.convert(ctClass)
             } else {
-                QxmlInitConverter.convert(ctClass, genClassInfoList, packageName, layoutIdMap)
+                QxmlInitConverter.convert(ctClass, genClassInfoList, packageName, layoutIdMap, qxmlInitContentCacheFile)
             }
             ctClass.toBytecode(DataOutputStream(output))
             ctClass.defrost()

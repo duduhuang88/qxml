@@ -11,7 +11,7 @@ object ViewGenInfoCombiner {
 
     private val genInfoHeadNode = GenInfoHeadNode()
 
-    fun viewGenInfoCombine(genClassInfoModel: GenClassInfoModel): Map<String, ViewGenClassModel> {
+    fun viewGenInfoCombine(genClassInfoModel: GenClassInfoModel): HashMap<String, ViewGenClassModel> {
         genInfoHeadNode.createTree(genClassInfoModel)
         return genInfoHeadNode.combine()
     }
@@ -113,7 +113,7 @@ private class GenInfoHeadNode {
         return result
     }
 
-    fun combine(): Map<String, ViewGenClassModel> {
+    fun combine(): HashMap<String, ViewGenClassModel> {
         genInfoCacheMap.clear()
         viewParseList.forEach { parseClassName ->
             if (viewTypeNameMap[parseClassName]!= null) {
@@ -149,7 +149,7 @@ private class GenInfoHeadNode {
                 }
                 viewGenClassModel.funcInfoModelHashMap = attrFuncMap
 
-                val onEndFuncMap = hashMapOf<String, AttrFuncInfoModel>()
+                val onEndFuncMap = LinkedHashMap<String, AttrFuncInfoModel>()
                 viewGenClassModel.onEndFuncInfoModelMap.forEach { (funcSign, attrFuncInfoModel) ->
                     attrFuncInfoModel.belongViewName = viewTypeNameMap[name]!!
                     onEndFuncMap[funcSign] = attrFuncInfoModel.clone().apply {
@@ -273,7 +273,7 @@ private class GenInfoHeadNode {
             parentInfoMap.putAll(parentGenInfo.funcInfoModelHashMap)
             parentInfoMap.putAll(curGenInfo.funcInfoModelHashMap)
 
-            val parentOnEndInfoMap = hashMapOf<String, AttrFuncInfoModel>()
+            val parentOnEndInfoMap = LinkedHashMap<String, AttrFuncInfoModel>()
             parentOnEndInfoMap.putAll(parentGenInfo.onEndFuncInfoModelMap)
             parentOnEndInfoMap.putAll(curGenInfo.onEndFuncInfoModelMap)
 

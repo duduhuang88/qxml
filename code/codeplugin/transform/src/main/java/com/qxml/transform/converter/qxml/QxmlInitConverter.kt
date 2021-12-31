@@ -1,10 +1,12 @@
 package com.qxml.transform.converter.qxml
 
+import com.google.common.io.Files
 import com.qxml.constant.Constants
 import com.qxml.tools.log.LogUtil
 import com.qxml.transform.pool.PoolManager
 import javassist.CtClass
 import javassist.bytecode.Descriptor
+import java.io.File
 import java.lang.StringBuilder
 
 object QxmlInitConverter {
@@ -18,7 +20,8 @@ object QxmlInitConverter {
     private val viewGroupClass by lazy { PoolManager.pool["android.view.ViewGroup"] }
     private val layoutIdAndNameList = arrayListOf<LayoutIdAndName>()
 
-    fun convert(ctClass: CtClass, genClassInfoList: List<String>, packageName: String, layoutIdMap: Map<String, Int>) {
+    //TODO ASM
+    fun convert(ctClass: CtClass, genClassInfoList: List<String>, packageName: String, layoutIdMap: Map<String, Int>, cacheFile: File) {
         layoutIdAndNameList.clear()
         genClassInfoList.forEach {
             layoutIdAndNameList.add(LayoutIdAndName(it, layoutIdMap[it]?:0))
@@ -33,9 +36,15 @@ object QxmlInitConverter {
         ctClass.getMethod("generate", Descriptor.ofMethod(viewClass, arrayOf(inflaterClass, CtClass.intType, viewGroupClass, CtClass.booleanType))).also {
             it.setBody("{ $stringBuilder }")
         }
-        LogUtil.d("qxml gen content: \n"+stringBuilder.toString().replace(PARAM_LAYOUT_ID, "resId")
-            .replace(PARAM_LAYOUT_INFLATER, Constants.GEN_PARAM_INFLATE_NAME).replace(PARAM_ROOT, Constants.GEN_PARAM_VIEW_GROUP_ROOT_NAME)
-            .replace(PARAM_ATTACH_TO, Constants.GEN_PARAM_ATTACH_TO_NAME))
+        if (LogUtil.debug) {
+            Files.createParentDirs(cacheFile)
+            if (!cacheFile.exists()) {
+                cacheFile.createNewFile()
+            }
+            cacheFile.writeText(stringBuilder.toString().replace(PARAM_LAYOUT_ID, "resId")
+                .replace(PARAM_LAYOUT_INFLATER, Constants.GEN_PARAM_INFLATE_NAME).replace(PARAM_ROOT, Constants.GEN_PARAM_VIEW_GROUP_ROOT_NAME)
+                .replace(PARAM_ATTACH_TO, Constants.GEN_PARAM_ATTACH_TO_NAME))
+        }
     }
 
     //二分查找
@@ -45,7 +54,7 @@ object QxmlInitConverter {
         when(diffIndex) {
             0 -> {
                 val startIdName = idNameList[startIndex]
-                stringBuilder.append("if($PARAM_LAYOUT_ID == $packageName.R.layout.${startIdName.name}) { //${startIdName.id}\n")
+                stringBuilder.append("if($PARAM_LAYOUT_ID == ${startIdName.id}) { //$packageName.R.layout.${startIdName.name}\n")
                 stringBuilder.append(makeReturn(startIdName.name))
                 stringBuilder.append("}\n")
             }
@@ -53,15 +62,15 @@ object QxmlInitConverter {
                 val startIdName = idNameList[startIndex]
                 val endIdName = idNameList[endIndex]
 
-                stringBuilder.append("if($PARAM_LAYOUT_ID == $packageName.R.layout.${startIdName.name}) { //${startIdName.id}\n")
+                stringBuilder.append("if($PARAM_LAYOUT_ID == ${startIdName.id}) { //$packageName.R.layout.${startIdName.name}\n")
                 stringBuilder.append(makeReturn(startIdName.name))
-                stringBuilder.append("} else if ($PARAM_LAYOUT_ID == $packageName.R.layout.${endIdName.name}) { //${endIdName.id}\n")
+                stringBuilder.append("} else if ($PARAM_LAYOUT_ID == ${endIdName.id}) { //$packageName.R.layout.${endIdName.name}\n")
                 stringBuilder.append(makeReturn(endIdName.name))
                 stringBuilder.append("}\n")
             }
             else -> {
                 val middleIdName = idNameList[middleIndex]
-                stringBuilder.append("if($PARAM_LAYOUT_ID <= $packageName.R.layout.${middleIdName.name}) { //${middleIdName.id}\n")
+                stringBuilder.append("if($PARAM_LAYOUT_ID <= ${middleIdName.id}) { //$packageName.R.layout.${middleIdName.name}\n")
                 processId(packageName, idNameList, startIndex, middleIndex, stringBuilder, loopCount + 1)
                 stringBuilder.append("} else {\n")
                 processId(packageName, idNameList, middleIndex + 1, endIndex, stringBuilder, loopCount + 1)

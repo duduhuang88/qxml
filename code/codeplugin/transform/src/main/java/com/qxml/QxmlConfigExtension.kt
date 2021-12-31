@@ -14,6 +14,7 @@ open class QxmlExtension(project: Project) {
     var useFactory = false
     var viewDebug = false
     var logEnable = false
+    var debugEnable = false
     var useCreateViewListener = false
 
     val buildType = project.container(QxmlConfigExtension::class.java)
@@ -46,6 +47,9 @@ open class QxmlExtension(project: Project) {
             }
             if (!it.logEnableSet) {
                 it.logEnable = logEnable
+            }
+            if (!it.debugEnableSet) {
+                it.debugEnable = debugEnable
             }
             if (!it.useCreateViewListenerSet) {
                 it.useCreateViewListener = useCreateViewListener
@@ -83,6 +87,7 @@ open class QxmlConfigExtension(val name: String) {
     var useFactory = false
     var viewDebug = false
     var logEnable = false
+    var debugEnable = false
     var useCreateViewListener = false
 
     var enableSet = false
@@ -92,6 +97,7 @@ open class QxmlConfigExtension(val name: String) {
     var useFactorySet = false
     var viewDebugSet = false
     var logEnableSet = false
+    var debugEnableSet = false
     var useCreateViewListenerSet = false
 
     fun enable(enable: Boolean) {
@@ -122,6 +128,11 @@ open class QxmlConfigExtension(val name: String) {
     fun logEnable(logEnable: Boolean) {
         this.logEnable = logEnable
         logEnableSet = true
+    }
+
+    fun debugEnable(debugEnable: Boolean) {
+        this.debugEnable = debugEnable
+        debugEnableSet = true
     }
 
     fun useCreateViewListener(useCreateViewListener: Boolean) {

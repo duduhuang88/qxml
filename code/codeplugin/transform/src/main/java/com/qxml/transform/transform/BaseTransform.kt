@@ -64,7 +64,7 @@ abstract class BaseTransform: Transform() {
                     when (jarInput.status ?: Status.NOTCHANGED) {
                         Status.NOTCHANGED -> {
                             if (shouldProcessNotChangeJar(jarInput)) {
-                                LogUtil.d("processNotChangeJar "+jarInput.name)
+                                //LogUtil.d("processNotChangeJar "+jarInput.name)
                                 FileUtils.forceDelete(outputJar)
                                 execTransformJar(function, inputJar, outputJar)
                             }
@@ -156,7 +156,7 @@ abstract class BaseTransform: Transform() {
 
     @Throws(IOException::class)
     private fun transformJar(function: BiConsumer<InputStream, OutputStream>?, inputJar: File, outputJar: File) {
-        LogUtil.d("f transformJar "+inputJar.absolutePath)
+        //LogUtil.d("transformJar "+inputJar.absolutePath)
         Files.createParentDirs(outputJar)
         FileInputStream(inputJar).use { fis ->
             ZipInputStream(fis).use { zis ->
@@ -211,7 +211,7 @@ abstract class BaseTransform: Transform() {
     @Throws(IOException::class)
     open fun apply(function: BiConsumer<InputStream, OutputStream>?, name: String, input: InputStream, output: OutputStream) {
         try {
-            LogUtil.d("apply "+name)
+            //LogUtil.d("apply transform "+name)
             function?.accept(input, output)
         } catch (e: UncheckedIOException) {
             e.printStackTrace()

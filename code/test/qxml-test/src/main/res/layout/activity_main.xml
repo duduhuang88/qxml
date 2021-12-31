@@ -37,7 +37,7 @@
         android:id="@+id/et_times"
         android:inputType="number"
         android:gravity="center"
-        android:text="10"
+        android:text="5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 

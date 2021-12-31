@@ -18,7 +18,6 @@ public class ReflectUtils {
             return field;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("touch", "f getDeclaredFieldOrNull "+e);
         }
         return null;
     }
@@ -31,7 +30,6 @@ public class ReflectUtils {
             return method;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("touch", "f getDeclaredMethodOrNull "+e);
         }
         return null;
     }
@@ -44,7 +42,6 @@ public class ReflectUtils {
             return constructor;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("touch", "f getDeclaredConstructorOrNull "+e);
         }
         return null;
     }
@@ -54,7 +51,6 @@ public class ReflectUtils {
         try {
             return Class.forName(className);
         } catch (Exception e) {
-            Log.e("touch", "f forName "+e+" "+className);
             e.printStackTrace();
         }
         return null;

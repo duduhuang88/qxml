@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.textfield.TextInputLayout
+        app:counterOverflowTextAppearance="@style/testTextAppearance"
+        app:counterTextAppearance="@style/testTextAppearance"
+        app:helperTextTextAppearance="@style/testTextAppearance"
+        app:errorTextAppearance="@style/testTextAppearance"
+        app:prefixTextAppearance="@style/testTextAppearance"
+        app:placeholderTextAppearance="@style/testTextAppearance"
+        app:suffixTextAppearance="@style/testTextAppearance"
+        android:hint="aaaa"
+        app:hintAnimationEnabled="true"
+        app:hintEnabled="true"
+        app:boxCollapsedPaddingTop="10dp"
+        app:boxCornerRadiusBottomEnd="20dp"
+        app:boxCornerRadiusTopStart="10dp"
+        app:helperTextEnabled="false"
+        app:helperText="help"
+        app:boxBackgroundColor="#123123"
+        app:boxStrokeColor="#321321"
+        app:errorEnabled="true"
+        app:counterEnabled="true"
+        app:counterMaxLength="10"
+        android:textColorHint="@color/colorPrimary"
+        app:hintTextAppearance="@style/testTextAppearance"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusBottomStart="30dp"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopEnd="33dp"
+        app:counterTextColor="@color/sss2"
+        app:counterOverflowTextColor="@color/sss"
+        app:errorTextColor="#445566"
+        app:placeholderTextColor="#665544"
+        app:suffixTextColor="#778899"
+        app:prefixTextColor="#998877"
+        app:hintTextColor="#aabbcc"
+        app:helperTextTextColor="#ccbbaa"
+        app:startIconCheckable="true"
+        app:startIconDrawable="@mipmap/qxml_debug_icon"
+        app:startIconContentDescription="asdf"
+        app:startIconTint="@color/colorPrimary"
+        app:startIconTintMode="src_in"
+        app:placeholderText="place"
+        app:prefixText="pre"
+        app:suffixText="suf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:hint="bbbb"
+        app:passwordToggleContentDescription="12344"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTintMode="multiply"
+        app:passwordToggleTint="@color/colorPrimary"
+        app:passwordToggleDrawable="@mipmap/qxml_debug_icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:hint="bbbb"
+        app:endIconDrawable="@color/sss2"
+        app:endIconMode="custom"
+        app:passwordToggleContentDescription="12344"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTintMode="multiply"
+        app:passwordToggleTint="@color/colorPrimary"
+        app:passwordToggleDrawable="@mipmap/qxml_debug_icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

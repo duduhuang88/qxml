@@ -5,7 +5,6 @@ import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.api.DefaultAndroidSourceSet
 import com.android.build.gradle.internal.res.GenerateLibraryRFileTask
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
-import com.android.ide.common.internal.WaitableExecutor
 import com.google.common.io.Files
 import com.google.gson.GsonBuilder
 import com.qxml.QxmlExtension
@@ -18,10 +17,12 @@ import groovy.util.XmlSlurper
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import java.io.File
-import java.lang.IllegalStateException
+import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.jar.JarFile
+import java.util.zip.CRC32
 
 private const val PUBLIC_KEY_STR = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDAkWb8VzyhkCzkiznSRjAZE8ALwop17CN00nzBvGLbajpvtxMCeriMCWTeDpitD83C4wxxjRGlVBitj6fVVH8xIm1hOdQ5lrDxGQ9T6mvk7q/aYl4uEdFZlIrFxVlIwsjcdHWJ2xdI9RyoHakwGBMjUT8w1o6NB1fgTSHuY83DpwIDAQAB"
 
@@ -31,7 +32,7 @@ class CodePlugin: Plugin<Project> {
     private lateinit var qxmlLogEnable: String
     private lateinit var qxmlUsingStableId: String
 
-    private val gson by lazy { GsonBuilder().disableHtmlEscaping().create() }
+    private val gson = GsonBuilder().disableHtmlEscaping().create()
     private lateinit var qxmlConfig: QxmlExtension
     private lateinit var publicROutputFile: File
 
@@ -40,7 +41,9 @@ class CodePlugin: Plugin<Project> {
         qxmlLogEnable = project.properties[Constants.QXML_LOG_ENABLE]?.toString() ?: "false"
         qxmlUsingStableId = project.properties[Constants.QXML_USING_STABLE_ID]?.toString() ?: "true"
         qxmlConfig = project.extensions.create("qxml", QxmlExtension::class.java, project)
-        publicROutputFile = project.buildDir.resolve(Constants.LAYOUT_ID_COLLECT_PATH).parentFile.resolve(Constants.PUBLIC_FILE_NAME)
+        publicROutputFile = project.buildDir.resolve(Constants.QXML_CACHE_DIR).parentFile.resolve(
+            Constants.PUBLIC_FILE_NAME
+        )
 
         project.plugins.all {
             when (it) {
@@ -61,13 +64,13 @@ class CodePlugin: Plugin<Project> {
 
                     project.afterEvaluate {
                         app.applicationVariants.forEach { v ->
-                            project.tasks.findByName("transformClassesAndResourcesWithQXmlTransformFor${v.name.capitalize()}")?.doFirst {
-                                transform.packageName = getPackageName(v)
-                                transform.curBuildType = v.name
-                            }
+                            project.tasks.findByName("transformClassesAndResourcesWithQXmlTransformFor${v.name.capitalize()}")
+                                ?.doFirst {
+                                    transform.packageName = getPackageName(v)
+                                    transform.curBuildType = v.name
+                                }
                         }
                     }
-
                 }
                 is LibraryPlugin -> {
                     project.extensions.findByType(LibraryExtension::class.java)?.run {
@@ -108,7 +111,12 @@ class CodePlugin: Plugin<Project> {
                         library?.packagingOptions?.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
                         library?.libraryVariants?.forEach { v ->
                             addProcessorOption(v, Constants.QXML_VALID_CODE, qxmlValidCode)
-                            addProcessorOption(v, Constants.QXML_LOG_ENABLE, if (qxmlConfig.getConfigByBuildType(v.name.capitalize()).logEnable) "true" else "false")
+                            addProcessorOption(
+                                v, Constants.QXML_LOG_ENABLE, if (qxmlConfig.getConfigByBuildType(
+                                        v.name.capitalize()
+                                    ).logEnable
+                                ) "true" else "false"
+                            )
 
                             setPreBuildConfig(project, v)
                             deleteQxmlConfig(project, v)
@@ -120,6 +128,7 @@ class CodePlugin: Plugin<Project> {
 
                         androidApp.packagingOptions.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
                         androidApp.applicationVariants.all { v ->
+
                             deleteQxmlConfig(project, v)
                             val type = v.name.capitalize()
                             val outputDir = project.buildDir.resolve(Constants.QXML_CACHE_PATH)
@@ -127,19 +136,47 @@ class CodePlugin: Plugin<Project> {
                                 outputDir.mkdirs()
                             }
 
-                            val task = project.tasks.create("generate${type}XmlCode", XmlCodeBuilder::class.java) { t->
-                                t.packageName = getPackageName(v)
-                                t.outputDir = outputDir
+                            val curProjectMergerXmlFile =
+                                project.buildDir.resolve(Constants.INTERMEDIATES)
+                                    .resolve(Constants.INCREMENTAL).resolve("merge${type}Resources")
+                                    .resolve(Constants.MERGER_XML)
+
+                            val styleWatchTask = project.tasks.create(
+                                "qxmlWatch${type}Style",
+                                StyleWatchTask::class.java
+                            ) { t ->
+                                t.outputDir = outputDir.resolve(Constants.QXML_STYLE_CACHE_DIR_NAME)
                                 t.buildType = v.name
-                                t.allRawAndroidResourcesFiles = v.allRawAndroidResources.files
+                                t.mergeXmlFile = curProjectMergerXmlFile
                             }
 
-                            v.assembleProvider.get().dependsOn(task)
-                            task.mustRunAfter(v.mergeResourcesProvider.get())
+                            val mergeXmlFiles = getMergerXmlFiles(
+                                project,
+                                v.allRawAndroidResources.files,
+                                curProjectMergerXmlFile,
+                                type
+                            )
+
+                            val layoutWatchTask = project.tasks.create(
+                                "qxmlWatch${type}Layout",
+                                LayoutWatchTask::class.java
+                            ) { t ->
+                                t.outputDir =
+                                    outputDir.resolve(Constants.QXML_LAYOUT_CACHE_DIR_NAME)
+                                t.buildType = v.name
+                                t.mergeXmlFiles = mergeXmlFiles
+                            }
+
+                            v.mergeAssetsProvider.get().dependsOn(styleWatchTask)
+                            styleWatchTask.mustRunAfter(v.mergeResourcesProvider.get())
+
+                            v.mergeAssetsProvider.get().dependsOn(layoutWatchTask)
+                            layoutWatchTask.mustRunAfter(v.mergeResourcesProvider.get())
+
                             //v.registerJavaGeneratingTask(task, outputDir)
 
                             setPreBuildConfig(project, v)
-                            mergeQxmlConfig(project, type, qxmlValidCode)
+                            mergeQxmlConfig(project, type)
                             changeTaskOrder(project, v)
                         }
                     }
@@ -148,158 +185,207 @@ class CodePlugin: Plugin<Project> {
         }
     }
 
+    private fun getMergerXmlFiles(project: Project, files: Set<File>,
+                                  curProjectMergerXmlFile: File, type: String): Set<File> {
+        val mergeXmlFiles = mutableSetOf<File>()
+        files.forEach { dir ->
+            val path = dir.absolutePath
+            if (path.contains(Constants.INTERMEDIATES) && path.contains(Constants.BUILD)) {
+                var curDir: File? = dir
+                while (curDir != null && curDir.name != Constants.INTERMEDIATES) {
+                    curDir = curDir.parentFile
+                }
+                if (curDir != null) {
+                    val parentDir = curDir.parentFile
+                    if (parentDir != null && parentDir.name == Constants.BUILD && parentDir.parentFile != null) {
+                        val projectName = parentDir.parentFile.name
+                        if (projectName != project.name) {
+                            mergeXmlFiles.add(
+                                curDir.resolve(Constants.INCREMENTAL)
+                                    .resolve("package${type}Resources")
+                                    .resolve(Constants.MERGER_XML)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        mergeXmlFiles.add(curProjectMergerXmlFile)
+        return mergeXmlFiles
+    }
+
     private fun setPreBuildConfig(project: Project, v: BaseVariant) {
         val type = v.name
         project.tasks.getByName("pre${type.capitalize()}Build").doFirst {
             val curQxmlConfig = qxmlConfig.getConfigByBuildType(type)
             LogUtil.enable = curQxmlConfig.logEnable
+            LogUtil.debug = curQxmlConfig.debugEnable
         }
     }
 
     /**
      * application时合并所有qxml_config资源，在transform中解析
      */
-    private fun mergeQxmlConfig(project: Project, type: String, qxmlValidCode: String) {
-        var configFile: File? = null
-        var finalConfigFile: File? = null
+    private fun mergeQxmlConfig(project: Project, type: String) {
         val mergerJavaResourceTask = project.tasks.getByName("merge${type}JavaResource")
-        //总是运行
-        mergerJavaResourceTask.outputs.upToDateWhen { false }
-        mergerJavaResourceTask.doFirst { mergeJavaResourceTask ->
-            val allViewParseClassInfoModels = mutableListOf<GenClassInfoModel>()
-            mergeJavaResourceTask.inputs.files.forEach { f ->
-                if (f.exists() && f.name.endsWith(".jar", true)) {
-                    val jarFile = JarFile(f.absolutePath)
-                    val entry = jarFile.getJarEntry(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-                    //LogUtil.pl("j entry "+f.absolutePath+" "+entry)
-                    if (entry != null) {
-                        val ins = jarFile.getInputStream(entry)
-                        val content = ins.reader().readText()
-                        val genClassInfoModel = gson.fromJson(content, GenClassInfoModel::class.java)
 
-                        if (!genClassInfoModel.sign.isNullOrEmpty()) {
-                            val sign = genClassInfoModel.sign
-                            genClassInfoModel.sign = ""
-                            genClassInfoModel.validCode = ""
-                            val infoModelInfoWithoutSignJsonStr = gson.toJson(genClassInfoModel)
-                            val decryptSign = RSAUtils.decryptByPublicKey(sign, PUBLIC_KEY_STR)
-                            if (infoModelInfoWithoutSignJsonStr != decryptSign) {
-                                throw IllegalStateException("远程依赖的qxml配置错误，请确定依赖来源是否正确")
-                            }
-                            LogUtil.pl("found qxml remote config file in "+f.absolutePath)
-                        } else {
-                            if (genClassInfoModel.validCode != qxmlValidCode) {
-                                throw IllegalStateException("qxml临时验签错误，请确定该配置来源正确：${f.absolutePath}")
-                            }
-                            LogUtil.pl("found qxml local config file in "+f.absolutePath)
-                        }
-
-                        allViewParseClassInfoModels.add(genClassInfoModel)
-
-                        ins.close()
-                    }
-                    jarFile.close()
-                }
-
-                if (f.absolutePath.endsWith(Constants.QXML_PARSE_FINAL_CONFIG_FILE_NAME, true)) {
-                    finalConfigFile = f
-                }
-
-                if (f.absolutePath.endsWith(Constants.QXML_PARSE_CONFIG_FILE_NAME, true)) {
-                    configFile = f
-                }
-            }
-            finalConfigFile?.apply {
-                if (configFile != null) {
-                    LogUtil.pl("current project config file is "+configFile!!.absolutePath)
-                    var content = configFile!!.readText()
-                    if (content.isEmpty()) {
-                        content = "{\"versionCode\":${Constants.QXML_VERSION_CODE},\"viewParseList\":[],\"viewReplaceList\":[],\"viewGenClassModelMap\":{},\"interfaceModelMap\":{},\"genClassNameMap\":{},\"parentClassMap\":{},\"localVarMap\":{},\"compatViewInfoModelMap\":{},\"layoutParamInitMap\":{},\"validCode\":\"${qxmlValidCode}\"}"
-                    }
-                    val thisGenClassInfoModel = gson.fromJson(content, GenClassInfoModel::class.java)
-                    if (thisGenClassInfoModel.validCode != qxmlValidCode) {
-                        throw IllegalStateException("qxml临时验签错误，请确定该配置来源正确：${configFile!!.absolutePath}")
-                    }
-                    allViewParseClassInfoModels.add(thisGenClassInfoModel)
-                }
-                val finalGenClassInfoModel = GenClassInfoModel()
-                finalGenClassInfoModel.versionCode = Constants.QXML_VERSION_CODE
-                finalGenClassInfoModel.viewParseList = mutableListOf()
-                finalGenClassInfoModel.viewReplaceList = mutableListOf()
-                finalGenClassInfoModel.genClassNameMap = hashMapOf()
-                finalGenClassInfoModel.interfaceModelMap = hashMapOf()
-                finalGenClassInfoModel.viewGenClassModelMap = hashMapOf()
-                finalGenClassInfoModel.parentClassMap = hashMapOf()
-                finalGenClassInfoModel.localVarMap = hashMapOf()
-                finalGenClassInfoModel.compatViewInfoModelMap = hashMapOf()
-                finalGenClassInfoModel.layoutParamInitMap = hashMapOf()
-                finalGenClassInfoModel.callOnFinishInflateMap = hashMapOf()
-                finalGenClassInfoModel.sign = ""
-                finalGenClassInfoModel.validCode = ""
-
-                allViewParseClassInfoModels.sort()
-                finalGenClassInfoModel.versionCode = allViewParseClassInfoModels.lastOrNull()?.versionCode ?: 1
-
-                val viewParseMap = hashMapOf<String, String>()
-                val viewReplaceMap = hashMapOf<String, String>()
-
-                allViewParseClassInfoModels.forEach { infoModel ->
-                    infoModel.viewParseList.forEach { viewParse ->
-                        if (!viewParseMap.containsKey(viewParse)) {
-                            viewParseMap[viewParse] = ""
-                            finalGenClassInfoModel.viewParseList.add(viewParse)
-                        }
-                    }
-                    infoModel.viewReplaceList.forEach { viewReplace ->
-                        if (!viewReplaceMap.containsKey(viewReplace)) {
-                            viewReplaceMap[viewReplace] = ""
-                            finalGenClassInfoModel.viewReplaceList.add(viewReplace)
-                        }
-                    }
-                    finalGenClassInfoModel.genClassNameMap.putAll(infoModel.genClassNameMap)
-                    finalGenClassInfoModel.interfaceModelMap.putAll(infoModel.interfaceModelMap)
-                    finalGenClassInfoModel.viewGenClassModelMap.putAll(infoModel.viewGenClassModelMap)
-                    finalGenClassInfoModel.parentClassMap.putAll(infoModel.parentClassMap)
-                    finalGenClassInfoModel.compatViewInfoModelMap.putAll(infoModel.compatViewInfoModelMap)
-                    finalGenClassInfoModel.layoutParamInitMap.putAll(infoModel.layoutParamInitMap)
-                    if (infoModel.callOnFinishInflateMap != null) {
-                        finalGenClassInfoModel.callOnFinishInflateMap.putAll(infoModel.callOnFinishInflateMap)
-                    }
-                    infoModel.localVarMap.forEach { (varName, localVarInfoModel) ->
-                        if (finalGenClassInfoModel.localVarMap[varName] != null) {
-                            error("有相同的变量名${varName}")
-                        }
-                        finalGenClassInfoModel.localVarMap[varName] = localVarInfoModel
-                    }
-                }
-                val finalGenInfoJsonStr = gson.toJson(finalGenClassInfoModel)
-                //LogUtil.pl("final viewParse class $finalGenInfoJsonStr")
-                writeText(finalGenInfoJsonStr)
-            }
+        mergerJavaResourceTask.outputs.upToDateWhen {
+            processConfigFile(it)
+            true
         }
     }
 
-    private fun addProcessorOption(variant : BaseVariant, key: String, value: String) {
+    private fun processConfigFile(mergeJavaResourceTask: Task) {
+        var configFile: File? = null
+        var finalConfigFile: File? = null
+        val allViewParseClassInfoModels = mutableListOf<GenClassInfoModel>()
+        mergeJavaResourceTask.inputs.files.forEach { f ->
+            if (f.exists() && f.name.endsWith(".jar", true)) {
+                val jarFile = JarFile(f.absolutePath)
+                val entry = jarFile.getJarEntry(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+                if (entry != null) {
+                    val ins = jarFile.getInputStream(entry)
+                    val content = ins.reader().readText()
+                    val genClassInfoModel = gson.fromJson(content, GenClassInfoModel::class.java)
+
+                    if (!genClassInfoModel.sign.isNullOrEmpty()) {
+                        val sign = genClassInfoModel.sign
+                        genClassInfoModel.sign = ""
+                        genClassInfoModel.validCode = ""
+                        val infoModelInfoWithoutSignJsonStr = gson.toJson(genClassInfoModel)
+                        val crc32 = CRC32()
+                        val infoBytes: ByteArray = infoModelInfoWithoutSignJsonStr.toByteArray()
+                        crc32.update(infoBytes)
+                        val crc32Str = java.lang.Long.toHexString(crc32.value)
+                        val md5Str = String(MessageDigest.getInstance("md5").digest(infoBytes))
+                        val signStr = crc32Str + "_" + md5Str + "_" + infoModelInfoWithoutSignJsonStr.length
+                        val decryptSign = RSAUtils.decryptByPublicKey(sign, PUBLIC_KEY_STR)
+                        if (signStr != decryptSign) {
+                            throw IllegalStateException("远程依赖的qxml配置错误，请确定依赖来源是否正确:${f.absolutePath}")
+                        }
+                        LogUtil.pl("found qxml remote config file in " + f.absolutePath)
+                    } else {
+                        if (genClassInfoModel.validCode != qxmlValidCode) {
+                            throw IllegalStateException("qxml临时验签错误，请确定该配置来源正确：${f.absolutePath}")
+                        }
+                        LogUtil.pl("found qxml local config file in " + f.absolutePath)
+                    }
+
+                    allViewParseClassInfoModels.add(genClassInfoModel)
+
+                    ins.close()
+                }
+                jarFile.close()
+            }
+
+            if (f.absolutePath.endsWith(Constants.QXML_PARSE_FINAL_CONFIG_FILE_NAME, true)) {
+                finalConfigFile = f
+            }
+
+            if (f.absolutePath.endsWith(Constants.QXML_PARSE_CONFIG_FILE_NAME, true)) {
+                configFile = f
+            }
+        }
+        finalConfigFile?.apply {
+            if (configFile != null) {
+                LogUtil.pl("current project config file is " + configFile!!.absolutePath)
+                var content = configFile!!.readText()
+                if (content.isEmpty()) {
+                    content = "{\"versionCode\":${Constants.QXML_VERSION_CODE},\"viewParseList\":[],\"viewReplaceList\":[],\"viewGenClassModelMap\":{},\"interfaceModelMap\":{},\"genClassNameMap\":{},\"parentClassMap\":{},\"localVarMap\":{},\"compatViewInfoModelMap\":{},\"layoutParamInitMap\":{},\"validCode\":\"${qxmlValidCode}\"}"
+                }
+                val thisGenClassInfoModel = gson.fromJson(content, GenClassInfoModel::class.java)
+                if (thisGenClassInfoModel.validCode != qxmlValidCode) {
+                    throw IllegalStateException("qxml临时验签错误，请确定该配置来源正确：${configFile!!.absolutePath}")
+                }
+                allViewParseClassInfoModels.add(thisGenClassInfoModel)
+            }
+            val finalGenClassInfoModel = GenClassInfoModel()
+            finalGenClassInfoModel.versionCode = Constants.QXML_VERSION_CODE
+            finalGenClassInfoModel.viewParseList = mutableListOf()
+            finalGenClassInfoModel.viewReplaceList = mutableListOf()
+            finalGenClassInfoModel.genClassNameMap = hashMapOf()
+            finalGenClassInfoModel.interfaceModelMap = hashMapOf()
+            finalGenClassInfoModel.viewGenClassModelMap = hashMapOf()
+            finalGenClassInfoModel.parentClassMap = hashMapOf()
+            finalGenClassInfoModel.localVarMap = hashMapOf()
+            finalGenClassInfoModel.compatViewInfoModelMap = hashMapOf()
+            finalGenClassInfoModel.layoutParamInitMap = hashMapOf()
+            finalGenClassInfoModel.callOnFinishInflateMap = hashMapOf()
+            finalGenClassInfoModel.sign = ""
+            finalGenClassInfoModel.validCode = ""
+
+            allViewParseClassInfoModels.sort()
+            finalGenClassInfoModel.versionCode = allViewParseClassInfoModels.lastOrNull()?.versionCode ?: 1
+
+            val viewParseMap = hashMapOf<String, String>()
+            val viewReplaceMap = hashMapOf<String, String>()
+
+            allViewParseClassInfoModels.forEach { infoModel ->
+                infoModel.viewParseList.forEach { viewParse ->
+                    if (!viewParseMap.containsKey(viewParse)) {
+                        viewParseMap[viewParse] = ""
+                        finalGenClassInfoModel.viewParseList.add(viewParse)
+                    }
+                }
+                infoModel.viewReplaceList.forEach { viewReplace ->
+                    if (!viewReplaceMap.containsKey(viewReplace)) {
+                        viewReplaceMap[viewReplace] = ""
+                        finalGenClassInfoModel.viewReplaceList.add(viewReplace)
+                    }
+                }
+                finalGenClassInfoModel.genClassNameMap.putAll(infoModel.genClassNameMap)
+                finalGenClassInfoModel.interfaceModelMap.putAll(infoModel.interfaceModelMap)
+                finalGenClassInfoModel.viewGenClassModelMap.putAll(infoModel.viewGenClassModelMap)
+                finalGenClassInfoModel.parentClassMap.putAll(infoModel.parentClassMap)
+                finalGenClassInfoModel.compatViewInfoModelMap.putAll(infoModel.compatViewInfoModelMap)
+                finalGenClassInfoModel.layoutParamInitMap.putAll(infoModel.layoutParamInitMap)
+                if (infoModel.callOnFinishInflateMap != null) {
+                    finalGenClassInfoModel.callOnFinishInflateMap.putAll(infoModel.callOnFinishInflateMap)
+                }
+                infoModel.localVarMap.forEach { (varName, localVarInfoModel) ->
+                    if (finalGenClassInfoModel.localVarMap[varName] != null) {
+                        error("有相同的变量名${varName}")
+                    }
+                    finalGenClassInfoModel.localVarMap[varName] = localVarInfoModel
+                }
+            }
+            val finalGenInfoJsonStr = gson.toJson(finalGenClassInfoModel)
+            //LogUtil.pl("final viewParse class $finalGenInfoJsonStr")
+            writeText(finalGenInfoJsonStr)
+        }
+    }
+
+    private fun addProcessorOption(variant: BaseVariant, key: String, value: String) {
         variant.javaCompileOptions.annotationProcessorOptions.arguments.putIfAbsent(key, value)
     }
 
     //将processJavaResTask依赖apt
-    private fun changeTaskOrder(project: Project, variant : BaseVariant) {
+    private fun changeTaskOrder(project: Project, variant: BaseVariant) {
         val type = variant.name
         val typeCap = type.capitalize()
 
         val outputDir = project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH)
 
-        val aptConfigFile = project.buildDir.resolve("generated${File.separator}ap_generated_sources${File.separator}${type}${File.separator}out").resolve(Constants.QXML_CONIFG_PATH).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-        val kaptConfigFile = project.buildDir.resolve("generated${File.separator}source${File.separator}kapt${File.separator}${type}").resolve(Constants.QXML_CONIFG_PATH).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+        val aptConfigFile = project.buildDir.resolve("generated${File.separator}ap_generated_sources${File.separator}${type}${File.separator}out").resolve(
+            Constants.QXML_CONIFG_PATH
+        ).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+        val kaptConfigFile = project.buildDir.resolve("generated${File.separator}source${File.separator}kapt${File.separator}${type}").resolve(
+            Constants.QXML_CONIFG_PATH
+        ).resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
 
-        val copyKaptTask = project.tasks.create("copy${typeCap}KaptProcessQxmlConfigFile", CopyConfigFileTask::class.java) {
+        val copyKaptTask = project.tasks.create(
+            "copy${typeCap}KaptProcessQxmlConfigFile",
+            CopyConfigFileTask::class.java
+        ) {
             it.outputDir = outputDir
             it.configFile = kaptConfigFile
         }
         copyKaptTask.onlyIf { kaptConfigFile.exists() }
 
-        val copyAptTask = project.tasks.create("copy${typeCap}AptProcessQxmlConfigFile", CopyConfigFileTask::class.java) {
+        val copyAptTask = project.tasks.create(
+            "copy${typeCap}AptProcessQxmlConfigFile",
+            CopyConfigFileTask::class.java
+        ) {
             it.outputDir = outputDir
             it.configFile = aptConfigFile
         }
@@ -323,16 +409,20 @@ class CodePlugin: Plugin<Project> {
         }
     }
 
-    private fun deleteQxmlConfig(project: Project, variant : BaseVariant) {
+    private fun deleteQxmlConfig(project: Project, variant: BaseVariant) {
         val type = variant.name
-        project.buildDir.resolve("generated${File.separator}ap_generated_sources${File.separator}${type}${File.separator}out").resolve(Constants.QXML_CONIFG_PATH).delete()
-        project.buildDir.resolve("generated${File.separator}source${File.separator}kapt${File.separator}${type}").resolve(Constants.QXML_CONIFG_PATH).delete()
+        project.buildDir.resolve("generated${File.separator}ap_generated_sources${File.separator}${type}${File.separator}out").resolve(
+            Constants.QXML_CONIFG_PATH
+        ).delete()
+        project.buildDir.resolve("generated${File.separator}source${File.separator}kapt${File.separator}${type}").resolve(
+            Constants.QXML_CONIFG_PATH
+        ).delete()
     }
 
     // from butter knife
     // Parse the variant's main manifest file in order to get the package id which is used to create
     // R.java in the right place.
-    private fun getPackageName(variant : BaseVariant) : String {
+    private fun getPackageName(variant: BaseVariant) : String {
         val slurper = XmlSlurper(false, false)
         val list = variant.sourceSets.map { it.manifestFile }
 
@@ -362,7 +452,11 @@ class CodePlugin: Plugin<Project> {
     /**
      * 依赖apt生成的qxml_config文件作为res资源
      */
-    private fun configureSourceSet(project: Project, variants: DomainObjectSet<out BaseVariant>, isApp: Boolean) {
+    private fun configureSourceSet(
+        project: Project,
+        variants: DomainObjectSet<out BaseVariant>,
+        isApp: Boolean
+    ) {
         val once = AtomicBoolean()
         variants.all { variant ->
             variant.sourceSets.forEach { sourceProvider ->
@@ -374,7 +468,10 @@ class CodePlugin: Plugin<Project> {
                     createFileWhenBuildStart(once, project, type, variant)
                     //sourceSet.srcDir(finalConfigFile.parentFile)
                 }
-                sourceSet.srcDir(project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH).absolutePath)
+                sourceSet.srcDir(
+                    project.buildDir.resolve(Constants.QXML_DIR_NAME)
+                        .resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH).absolutePath
+                )
             }
         }
     }
@@ -386,16 +483,25 @@ class CodePlugin: Plugin<Project> {
      * @param type String
      * @param variant BaseVariant
      */
-    private fun createFileWhenBuildStart(once: AtomicBoolean, project: Project, type: String, variant: BaseVariant) {
+    private fun createFileWhenBuildStart(
+        once: AtomicBoolean,
+        project: Project,
+        type: String,
+        variant: BaseVariant
+    ) {
         project.tasks.findByName("pre${type.capitalize()}Build")?.doFirst {
             if (once.compareAndSet(false, true)) {
-                val finalConfigFile = project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH).resolve(Constants.QXML_PARSE_FINAL_CONFIG_FILE_NAME)
+                val finalConfigFile = project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(
+                    Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH
+                ).resolve(Constants.QXML_PARSE_FINAL_CONFIG_FILE_NAME)
                 Files.createParentDirs(finalConfigFile)
                 if (!finalConfigFile.exists()) {
                     finalConfigFile.createNewFile()
                 }
                 finalConfigFile.writeText("{\"versionCode\":${Constants.QXML_VERSION_CODE},\"viewParseList\":[],\"viewReplaceList\":[],\"viewGenClassModelMap\":{},\"interfaceModelMap\":{},\"genClassNameMap\":{},\"parentClassMap\":{},\"localVarMap\":{},\"compatViewInfoModelMap\":{},\"layoutParamInitMap\":{},\"validCode\":\"${qxmlValidCode}\"}")
-                val idOutputFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${variant.dirName}").resolve(Constants.ID_COLLECT_FILE_NAME)
+                val idOutputFile = project.buildDir.resolve("${Constants.QXML_CACHE_DIR}${variant.dirName}").resolve(
+                    Constants.ID_COLLECT_FILE_NAME
+                )
                 publicROutputFile
                 Files.createParentDirs(idOutputFile)
                 if (!idOutputFile.exists()) {
@@ -404,7 +510,9 @@ class CodePlugin: Plugin<Project> {
                 if (!publicROutputFile.exists()) {
                     publicROutputFile.createNewFile()
                 }
-                val layoutIdOutputFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${variant.dirName}").resolve(Constants.LAYOUT_ID_COLLECT_FILE_NAME)
+                val layoutIdOutputFile = project.buildDir.resolve("${Constants.QXML_CACHE_DIR}${variant.dirName}").resolve(
+                    Constants.LAYOUT_ID_COLLECT_FILE_NAME
+                )
                 Files.createParentDirs(layoutIdOutputFile)
                 if (!layoutIdOutputFile.exists()) {
                     layoutIdOutputFile.createNewFile()
@@ -415,13 +523,20 @@ class CodePlugin: Plugin<Project> {
 
     //from butter knife
     //生成RS, application收集layout id值
-    private fun generateRsAndLayoutId(project: Project, variants: DomainObjectSet<out BaseVariant>, isApplication: Boolean) {
+    private fun generateRsAndLayoutId(
+        project: Project,
+        variants: DomainObjectSet<out BaseVariant>,
+        isApplication: Boolean
+    ) {
         variants.all { variant ->
             val outputDir = project.buildDir.resolve("${Constants.GENERATE_RS_PATH}${variant.dirName}")
 
             val rPackage = getPackageName(variant)
             val once = AtomicBoolean()
             variant.outputs.all { output ->
+
+                val curBuildType = variant.name.capitalize()
+
                 // Though there might be multiple outputs, their R files are all the same. Thus, we only
                 // need to configure the task once with the R.java input and action.
                 if (once.compareAndSet(false, true)) {
@@ -440,13 +555,17 @@ class CodePlugin: Plugin<Project> {
                         )
                             .builtBy(processResources)
 
-                    val extension by lazy { project.extensions.getByName("android") as BaseExtension }
+                    val extension = project.extensions.getByName("android") as BaseExtension
 
-                    val androidJar by lazy {
-                        File(extension.sdkDirectory, "platforms${File.separator}${extension.compileSdkVersion}${File.separator}android.jar")
-                    }
+                    val androidJar = File(
+                        extension.sdkDirectory,
+                        "platforms${File.separator}${extension.compileSdkVersion}${File.separator}android.jar"
+                    )
 
-                    val generate = project.tasks.create("generate${variant.name.capitalize()}RS", RSGenerator::class.java) {
+                    val generate = project.tasks.create(
+                        "generate${curBuildType}RS",
+                        RSGenerator::class.java
+                    ) {
                         it.outputDir = outputDir
                         it.rFile = rFile
                         it.packageName = rPackage
@@ -458,21 +577,34 @@ class CodePlugin: Plugin<Project> {
 
                     if (isApplication) {
                         //application时收集layout对应的id值
-                        val layoutIdOutputFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${variant.dirName}").resolve(Constants.LAYOUT_ID_COLLECT_FILE_NAME)
-                        val layoutIdCollectorTask = project.tasks.create("layoutId${variant.name.capitalize()}Collect", LayoutIdCollector::class.java) { t->
+                        val layoutIdOutputFile = project.buildDir.resolve("${Constants.QXML_CACHE_DIR}${variant.dirName}").resolve(
+                            Constants.LAYOUT_ID_COLLECT_FILE_NAME
+                        )
+                        val layoutIdCollectorTask = project.tasks.create(
+                            "layoutId${curBuildType}Collect",
+                            LayoutIdCollector::class.java
+                        ) { t->
                             t.outputFile = layoutIdOutputFile
                             t.rFile = rFile
                         }
                         variant.assembleProvider.get().dependsOn(layoutIdCollectorTask)
                         layoutIdCollectorTask.mustRunAfter(variant.mergeResourcesProvider.get())
 
-                        val idOutputFile = project.buildDir.resolve("${Constants.LAYOUT_ID_COLLECT_PATH}${variant.dirName}").resolve(Constants.ID_COLLECT_FILE_NAME)
-                        val publicROutputFile = project.buildDir.resolve(Constants.LAYOUT_ID_COLLECT_PATH).parentFile.resolve(Constants.PUBLIC_FILE_NAME)
-                        val idCollectorTask = project.tasks.create("id${variant.name.capitalize()}Collect", IdCollector::class.java) { t->
+                        val idOutputFile = project.buildDir.resolve("${Constants.QXML_CACHE_DIR}${variant.dirName}").resolve(
+                            Constants.ID_COLLECT_FILE_NAME
+                        )
+                        val publicROutputFile = project.buildDir.resolve(Constants.QXML_CACHE_DIR).parentFile.resolve(
+                            Constants.PUBLIC_FILE_NAME
+                        )
+                        val idCollectorTask = project.tasks.create(
+                            "id${curBuildType}Collect",
+                            IdCollector::class.java
+                        ) { t->
                             t.publicROutputFile = publicROutputFile
                             t.outputFile = idOutputFile
                             t.rFile = rFile
                             t.packageName = rPackage
+                            t.curBuildType = curBuildType
                         }
                         variant.assembleProvider.get().dependsOn(idCollectorTask)
                         idCollectorTask.mustRunAfter(variant.mergeResourcesProvider.get())
@@ -482,4 +614,3 @@ class CodePlugin: Plugin<Project> {
         }
     }
 }
-

@@ -21,7 +21,7 @@ object TestSupportLayoutRes {
         R.layout.coordinatorlayout_test,
         R.layout.constrainlayout_test,
         R.layout.swiperefreshlayout_test,
-
+        R.layout.text_input_layout_test,
 
         //以下不常用
 

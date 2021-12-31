@@ -5,7 +5,7 @@
 
 在gradle.properties中添加 QXML_VALID_CODE=*** (随机字符串)
 
-**注：当前仅支持使用Java且需使用全限定类名**
+**注：当前仅支持使用Java**
 
 ### 1. 新建Java类，根据要扩展 View 的继承情况继承特定的Gen类，并添加`ViewParse` 注解，例如TextView继承自View，则TextView继承View支持的所有属性
 ```java
@@ -54,11 +54,12 @@ public class TextViewGen extends ViewGen {
 ```
 ##### 注1：Attr注解中请使用 AndroidRS.attr.* 引用Android属性或 RS.attr.* 引用自定义属性，如果找不到RS类，请先 build project 进行生成
 ##### 注2：Attr注解的方法必须包含两个参数，第一个参数类型为`ViewParse`注解中`value`定义的类型，第二个参数详见下参数说明
-##### 注3：方法体中请添加类的全限定类名，例：android.support.v4.content.ContextCompat.getColor...
 
 ### 3. 根据需要，使用`LocalVar`与`OnEnd`注解
 
 ##### LocalVar注解可标记一个共享变量暂存变量值，供后续使用
+
+**注：定义共享变量需使用全限定类名**
 
 ```java
 public static class $$TestLocalVariable {
@@ -87,7 +88,7 @@ public void onMarginEnd(View view) {
 
 # 扩展已定义View的属性
 
-**注：当前仅支持使用Java且需补全全限定类名**
+**注：当前仅支持使用Java**
 
 ### 新建Java类，继承待扩展的Gen类，并添加`ViewReplace` 注解，继承已有属性方法并重写逻辑(不支持调用super)，或使用`Attr`注解添加或重写属性，如：
 

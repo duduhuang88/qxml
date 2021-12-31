@@ -5,7 +5,7 @@
 
 Add QXML_VALID_CODE=*** (random string) to gradle.properties
 
-**Note: Currently, only Java is supported and fully qualified class names are required**
+**Note: Currently, only Java is supported**
 
 ### 1. Create a new Java class, inherit the Specific Gen class according to the inheritance of the view to be extended, and add the 'ViewParse' annotation. For example, textview inherits from view, then textview inherits all the properties supported by view
 ```java
@@ -55,11 +55,12 @@ public class TextViewGen extends ViewGen {
 ```
 ##### Note 1: in Attr annotation, please use androidrs.attr. * to refer to Android property or rs.attr. * to reference custom property. If RS class is not found, build project first to generate
 ##### Note 2: the method of Attr annotation must contain two parameters. The first parameter type is the type defined by 'value' in the 'ViewParse' annotation. For the second parameter, please refer to the parameter description below
-##### Note 3: use the fully qualified class name of the class in the method body, for example: android.support.v4.content.contextcompact.getcolor......
 
 ### 3. Use 'LocalVar' and 'OnEnd' annotations as needed
 
 ##### LocalVar annotation can mark a shared variable and temporarily store the variable value for later use
+
+**Note: you should use fully qualified class name**
 
 ```java
 public static class $$TestLocalVariable {
@@ -88,8 +89,6 @@ public void onMarginEnd(View view) {
 
 
 # Extend properties for defined view
-
-**Note: at present, only Java is supported and the fully qualified class name required**
 
 ### Create a new Java class, inherit the gen class to be extended, add 'ViewReplace' annotation, inherit existing attribute methods and override logic (super is not supported), or add or override attributes with 'Attr' annotation, for example:
 
@@ -174,6 +173,29 @@ class ValueInfo {
     @JvmField
     var referenceType: ValueType = ValueType.SOURCE_STRING //the reference type
 }
+```
+### 5. using createViewListener
+##### 1. option
+```gradle
+qxml {
+    ...
+    useCreateViewListener true
+    ...
+}
+```
+##### 2. set the createViewListener
+```java
+QxmlInflater.createViewListener = object : CreateViewListener {
+            override fun onCreateView(
+                parentView: View?,
+                view: View,
+                context: Context,
+                viewClassName: String,
+                originViewClassName: String
+            ) {
+
+            }
+        }
 ```
 
 

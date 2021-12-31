@@ -1,6 +1,5 @@
 package com.qxml.gradle
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection

@@ -2,6 +2,8 @@
 
 [中文](README.md)
 
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/duduhuang88/qxml?include_prereleases)  ![GitHub](https://img.shields.io/github/license/duduhuang88/qxml)
+
 A low intrusive, configurable android library that converts layout XML files into Java code to improve performance.
 
 # Performance
@@ -48,7 +50,7 @@ Gradle 3.5.0 above
 | CoordinatorLayout |  almost  | DrawerLayout |  almost  |      RecyclerView       |  almost  |
 | NestedScrollView  |  almost  |  TabLayout   |  almost  |         TabItem         |  almost  |
 |      Toolbar      |  almost  |  ViewPager   |    all   |        Fragment         |  almost  |
-|SwipeRefreshLayout |    all   |              |          |                         |          |
+|SwipeRefreshLayout |    all   |  TextInputLayout  |  almost  |                         |          |
 
 ### Third Part
 
@@ -60,12 +62,10 @@ Gradle 3.5.0 above
 
 ### 1. Add dependency in Project `build.gradle`
 
-check [Releases](https://github.com/duduhuang88/qxml/releases) to get newest version info
-
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "1.3.4"
+    ext.qxml_version = "2.0.0"
     repositories {
         ...
         mavenCentral()
@@ -123,13 +123,15 @@ android {
 }
 
 qxml {
-    enable true		//qxml enable option
-    useFactory false		//whether or not to use the factory of the layoutinflate, there is a loss of performance when it is turned on
-    viewDebug false		//show flag on converted view
-    logEnable true		//log option
-    compatMode com.qxml.CompatMode.AUTO  //compat mode
-    acceptReferenceStyle true    //whether to accept style reference, only a few references are supported
-    useCreateViewListener true  //using createViewListener
+    enable true		//qxml enable option, default value: true
+    useFactory false		//whether or not to use the factory of the layoutinflate, there is a loss of performance when it is turned on, default value: false
+    viewDebug false		//show flag on converted view, default value: false
+    logEnable true		//log option, default value: false
+    debugEnable false	//debug option，default value: false，this will print more debug msg and file when the value is true
+    compatMode com.qxml.CompatMode.AUTO  //compat mode, default value: AUTO
+    acceptReferenceStyle true    //whether to accept style reference, only a few references are supported, default value: true
+    ignoreUnImplementAttr       //ignore unImplement attr or not, default value: true
+    useCreateViewListener true  //using createViewListener, default value: false
     //default config above
     buildType {
         debug { //the default option will be used for values that are not set
@@ -178,7 +180,7 @@ no need
 
 #### 1. Android system style is not supported
 
-#### 2. Increase the build time and increase linearly according to the number of layouts, after first time, the build will use cache
+#### 2. ~~Increase the build time~~ and increase linearly according to the number of layouts, after first time, the build will use cache
 
 #### 3. Increase the raw size of APK. When there are 52 layout files in the demo, the size of release APK increases by about 38K. The option of repackaging and removing converted layout files may be added later
 

@@ -2,6 +2,7 @@ package com.qxml.tools.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +10,7 @@ public class ViewGenClassModel {
 
     private Map<String, AttrFuncInfoModel> funcInfoModelHashMap = new HashMap<>();
     private List<AttrFuncInfoModel> overrideFuncInfoModelList = new ArrayList<>();
-    private Map<String, AttrFuncInfoModel> onEndFuncInfoModelMap = new HashMap<>();
+    private Map<String, AttrFuncInfoModel> onEndFuncInfoModelMap = new LinkedHashMap<>();
     private Map<String, String> importPackageMap = new HashMap<>();
 
     public Map<String, String> getImportPackageMap() {

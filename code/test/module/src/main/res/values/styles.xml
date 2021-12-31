@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="GSH_Model">
-        <attr name="gsh_allow_blank2" format="dimension"/>
+    <declare-styleable name="GGG_Model">
+        <attr name="ggg_allow_blank2" format="dimension"/>
     </declare-styleable>
+
+    <style name="moduleBgAndSizeStyle" >
+        <item name="android:layout_width">150dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:textSize">25dp</item>
+        <item name="android:text">style of module</item>
+        <item name="android:background">#123456</item>
+    </style>
+
 </resources>
