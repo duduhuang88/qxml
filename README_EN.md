@@ -35,7 +35,7 @@ Gradle 3.5.0 above
 | FrameLayout  |  almost  | TextureView  |  almost  |       WebView        |  almost  |
 |   ListView   |  almost  |  GridLayout  |  almost  |  ExpandableListView  |  almost  |
 |   ViewFlipper   |  almost  |  ViewSwitcher  |  almost  |  TextSwitcher  |  almost  |
-|  VideoView   |  almost  |              |          |                      |          |
+|  VideoView   |  almost  | ToggleButton | almost  |    Space    |   almost   |
 |              |          |              |          |                      |          |
 |   include    |  almost  |    merge     |  almost  |     DataBinding      |  almost  |
 | custom style |  almost  | system style |   **none**   |  layout multi type  |  almost |
@@ -49,7 +49,7 @@ Gradle 3.5.0 above
 |    Placeholder    |  almost  |   Barrier    |  almost  |      MotionLayout       |  almost  |
 | CoordinatorLayout |  almost  | DrawerLayout |  almost  |      RecyclerView       |  almost  |
 | NestedScrollView  |  almost  |  TabLayout   |  almost  |         TabItem         |  almost  |
-|      Toolbar      |  almost  |  ViewPager   |    all   |        Fragment         |  almost  |
+|      Toolbar      |  almost  |  ViewPager   |    all   |        Fragment         |  **androidx not support** |
 |SwipeRefreshLayout |    all   |  TextInputLayout  |  almost  |                         |          |
 
 ### Third Part
@@ -65,7 +65,7 @@ Gradle 3.5.0 above
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "2.0.0"
+    ext.qxml_version = "3.0.0"
     repositories {
         ...
         mavenCentral()
@@ -126,16 +126,17 @@ qxml {
     enable true		//qxml enable option, default value: true
     useFactory false		//whether or not to use the factory of the layoutinflate, there is a loss of performance when it is turned on, default value: false
     viewDebug false		//show flag on converted view, default value: false
-    logEnable true		//log option, default value: false
+    logEnable false		//log option, default value: false
     debugEnable false	//debug option，default value: false，this will print more debug msg and file when the value is true
     compatMode com.qxml.CompatMode.AUTO  //compat mode, default value: AUTO
     acceptReferenceStyle true    //whether to accept style reference, only a few references are supported, default value: true
     ignoreUnImplementAttr       //ignore unImplement attr or not, default value: true
     useCreateViewListener true  //using createViewListener, default value: false
+    checkMethod false               //default value: false,  check the view attr method change when building, you should set true when custom view attr
     //default config above
     buildType {
         debug { //the default option will be used for values that are not set
-            viewDebug true
+            viewDebug false
         }
         release {
             viewDebug false
@@ -150,7 +151,7 @@ QXML_VALID_CODE = ***   : use when custom view
 
 QXML_LOG_ENABLE = true/false  : annotationProcesser log enable
 
-QXML_USING_STABLE_ID = true/false  : using resource stable Id，default value is true
+~~QXML_USING_STABLE_ID = true/false  : using resource stable Id~~ Deprecated
 
 ### 5. Layout configuration options
 
@@ -168,7 +169,7 @@ Attr can be used in the root node of layout xml：
 
 ### 6. Simple build result chart
 
-After the build, there is a simple result chart in build/qxml/report.html
+After the build, there is a simple result chart in build/qxml/report.html，and you can find the view code in build/qxml/genClassInfo/*
 
 ### 7. Proguard
 

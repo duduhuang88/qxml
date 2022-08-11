@@ -10,7 +10,6 @@ import com.qxml.QxmlExtension
 import com.qxml.constant.Constants
 import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.GenClassInfoModel
-import com.qxml.tools.model.ViewGenClassModel
 import com.qxml.transform.collect.*
 import com.qxml.transform.generate.LayoutClassGenerator
 import com.qxml.transform.generate.model.LayoutFileInfo
@@ -25,14 +24,18 @@ import java.io.*
 import java.util.*
 import java.util.function.BiConsumer
 import java.util.jar.JarFile
-import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import kotlin.collections.HashMap
 
+data class TransformConfig(var projectDebuggable: Boolean = true)
+
+@Suppress("UnstableApiUsage")
 class QXmlTransform(private val project: Project): BaseTransform() {
 
     var packageName: String = ""
     var curBuildType: String = ""
+    val transformConfig = TransformConfig()
+
     private lateinit var curBuildTypeCapitalize: String
 
     private val layoutFileInfoCollector by lazy { LayoutFileInfoCollector() }
@@ -68,7 +71,7 @@ class QXmlTransform(private val project: Project): BaseTransform() {
             .resolve(Constants.QXML_STYLE_CACHE_FILE_NAME)
     }
 
-    override fun provideFunction(): BiConsumer<InputStream, OutputStream>? {
+    override fun provideFunction(): BiConsumer<InputStream, OutputStream> {
         return BiConsumer<InputStream, OutputStream> { input, output ->
             if (qxmlConfig.enable) {
                 CodeTransformer.transform(input, output, genClassInfoList, packageName, layoutIdMap)
@@ -85,10 +88,9 @@ class QXmlTransform(private val project: Project): BaseTransform() {
 
         CodeTransformer.qxmlInitContentCacheFile = cacheDir.resolve(Constants.QXML_INIT_CONTENT_DIR).resolve(Constants.QXML_INIT_CONTENT_CACHE_FILE)
 
-        curBuildTypeCapitalize = curBuildType.capitalize()
+        curBuildTypeCapitalize = curBuildType.capitalize(Locale.ROOT)
 
         LogUtil.pl("transform start $packageName")
-        var time = System.currentTimeMillis()
 
         ClassPool.cacheOpenedJarFile = false
         PoolManager.pool = PoolManager.initPool()
@@ -101,7 +103,7 @@ class QXmlTransform(private val project: Project): BaseTransform() {
         val idMapJsonStr = if (idMapFile.exists()) idMapFile.readText() else ""
         idMap = if (idMapJsonStr.isEmpty()) hashMapOf() else gson.fromJson(idMapJsonStr, object : TypeToken<HashMap<String, Int>>() {}.type)
 
-        time = System.currentTimeMillis()
+        var time = System.currentTimeMillis()
 
         //收集attr信息
         val attrsXmlParser = AttrsXmlParser(project, curBuildTypeCapitalize)
@@ -112,10 +114,15 @@ class QXmlTransform(private val project: Project): BaseTransform() {
         //layout信息
         layoutFileInfoList = gson.fromJson(layoutInfoFile.readText(), object : TypeToken<List<LayoutFileInfo>>() {}.type)
 
+        val processOrOptimizedResInfoFile = cacheDir.resolve(curBuildType).resolve(Constants.RES_PROCESS_OR_OPTIMIZED_INFO_COLLECT_FILE_NAME)
+
+        //layout type信息
+        val layoutTypeInfoMap: Map<String, Map<String, String>> = gson.fromJson(processOrOptimizedResInfoFile.readText(), object : TypeToken<Map<String, Map<String, String>>>() {}.type)
+
         //style信息
         val styleInfoMap: TreeMap<String, TreeMap<String, StyleInfo>> = gson.fromJson(styleInfoFile.readText(), object : TypeToken<TreeMap<String, TreeMap<String, StyleInfo>>>() {}.type)
 
-        layoutFileInfoMap = layoutFileInfoCollector.collect(layoutFileInfoList!!)
+        layoutFileInfoMap = layoutFileInfoCollector.collect(layoutFileInfoList!!, layoutTypeInfoMap)
         layoutFileInfoList!!.forEach {
             LogUtil.d("layout: "+it)
         }
@@ -154,7 +161,7 @@ class QXmlTransform(private val project: Project): BaseTransform() {
             val genInfoHolder = ViewGenInfoHolderImpl(genInfoMap, genClassInfoModel
                 , cacheDir.resolve(Constants.LOCAL_VAR_DEF_CONTENT_CACHE_FILE_NAME)
                 , qxmlConfig, waitableExecutor, styleInfoMap, genClassInfoModelJsonStr
-                , cacheDir.resolve(Constants.GEN_MODEL_CACHE_DIR), gson)
+                , layoutTypeInfoMap, cacheDir.resolve(Constants.GEN_MODEL_CACHE_DIR), gson)
 
             if (LogUtil.debug) {
                 val content = gson.toJson(genInfoMap)
@@ -181,8 +188,8 @@ class QXmlTransform(private val project: Project): BaseTransform() {
             val idCacheMap: Map<String, Int> = if (idMapCacheJsonStr.isEmpty()) hashMapOf() else gson.fromJson(idMapCacheJsonStr, object : TypeToken<HashMap<String, Int>>() {}.type)
 
             val result = LayoutClassGenerator(isAndroidx, transformInvocation.outputProvider
-                , layoutFileInfoMap, attrInfoMap, genInfoHolder, packageName
-                , waitableExecutor, genClassInfoCacheDir, qxmlConfig
+                , layoutFileInfoMap, layoutTypeInfoMap, attrInfoMap, genInfoHolder, packageName
+                , waitableExecutor, genClassInfoCacheDir, qxmlConfig, transformConfig
                 , genClassInfoModel.compatViewInfoModelMap, idMap, idCacheMap).generate()
 
 
@@ -271,6 +278,7 @@ class QXmlTransform(private val project: Project): BaseTransform() {
         val transformKitJar = File(QXmlTransform::class.java.protectionDomain.codeSource.location.toURI())
 
         return ImmutableList.of(
+            //SecondaryFile.incremental(project.files(processOrOptimizedResInfoFile)),
             SecondaryFile.incremental(project.files(layoutInfoFile)),
             SecondaryFile.incremental(project.files(styleInfoFile)),
             SecondaryFile.nonIncremental(project.files(transformJar)),

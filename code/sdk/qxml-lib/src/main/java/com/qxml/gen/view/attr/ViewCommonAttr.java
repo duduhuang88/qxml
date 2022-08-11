@@ -3,14 +3,14 @@ package com.qxml.gen.view.attr;
 import android.view.View;
 
 import com.qxml.AndroidRS;
-import com.qxml.constant.ValueType;
+import com.qxml.RS;
 import com.qxml.gen.view.lovalVar.ViewLocalVar;
 import com.qxml.value.ValueInfo;
 import com.yellow.qxml_annotions.Attr;
 import com.yellow.qxml_annotions.LocalVar;
 import com.yellow.qxml_annotions.UnSupport;
 
-public interface ViewCommonAttr extends ViewLocalVar {
+public interface ViewCommonAttr extends ViewLocalVar, RelativeAttr {
 
     class $$ViewSizeLocalVar {
         public int minHeight = 0;
@@ -22,23 +22,27 @@ public interface ViewCommonAttr extends ViewLocalVar {
     @LocalVar
     $$ViewSizeLocalVar __viewSizeLocalVar = new $$ViewSizeLocalVar();
 
+    @Attr(RS.attr.qxml_start)
+    default void viewStart(View view, boolean useless) {
+        //在View创建后设置属性时首先调用
+        if (___cur_layout_param instanceof android.widget.RelativeLayout.LayoutParams) {
+            __relativeLocalVar.rlLp = (android.widget.RelativeLayout.LayoutParams) ___cur_layout_param;
+        }
+    }
+
     @Attr(AndroidRS.attr.id)
     default void viewId(View view, int id) {
         view.setId(id);
     }
 
-    //在ViewMarginAttr的onEnd里一起设置
-    @Attr(AndroidRS.attr.layout_width)
+    @Attr(value = AndroidRS.attr.layout_width, requiredCondition = "___cur_layout_param != null")
     default void viewLayoutWidth(View view, int width) {
-        __viewLocalVar.layoutWidth = width;
-        __viewLocalVar.layoutWidthSet = true;
+        ___cur_layout_param.width = width;
     }
 
-    //在ViewMarginAttr的onEnd里一起设置
-    @Attr(AndroidRS.attr.layout_height)
+    @Attr(value = AndroidRS.attr.layout_height, requiredCondition = "___cur_layout_param != null")
     default void viewLayoutHeight(View view, int height) {
-        __viewLocalVar.layoutHeight = height;
-        __viewLocalVar.layoutHeightSet = true;
+        ___cur_layout_param.height = height;
     }
 
     @Attr(AndroidRS.attr.layoutDirection)
@@ -78,7 +82,7 @@ public interface ViewCommonAttr extends ViewLocalVar {
     //所以先重置下padding，后续padding在onEnd中重新设置
     @Attr(AndroidRS.attr.background)
     default void viewBackground(View view, ValueInfo valueInfo) {
-        view.setPadding(0, 0, 0, 0);
+        //view.setPadding(0, 0, 0, 0);
         if (valueInfo.isColor()) {
             view.setBackgroundColor(valueInfo.colorValue);
         } else if (valueInfo.isReference()) {
@@ -155,14 +159,14 @@ public interface ViewCommonAttr extends ViewLocalVar {
 
     @Attr(AndroidRS.attr.minWidth)
     default void viewMinWidth(View view, int minWidth) {
-        view.setMinimumWidth(minWidth);
         __viewSizeLocalVar.minWidth = minWidth;
+        view.setMinimumWidth(minWidth);
     }
 
     @Attr(AndroidRS.attr.minHeight)
     default void viewMinHeight(View view, int minHeight) {
-        view.setMinimumHeight(minHeight);
         __viewSizeLocalVar.minHeight = minHeight;
+        view.setMinimumHeight(minHeight);
     }
 
     //view 没有 max size, 这里给需要使用的view赋值
@@ -179,28 +183,22 @@ public interface ViewCommonAttr extends ViewLocalVar {
 
     @Attr(AndroidRS.attr.nextClusterForward)
     default void viewNextClusterForward(View view, ValueInfo valueInfo) {
-        if (android.os.Build.VERSION.SDK_INT >= 26) {
-            if (valueInfo.referenceType == com.qxml.constant.ValueType.REFERENCE_ID && valueInfo.isReference()) {
-                view.setNextClusterForwardId(valueInfo.resourceId);
-            }
+        if (android.os.Build.VERSION.SDK_INT >= 26 && valueInfo.referenceType == com.qxml.constant.ValueType.REFERENCE_ID && valueInfo.isReference()) {
+            view.setNextClusterForwardId(valueInfo.resourceId);
         }
     }
 
     @Attr(AndroidRS.attr.outlineSpotShadowColor)
     default void viewOutlineSpotShadowColor(View view, ValueInfo valueInfo) {
-        if (android.os.Build.VERSION.SDK_INT >= 28) {
-            if (valueInfo.isColor()) {
-                view.setOutlineSpotShadowColor(valueInfo.colorValue);
-            }
+        if (android.os.Build.VERSION.SDK_INT >= 28 && valueInfo.isColor()) {
+            view.setOutlineSpotShadowColor(valueInfo.colorValue);
         }
     }
 
     @Attr(AndroidRS.attr.outlineAmbientShadowColor)
     default void viewOutlineAmbientShadowColor(View view, ValueInfo valueInfo) {
-        if (android.os.Build.VERSION.SDK_INT >= 28) {
-            if (valueInfo.isColor()) {
-                view.setOutlineAmbientShadowColor(valueInfo.colorValue);
-            }
+        if (android.os.Build.VERSION.SDK_INT >= 28 && valueInfo.isColor()) {
+            view.setOutlineAmbientShadowColor(valueInfo.colorValue);
         }
     }
 
@@ -221,16 +219,12 @@ public interface ViewCommonAttr extends ViewLocalVar {
 
     @Attr(AndroidRS.attr.textAlignment)
     default void viewTextAlignment(View view, int textAlignment) {
-        if (android.os.Build.VERSION.SDK_INT >= 17) {
-            view.setTextAlignment(textAlignment);
-        }
+        if (android.os.Build.VERSION.SDK_INT >= 17) view.setTextAlignment(textAlignment);
     }
 
     @Attr(AndroidRS.attr.textDirection)
     default void viewTextDirection(View view, int textDirection) {
-        if (android.os.Build.VERSION.SDK_INT >= 17) {
-            view.setTextDirection(textDirection);
-        }
+        if (android.os.Build.VERSION.SDK_INT >= 17) view.setTextDirection(textDirection);
     }
 
     @Attr(AndroidRS.attr.theme)

@@ -15,28 +15,29 @@ import com.yellow.qxml_annotions.ViewReplace;
 public class ViewCompatGen extends ViewGen implements ConstrainAttr, AppbarAttr, CollapsingToolbarAttr, CoordinatorAttr {
 
     @Override
-    public void viewBackgroundTint(View view, ValueInfo valueInfo) {
-        android.content.Context context = view.getContext();
-        android.content.res.ColorStateList colorStateList;
-        if (valueInfo.isColor()) {
-            colorStateList = android.content.res.ColorStateList.valueOf(valueInfo.colorValue);
-        } else {
-            colorStateList = android.os.Build.VERSION.SDK_INT >= 23 ? context.getColorStateList(valueInfo.resourceId) : context.getResources().getColorStateList(valueInfo.resourceId);
+    public void viewStart(View view, boolean useless) {
+        if (___cur_layout_param instanceof android.widget.RelativeLayout.LayoutParams) {
+            __relativeLocalVar.rlLp = (android.widget.RelativeLayout.LayoutParams) ___cur_layout_param;
+        } else if (___cur_layout_param instanceof androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) {
+            __constrainLocalVar.constraintLp = (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) ___cur_layout_param;
         }
+    }
+
+    @Override
+    public void viewBackgroundTint(View view, ValueInfo valueInfo) {
         if (android.os.Build.VERSION.SDK_INT >= 21) {
-            view.setBackgroundTintList(colorStateList);
+            view.setBackgroundTintList(valueInfo.getColorStateList(__context));
         } else {
-            androidx.core.view.ViewCompat.setBackgroundTintList(view, colorStateList);
+            androidx.core.view.ViewCompat.setBackgroundTintList(view, valueInfo.getColorStateList(__context));
         }
     }
 
     @Override
     public void viewBackgroundTintMode(View view, int mode) {
-        android.graphics.PorterDuff.Mode tintMode = AttrHelperKt.intToMode(mode, null);
         if (android.os.Build.VERSION.SDK_INT >= 21) {
-            view.setBackgroundTintMode(tintMode);
+            view.setBackgroundTintMode(AttrHelperKt.intToMode(mode, null));
         } else {
-            androidx.core.view.ViewCompat.setBackgroundTintMode(view, tintMode);
+            androidx.core.view.ViewCompat.setBackgroundTintMode(view, com.qxml.helper.AttrHelperKt.intToMode(mode, null));
         }
     }
 }

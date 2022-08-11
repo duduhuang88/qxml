@@ -50,7 +50,7 @@ Gradle 3.5.0 以上
 | FrameLayout  |  almost  | TextureView  |  almost  |       WebView        |  almost  |
 |   ListView   |  almost  |  GridLayout  |  almost  |  ExpandableListView  |  almost  |
 | ViewFlipper  |  almost  | ViewSwitcher |  almost  |     TextSwitcher     |  almost  |
-|  VideoView   |  almost  | ToggleButton | almost  |                      |          |
+|  VideoView   |  almost  | ToggleButton | almost   |        Space         |  almost  |
 |              |          |              |          |                      |          |
 |   include    |  almost  |    merge     |  almost  |     DataBinding      |  almost  |
 | custom style |  almost  | system style | **none** |  layout multi type   |  almost  |
@@ -64,7 +64,7 @@ Gradle 3.5.0 以上
 |    Placeholder    |  almost  |   Barrier    |  almost  |      MotionLayout       |  almost  |
 | CoordinatorLayout |  almost  | DrawerLayout |  almost  |      RecyclerView       |  almost  |
 | NestedScrollView  |  almost  |  TabLayout   |  almost  |         TabItem         |  almost  |
-|      Toolbar      |  almost  |  ViewPager   |    all   |        Fragment         |  almost  |
+|      Toolbar      |  almost  |  ViewPager   |    all   |        Fragment         |  **androidx not support** |
 |SwipeRefreshLayout |    all   |  TextInputLayout  |  almost  |                         |          |
 
 ### Third Part
@@ -80,7 +80,7 @@ Gradle 3.5.0 以上
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "2.0.0"
+    ext.qxml_version = "3.0.0"
     repositories {
         ...
         mavenCentral()
@@ -141,21 +141,22 @@ qxml {
     enable true		 //是否开启，默认true
     useFactory false		 //是否使用layoutInflater的factory，开启时性能有损耗，默认false
     viewDebug false		 //是否在转换的View上显示标志，默认false
-    logEnable true		 //是否开启log，默认false
+    logEnable false		 //是否开启log，默认false
     debugEnable false	 //是否开启debug，默认false，开启时会输出一些调试信息和文件
     compatMode com.qxml.CompatMode.AUTO  //compat模式，默认AUTO
     acceptReferenceStyle true     //是否接受style引用，仅支持很少部分引用，默认true
     ignoreUnImplementAttr true //是否忽略未实现的属性，默认true
     useCreateViewListener true   //使用createViewListener，默认false
+    checkMethod false                //是否检查View属性配置变化进行重新生成，设置false可提高transform速度，默认false，如果修改/自定义View属性时设置为false需删除缓存（build/qxml或clean）
     //以上为默认设置
-    buildType {
+    /*buildType {
         debug { //单独配置debug，没有设置的值会使用默认设置
-            viewDebug true
+            viewDebug false
         }
         release {
             viewDebug false
         }
-    }
+    }*/
 }
 ```
 
@@ -165,7 +166,7 @@ QXML_VALID_CODE = ***   : 自定义View时使用，用于本地验签
 
 QXML_LOG_ENABLE = true/false  : 是否开启annotationProcesser的log
 
-QXML_USING_STABLE_ID = true/false  : 是否使用固定资源Id，默认使用
+~~QXML_USING_STABLE_ID = true/false  : 是否使用固定资源Id~~ 已废弃
 
 ### 5. layout可选配置
 
@@ -183,7 +184,7 @@ QXML_USING_STABLE_ID = true/false  : 是否使用固定资源Id，默认使用
 
 ### 6. 简单的构建结果的图表显示
 
-构建结束后，在 build\qxml\report.html 中有简单的结果图表
+构建结束后，在 build\qxml\report.html 中有简单的结果图表，生成的View代码在 build\qxml\genClassInfo\* 中
 
 ### 7. 混淆
 

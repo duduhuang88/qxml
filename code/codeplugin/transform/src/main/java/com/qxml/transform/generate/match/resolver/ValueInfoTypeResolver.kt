@@ -34,13 +34,12 @@ class ValueInfoTypeResolver: ValueResolver {
         attrInfoModel: AttrInfoModel,
         fieldInfo: FieldInfo,
         contextName: String,
-        usedTempVarMap: HashMap<String, String>,
-        shouldWrapScope: Boolean
+        usedTempVarMap: HashMap<String, String>
     ): MatchResult {
         val valueType = valueInfo.valueType
         val value = valueInfo.value
         val stringBuilder = StringBuilder()
-        val lastFuncBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName).replace(Constants.VALUE_INFO_PARAM_NAME_TEMP, Constants.GEN_FIELD_VALUE_INFO_NAME)
+        val lastFuncBody = attrFuncInfoModel.funcBodyContent.substring(3).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName).replace(Constants.VALUE_INFO_PARAM_NAME_TEMP, Constants.GEN_FIELD_VALUE_INFO_NAME)
 
         stringBuilder.append(VALUE_INFO_CLEAR)
         stringBuilder.append(makeString(valueInfo.sourceValue))

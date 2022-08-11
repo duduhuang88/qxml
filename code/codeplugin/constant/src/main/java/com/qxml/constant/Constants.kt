@@ -15,7 +15,6 @@ class Constants {
         const val GEN_FIELD_VALUE_INFO_NAME = "___valueInfo"
         const val GEN_FIELD_TYPED_VALUE_NAME = "___typedValue"
         const val GEN_FIELD_LAYOUT_TYPE_STRING_NAME = "___layoutTypeStr"
-        const val GEN_FIELD_LAYOUT_TYPE_HASHCODE_NAME = "___layoutTypeHashCode"
         const val GEN_FIELD_STYLE_REFERENCE_RES_ID_PRE = "___style_reference_res_id_"
         const val GEN_FIELD_RESOURCE = "___resources"
 
@@ -90,6 +89,7 @@ class Constants {
         const val QXML_USE_FACTORY_CONFIG_ATTR_NAME = "qxml_use_factory"
         const val QXML_VIEW_DEBUG_CONFIG_ATTR_NAME = "qxml_debug"
         const val QXML_USE_COMPAT_CONFIG_ATTR_NAME = "qxml_compat"
+        const val QXML_START_ATTR_NAME = "qxml_start"
 
 
         const val TAG_MERGE = "merge"
@@ -117,8 +117,8 @@ class Constants {
         val GENERATE_RS_PATH = "qxml${File.separator}cache${File.separator}rs${File.separator}"
         val QXML_CACHE_DIR = "qxml${File.separator}cache${File.separator}"
         const val LAYOUT_ID_COLLECT_FILE_NAME = "layoutIdCollect.txt"
+        const val RES_PROCESS_OR_OPTIMIZED_INFO_COLLECT_FILE_NAME = "res_process_or_optimized_info.txt"
         const val ID_COLLECT_FILE_NAME = "idCollect.txt"
-        const val PUBLIC_FILE_NAME = "public.txt"
         const val ID_COLLECT_CACHE_FILE_NAME = "idCollectCache.txt"
         const val LOCAL_VAR_DEF_CONTENT_CACHE_FILE_NAME = "localVarDefContentCache.txt"
         const val GEN_CLASS_CACHE_DIR = "genClassInfo"
@@ -155,11 +155,11 @@ class Constants {
 
         const val QXML_VALID_CODE = "QXML_VALID_CODE"
         const val QXML_LOG_ENABLE = "QXML_LOG_ENABLE"
-        const val QXML_USING_STABLE_ID = "QXML_USING_STABLE_ID"
         const val QXML_PROJECT_BUILD_TEMP_RES_PATH = "tempRes"
 
         const val VIEW_PARAM_NAME_TEMP = "鼕"
         const val VALUE_INFO_PARAM_NAME_TEMP = "鬵"
+        const val BASE_TYPE_PARAM_NAME_TEMP = "畿"
 
         const val SUPPORT_FRAGMENT_HELPER = "com.qxml.qxml_support.helper.FragmentHelper"
         const val ANDROIDX_FRAGMENT_HELPER = "com.qxml.qxml_androidx.helper.FragmentHelper"

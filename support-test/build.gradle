@@ -7,17 +7,19 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'com.qxml.code.plugin'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "30.0.3"
+    compileSdkVersion android_compileSdkVersion.toInteger()
+    buildToolsVersion android_buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 29
+        minSdkVersion android_minSdkVersion
+        targetSdkVersion android_targetSdkVersion.toInteger()
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        flavorDimensions "versionCode"
     }
 
     signingConfigs {
@@ -73,6 +75,15 @@ android {
             resources.srcDirs += "build/qxml/tempRes"
         }
     }
+
+    productFlavors {
+        Aa {
+            applicationId 'com.support_test.a'
+        }
+        Bb {
+            applicationId 'com.support_test.b'
+        }
+    }
 }
 
 qxml {
@@ -84,6 +95,7 @@ qxml {
     compatMode com.qxml.CompatMode.AUTO
     acceptReferenceStyle true
     useCreateViewListener false
+    checkMethod true
     buildType {
         debug {
             viewDebug true
@@ -93,17 +105,17 @@ qxml {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation deps.support.v7
-    implementation deps.support.recyclerview
-    implementation deps.support.design
-    implementation deps.support.constraintLayout
-    implementation deps.support.lottie
-    implementation deps.support.fresco
+    implementation kotlin_stdlib
+    implementation support_v7
+    implementation support_recyclerview
+    implementation support_design
+    implementation support_constraintLayout
+    implementation support_lottie
+    implementation support_fresco
 
-    testImplementation deps.junit
-    androidTestImplementation deps.test.runner
-    androidTestImplementation deps.test.core
+    testImplementation junit
+    androidTestImplementation test_runner
+    androidTestImplementation test_core
 
     //annotationProcessor deps.qxml.processor
     kapt deps.qxml.processor

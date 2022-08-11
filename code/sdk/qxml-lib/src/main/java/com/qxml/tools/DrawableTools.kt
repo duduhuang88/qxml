@@ -7,8 +7,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.TypedValue
-import com.qxml.AndroidRS
-import com.qxml.RS
 import com.qxml.constant.ValueType
 import com.qxml.value.ValueInfo
 

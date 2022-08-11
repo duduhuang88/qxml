@@ -29,6 +29,7 @@ import javax.tools.Diagnostic;
  * 获取类被{@link com.yellow.qxml_annotions.Attr}
  * , {@link com.yellow.qxml_annotions.OnEnd}和{@link java.lang.Override}注解的方法信息
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class AttrMethodInfoScanner extends TreeScanner {
 
     private static final String VOID_CLASS_NAME = "java.lang.Void";
@@ -48,11 +49,11 @@ public class AttrMethodInfoScanner extends TreeScanner {
 
     private ViewGenClassModel curViewGenClassModel = null;
 
-    private AttrAnnotationScanner attrAnnotationScanner = new AttrAnnotationScanner();
+    private final AttrAnnotationScanner attrAnnotationScanner = new AttrAnnotationScanner();
 
-    private Trees trees;
-    private Types mTypes;
-    private Messager messager;
+    private final Trees trees;
+    private final Types mTypes;
+    private final Messager messager;
     private TypeElement curScanElement;
     private boolean curScanIsInterface;
 
@@ -312,19 +313,32 @@ public class AttrMethodInfoScanner extends TreeScanner {
                 bodyContent = replaceViewParamNameByTemp(bodyContent, viewParamName);
 
                 attrFuncInfoModel = new AttrFuncInfoModel();
-                if (valueParamName != null && Constants.QXML_VALUE_INFO_CLASS_NAME.equals(valueParamType)) {
-                    attrFuncInfoModel.setFuncBodyContent(replaceValueInfoParamNameByTemp(bodyContent, valueParamName));
+                if (valueParamName != null) {
+                    if (Constants.QXML_VALUE_INFO_CLASS_NAME.equals(valueParamType)) {
+                        attrFuncInfoModel.setFuncBodyContent(replaceValueInfoParamNameByTemp(bodyContent, valueParamName));
+                    } else {
+                        attrFuncInfoModel.setFuncBodyContent(replaceBaseTypeParamNameByTemp(bodyContent, valueParamName));
+                    }
                 } else {
                     attrFuncInfoModel.setFuncBodyContent(bodyContent);
                 }
                 if (Constants.ATTR_ANNOTATION_CLASS_NAME.equals(methodAnnotationName)) {
                     String attrValue = ((JCTree.JCAssign)jcAnnotation.args.get(0)).rhs.toString();
+                    String requiredCondition = "";
+                    if (jcAnnotation.args.size() > 1) {
+                        requiredCondition = ((JCTree.JCAssign)jcAnnotation.args.get(1)).rhs.toString();
+                        if (requiredCondition.startsWith("\"")) {
+                            requiredCondition = requiredCondition.substring(1, requiredCondition.length() - 1);
+                        }
+                    }
+
                     attrFuncInfoModel.setViewParamType(viewParamType);
                     attrFuncInfoModel.setViewParamName(viewParamName);
                     attrFuncInfoModel.setValueParamType(valueParamType);
                     attrFuncInfoModel.setValueParamName(valueParamName);
                     attrFuncInfoModel.setAttrName(attrValue);
                     attrFuncInfoModel.setFuncName(funcName);
+                    attrFuncInfoModel.setRequiredCondition(requiredCondition);
                     attrFuncInfoModel.setType(AttrFuncInfoModel.ATTR_TYPE);
                 } else {
                     attrFuncInfoModel.setViewParamType(viewParamType);
@@ -339,6 +353,7 @@ public class AttrMethodInfoScanner extends TreeScanner {
             } else if (Constants.ON_END_ANNOTATION_CLASS_NAME.equals(methodAnnotationName)) {
                 String arg = null;
                 boolean afterAdd = false;
+                String requiredCondition = "";
 
                 for (int i = 0; i < jcAnnotation.args.size(); i++) {
                     JCTree.JCAssign assign = (JCTree.JCAssign)jcAnnotation.args.get(i);
@@ -350,6 +365,11 @@ public class AttrMethodInfoScanner extends TreeScanner {
                         }
                     } else if ("afterAdd".equals(what)) {
                         afterAdd = assign.rhs.toString().equalsIgnoreCase("true");
+                    } else if ("requiredCondition".equals(what)) {
+                        requiredCondition = assign.rhs.toString();
+                        if (requiredCondition.length() > 2) {
+                            requiredCondition = requiredCondition.substring(1, requiredCondition.length() - 1);
+                        }
                     }
                 }
                 /*if (jcAnnotation.args.size() > 0) {
@@ -370,6 +390,7 @@ public class AttrMethodInfoScanner extends TreeScanner {
                 attrFuncInfoModel.setFuncBodyContent(replaceViewParamNameByTemp(bodyContent, viewParamName));
                 attrFuncInfoModel.setType(AttrFuncInfoModel.ON_END_TYPE);
                 attrFuncInfoModel.setAfterAdd(afterAdd);
+                attrFuncInfoModel.setRequiredCondition(requiredCondition);
                 if (arg != null && arg.length() > 2) {//忽略 "", {}
                     List<String> conditions = new ArrayList<>();
                     String[] onEndConditions = arg.split(",");
@@ -398,6 +419,7 @@ public class AttrMethodInfoScanner extends TreeScanner {
         private static final String REPLACE_12 = ")"+Constants.VIEW_PARAM_NAME_TEMP +".";
         private static final String REPLACE_13 = ")"+Constants.VIEW_PARAM_NAME_TEMP +",";
         private static final String REPLACE_14 = ")"+Constants.VIEW_PARAM_NAME_TEMP +";";
+        private static final String REPLACE_15 = "["+Constants.VIEW_PARAM_NAME_TEMP +".";
 
         private String replaceViewParamNameByTemp(String funcBody, String viewParamName) {
             return funcBody
@@ -414,7 +436,8 @@ public class AttrMethodInfoScanner extends TreeScanner {
                     .replace(")"+viewParamName+")", REPLACE_11)
                     .replace(")"+viewParamName+".", REPLACE_12)
                     .replace(")"+viewParamName+",", REPLACE_13)
-                    .replace(")"+viewParamName+";", REPLACE_14);
+                    .replace(")"+viewParamName+";", REPLACE_14)
+                    .replace("["+viewParamName+".", REPLACE_15);
         }
 
         private static final String VALUE_INFO_REPLACE_1 = " "+Constants.VALUE_INFO_PARAM_NAME_TEMP +" ";
@@ -448,6 +471,43 @@ public class AttrMethodInfoScanner extends TreeScanner {
                     .replace(")"+valueInfoParamName+".", VALUE_INFO_REPLACE_12)
                     .replace(")"+valueInfoParamName+",", VALUE_INFO_REPLACE_13)
                     .replace(")"+valueInfoParamName+";", VALUE_INFO_REPLACE_14);
+        }
+
+        private static final String BASE_TYPE_REPLACE_1 = " "+Constants.BASE_TYPE_PARAM_NAME_TEMP +" ";
+        private static final String BASE_TYPE_REPLACE_2 = " "+Constants.BASE_TYPE_PARAM_NAME_TEMP +".";
+        private static final String BASE_TYPE_REPLACE_3 = " "+Constants.BASE_TYPE_PARAM_NAME_TEMP +",";
+        private static final String BASE_TYPE_REPLACE_4 = " "+Constants.BASE_TYPE_PARAM_NAME_TEMP +")";
+        private static final String BASE_TYPE_REPLACE_5 = " "+Constants.BASE_TYPE_PARAM_NAME_TEMP +";";
+        private static final String BASE_TYPE_REPLACE_6 = "("+Constants.BASE_TYPE_PARAM_NAME_TEMP +" ";
+        private static final String BASE_TYPE_REPLACE_7 = "("+Constants.BASE_TYPE_PARAM_NAME_TEMP +")";
+        private static final String BASE_TYPE_REPLACE_8 = "("+Constants.BASE_TYPE_PARAM_NAME_TEMP +",";
+        private static final String BASE_TYPE_REPLACE_9 = "("+Constants.BASE_TYPE_PARAM_NAME_TEMP +".";
+        private static final String BASE_TYPE_REPLACE_10 = ")"+Constants.BASE_TYPE_PARAM_NAME_TEMP +" ";
+        private static final String BASE_TYPE_REPLACE_11 = ")"+Constants.BASE_TYPE_PARAM_NAME_TEMP +")";
+        private static final String BASE_TYPE_REPLACE_12 = ")"+Constants.BASE_TYPE_PARAM_NAME_TEMP +".";
+        private static final String BASE_TYPE_REPLACE_13 = ")"+Constants.BASE_TYPE_PARAM_NAME_TEMP +",";
+        private static final String BASE_TYPE_REPLACE_14 = ")"+Constants.BASE_TYPE_PARAM_NAME_TEMP +";";
+        private static final String BASE_TYPE_REPLACE_15 = "["+Constants.BASE_TYPE_PARAM_NAME_TEMP +".";
+        private static final String BASE_TYPE_REPLACE_16 = "["+Constants.BASE_TYPE_PARAM_NAME_TEMP +"]";
+
+        private String replaceBaseTypeParamNameByTemp(String funcBody, String baseTypeParamName) {
+            return funcBody
+                    .replace(" "+baseTypeParamName+" ", BASE_TYPE_REPLACE_1)
+                    .replace(" "+baseTypeParamName+".", BASE_TYPE_REPLACE_2)
+                    .replace(" "+baseTypeParamName+",", BASE_TYPE_REPLACE_3)
+                    .replace(" "+baseTypeParamName+")", BASE_TYPE_REPLACE_4)
+                    .replace(" "+baseTypeParamName+";", BASE_TYPE_REPLACE_5)
+                    .replace("("+baseTypeParamName+" ", BASE_TYPE_REPLACE_6)
+                    .replace("("+baseTypeParamName+")", BASE_TYPE_REPLACE_7)
+                    .replace("("+baseTypeParamName+",", BASE_TYPE_REPLACE_8)
+                    .replace("("+baseTypeParamName+".", BASE_TYPE_REPLACE_9)
+                    .replace(")"+baseTypeParamName+" ", BASE_TYPE_REPLACE_10)
+                    .replace(")"+baseTypeParamName+")", BASE_TYPE_REPLACE_11)
+                    .replace(")"+baseTypeParamName+".", BASE_TYPE_REPLACE_12)
+                    .replace(")"+baseTypeParamName+",", BASE_TYPE_REPLACE_13)
+                    .replace(")"+baseTypeParamName+";", BASE_TYPE_REPLACE_14)
+                    .replace("["+baseTypeParamName+".", BASE_TYPE_REPLACE_15)
+                    .replace("["+baseTypeParamName+"]", BASE_TYPE_REPLACE_16);
         }
     }
 

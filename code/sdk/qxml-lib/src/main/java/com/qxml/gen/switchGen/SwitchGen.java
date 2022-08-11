@@ -1,6 +1,5 @@
 package com.qxml.gen.switchGen;
 
-import android.os.Build;
 import android.widget.Switch;
 
 import com.qxml.AndroidRS;
@@ -18,21 +17,17 @@ public class SwitchGen extends CompoundButtonGen {
 
     @Attr(AndroidRS.attr.textOff)
     public void onSwitchTextOff(Switch s, String textOff) {
-        s.setTextOn(textOff);
+        s.setTextOff(textOff);
     }
 
     @Attr(AndroidRS.attr.switchMinWidth)
     public void onSwitchSwitchMinWidth(Switch s, int switchMinWidth) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            s.setSwitchMinWidth(switchMinWidth);
-        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) s.setSwitchMinWidth(switchMinWidth);
     }
 
     @Attr(AndroidRS.attr.switchPadding)
     public void onSwitchSwitchPadding(Switch s, int switchPadding) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            s.setSwitchPadding(switchPadding);
-        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) s.setSwitchPadding(switchPadding);
     }
 
     @Attr(AndroidRS.attr.switchTextAppearance)
@@ -42,23 +37,17 @@ public class SwitchGen extends CompoundButtonGen {
 
     @Attr(AndroidRS.attr.thumb)
     public void onSwitchThumb(Switch s, int thumb) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            s.setThumbResource(thumb);
-        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) s.setThumbResource(thumb);
     }
 
     @Attr(AndroidRS.attr.thumbTextPadding)
     public void onSwitchThumbTextPadding(Switch s, int thumbTextPadding) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            s.setThumbTextPadding(thumbTextPadding);
-        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) s.setThumbTextPadding(thumbTextPadding);
     }
 
     @Attr(AndroidRS.attr.track)
     public void onSwitchTrack(Switch s, int track) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            s.setTrackResource(track);
-        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) s.setTrackResource(track);
     }
 
 }

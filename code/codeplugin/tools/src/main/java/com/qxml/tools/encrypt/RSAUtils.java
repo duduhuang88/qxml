@@ -157,7 +157,6 @@ public final class RSAUtils {
     {
         try
         {
-            System.out.println("f decryptDataByPublicKey "+encryptedData.length);
             Cipher cipher = Cipher.getInstance(RSA);
             cipher.init(Cipher.DECRYPT_MODE, publicKey);
             return cipher.doFinal(encryptedData);

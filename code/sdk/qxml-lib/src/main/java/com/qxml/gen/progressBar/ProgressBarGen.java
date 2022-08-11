@@ -173,21 +173,26 @@ public class ProgressBarGen extends ViewGen {
         __progressLocalVar.min = min;
     }
 
+    @OnEnd({AndroidRS.attr.max})
+    public void onProgressBarMaxEnd(ProgressBar progressBar) {
+        progressBar.setMax(__progressLocalVar.max);
+    }
 
-    @OnEnd({AndroidRS.attr.progress, AndroidRS.attr.secondaryProgress, AndroidRS.attr.min, AndroidRS.attr.max})
-    public void onProgressBarProgressEnd(ProgressBar progressBar) {
-        if (__progressLocalVar.max != -1) {
-            progressBar.setMax(__progressLocalVar.max);
-        }
-        if (__progressLocalVar.min != -1 && android.os.Build.VERSION.SDK_INT >= 26) {
+    @OnEnd({AndroidRS.attr.min})
+    public void onProgressBarMinEnd(ProgressBar progressBar) {
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
             progressBar.setMin(__progressLocalVar.min);
         }
-        if (__progressLocalVar.progress != -1) {
-            progressBar.setProgress(__progressLocalVar.progress);
-        }
-        if (__progressLocalVar.secondaryProgress != -1) {
-            progressBar.setSecondaryProgress(__progressLocalVar.secondaryProgress);
-        }
+    }
+
+    @OnEnd({AndroidRS.attr.progress})
+    public void onProgressBarProgressEnd(ProgressBar progressBar) {
+        progressBar.setProgress(__progressLocalVar.progress);
+    }
+
+    @OnEnd({AndroidRS.attr.secondaryProgress})
+    public void onProgressBarSecondaryProgressEnd(ProgressBar progressBar) {
+        progressBar.setSecondaryProgress(__progressLocalVar.secondaryProgress);
     }
 
     @OnEnd({AndroidRS.attr.indeterminateOnly, AndroidRS.attr.indeterminate})

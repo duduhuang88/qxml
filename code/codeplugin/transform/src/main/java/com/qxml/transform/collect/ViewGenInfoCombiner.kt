@@ -19,16 +19,16 @@ object ViewGenInfoCombiner {
 
 /**
  *        ViewGen
- *          ⬤ ———————
+ *          * ———————
  *         /  \   \   \
- *       ⬤    ⭘  ⭘  ⬤
+ *       *     ⭘   ⭘   *
  *      /     / \
- *    ⭘    ⬤   ⭘
+ *    ⭘     *    ⭘
  *         /
  *       ⭘
  *
  *   ⭘ : viewReplace注解类
- *   ⬤ : viewParse注解类
+ *   * : viewParse注解类
  *   这是一棵以com.qxml.gen.view.ViewGen类为根的双向多叉分类树
  */
 private class GenInfoTreeNode(val genClassName: String) {
@@ -120,11 +120,11 @@ private class GenInfoHeadNode {
                 combineGen(parseClassName, true)
             }
         }
-        viewReplaceList.forEach {
+        /*viewReplaceList.forEach {
             //resultViewGenClassModelMap.remove(it)
-        }
+        }*/
 
-        resultViewGenClassModelMap.forEach { (genName, viewGenClassModel) ->
+        resultViewGenClassModelMap.forEach { (_, viewGenClassModel) ->
             viewGenClassModel.overrideFuncInfoModelList = null
             /*viewGenClassModel.funcInfoModelHashMap.forEach { (_, attrFuncInfoModel) ->
                 LogUtil.pl("gen key "+attrFuncInfoModel)
@@ -135,7 +135,7 @@ private class GenInfoHeadNode {
 
         return hashMapOf<String, ViewGenClassModel>().also { resultMap ->
             resultViewGenClassModelMap.forEach { (name, viewGenClassModel) ->
-                val attrFuncMap = hashMapOf<String, AttrFuncInfoModel>()
+                val attrFuncMap = LinkedHashMap<String, AttrFuncInfoModel>()
                 viewGenClassModel.funcInfoModelHashMap.forEach { (attrName, attrFuncInfoModel) ->
                     attrFuncInfoModel.attrName = attrName
                     if (viewTypeNameMap[name] == null) {
@@ -228,6 +228,7 @@ private class GenInfoHeadNode {
                         }
                         attrFuncInfoModel.attrName = attrName
                         attrFuncInfoModel.type = AttrFuncInfoModel.ATTR_TYPE
+                        attrFuncInfoModel.requiredCondition = parentAttrFuncInfo.requiredCondition
                         if (isParseType) {
                             curGenInfo.funcInfoModelHashMap[attrFuncInfoModel.attrName] = attrFuncInfoModel
                         } else {
@@ -243,6 +244,8 @@ private class GenInfoHeadNode {
                         && parentAttrFuncInfo.valueParamType == null) {
                         attrFuncInfoModel.type = AttrFuncInfoModel.ON_END_TYPE
                         attrFuncInfoModel.onEndCondition = parentAttrFuncInfo.onEndCondition
+                        attrFuncInfoModel.requiredCondition = parentAttrFuncInfo.requiredCondition
+                        attrFuncInfoModel.isAfterAdd = parentAttrFuncInfo.isAfterAdd
                         if (isParseType) {
                             curGenInfo.onEndFuncInfoModelMap[attrFuncInfoModel.funcSignInfo] = attrFuncInfoModel
                         } else {
@@ -269,7 +272,7 @@ private class GenInfoHeadNode {
             curGenInfo.onEndFuncInfoModelMap = parentGenInfo.onEndFuncInfoModelMap
             curGenInfo.onEndFuncInfoModelMap.putAll(curOnEndInfoMap)
         } else {
-            val parentInfoMap = hashMapOf<String, AttrFuncInfoModel>()
+            val parentInfoMap = LinkedHashMap<String, AttrFuncInfoModel>()
             parentInfoMap.putAll(parentGenInfo.funcInfoModelHashMap)
             parentInfoMap.putAll(curGenInfo.funcInfoModelHashMap)
 

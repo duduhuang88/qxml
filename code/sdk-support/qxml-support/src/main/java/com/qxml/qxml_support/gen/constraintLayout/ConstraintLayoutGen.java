@@ -19,24 +19,30 @@ public class ConstraintLayoutGen extends ViewGroupGen {
 
     @Attr(RS.attr.constraintSet)
     public void constraintLayoutConstraintSet(ConstraintLayout constraintLayout, int resId) {
-        android.support.constraint.ConstraintSet constraintSet = new android.support.constraint.ConstraintSet();
-        constraintSet.load(constraintLayout.getContext(), resId);
-        constraintLayout.setConstraintSet(constraintSet);
+        {
+            android.support.constraint.ConstraintSet constraintSet = new android.support.constraint.ConstraintSet();
+            constraintSet.load(constraintLayout.getContext(), resId);
+            constraintLayout.setConstraintSet(constraintSet);
+        }
     }
 
-    @OnEnd({AndroidRS.attr.minWidth, AndroidRS.attr.minHeight, AndroidRS.attr.maxWidth, AndroidRS.attr.maxHeight, })
-    public void onConstraintLayoutSizeEnd(ConstraintLayout constraintLayout) {
-        if (__viewSizeLocalVar.minHeight != 0) {
-            constraintLayout.setMinHeight(__viewSizeLocalVar.minHeight);
-        }
-        if (__viewSizeLocalVar.minWidth != 0) {
-            constraintLayout.setMinWidth(__viewSizeLocalVar.minWidth);
-        }
-        if (__viewSizeLocalVar.maxHeight != 2147483647) {
-            constraintLayout.setMaxHeight(__viewSizeLocalVar.maxHeight);
-        }
-        if (__viewSizeLocalVar.maxWidth != 2147483647) {
-            constraintLayout.setMaxWidth(__viewSizeLocalVar.maxWidth);
-        }
+    @OnEnd({AndroidRS.attr.minWidth})
+    public void onConstraintLayoutMinWidthEnd(ConstraintLayout constraintLayout) {
+        constraintLayout.setMinWidth(__viewSizeLocalVar.minWidth);
+    }
+
+    @OnEnd({AndroidRS.attr.minHeight})
+    public void onConstraintLayoutMinHeightEnd(ConstraintLayout constraintLayout) {
+        constraintLayout.setMinHeight(__viewSizeLocalVar.minHeight);
+    }
+
+    @OnEnd({AndroidRS.attr.maxWidth})
+    public void onConstraintLayoutMaxWidthEnd(ConstraintLayout constraintLayout) {
+        constraintLayout.setMaxWidth(__viewSizeLocalVar.maxWidth);
+    }
+
+    @OnEnd({AndroidRS.attr.maxHeight})
+    public void onConstraintLayoutMaxHeightEnd(ConstraintLayout constraintLayout) {
+        constraintLayout.setMaxHeight(__viewSizeLocalVar.maxHeight);
     }
 }

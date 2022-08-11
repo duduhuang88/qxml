@@ -1,4 +1,4 @@
-import org.gradle.internal.jvm.Jvm
+//import org.gradle.internal.jvm.Jvm
 
 apply plugin: 'java-library'
 
@@ -14,12 +14,16 @@ dependencies {
 
     implementation deps.gson
 
-    compileOnly files(Jvm.current().getToolsJar())
+    //compileOnly files(Jvm.current().getToolsJar())
+    //compileOnly files('libs/tools.jar')
+
 
     implementation project(":qxml-annotations")
     implementation project(":constant")
     implementation project(":tools")
 }
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}

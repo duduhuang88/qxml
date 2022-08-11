@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package com.qxml.transform.generate
 
 import com.google.common.io.Files
@@ -81,17 +83,12 @@ interface CreateClassFile {
             //layout不止一种type
             if (classGenCacheInfo.layoutTypeAmount != 1) {
                 methodBuilder.addStatement("${Constants.GEN_FIELD_RESOURCE}.getValue(${packageName}.R.layout.${layoutName}, ${Constants.GEN_FIELD_TYPED_VALUE_NAME}, true)")
-                //默认为layout -> "".hashCode = 0
-                val suffixLength = layoutName.length + 5 // '.' + '.xml'
                 methodBuilder.addComment("默认为layout")
-                methodBuilder.addStatement("int ${Constants.GEN_FIELD_LAYOUT_TYPE_HASHCODE_NAME} = 0")
-                methodBuilder.addStatement("CharSequence ${Constants.GEN_FIELD_LAYOUT_TYPE_STRING_NAME} = ${Constants.GEN_FIELD_TYPED_VALUE_NAME}.string")
-                methodBuilder.beginControlFlow("if(${Constants.GEN_FIELD_LAYOUT_TYPE_STRING_NAME}.charAt(10) == '-')")
-                methodBuilder.addStatement("${Constants.GEN_FIELD_LAYOUT_TYPE_HASHCODE_NAME} = ${Constants.GEN_FIELD_LAYOUT_TYPE_STRING_NAME}.subSequence(11, ${Constants.GEN_FIELD_LAYOUT_TYPE_STRING_NAME}.length() - $suffixLength).toString().hashCode()")
+                methodBuilder.addStatement("final String ${Constants.GEN_FIELD_LAYOUT_TYPE_STRING_NAME} = ${Constants.GEN_FIELD_TYPED_VALUE_NAME}.string.toString()")
 
-                //methodBuilder.addStatement("android.util.Log.e(\"touch\", \"f layout type info: \"+___layoutTypeHashCode+\" \"+___layoutTypeStr)")
+                //methodBuilder.addStatement("android.util.Log.e(\"touch\", \"f layout type info: \"+${Constants.GEN_FIELD_LAYOUT_TYPE_STRING_NAME})")
 
-                methodBuilder.endControlFlow()
+                //methodBuilder.endControlFlow()
             }
 
             methodBuilder.addStatement(viewGenInfoHolder.localVarDefContent(finalUsedLocalVarMap))

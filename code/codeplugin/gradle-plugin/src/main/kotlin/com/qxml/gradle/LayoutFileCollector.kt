@@ -14,8 +14,9 @@ import java.io.File
  * 收集所有可代码依赖project的layout文件信息
  * 对于子module间的同名layout文件会按project顺序选择
  */
-class LayoutFileCollector(private val project: Project, private val curBuildType: String,
-                          private val mergeXmlFiles: Set<File>, private val outputDir: File) {
+class LayoutFileCollector(private val project: Project, private val mainProjectVariantType: String,
+                          private val mergeXmlFiles: Set<File>, private val outputDir: File,
+                          private val libProjectVariantInfoMap: Map<String, String>) {
 
     companion object {
         private const val TAG_NAME = "name"
@@ -77,7 +78,7 @@ class LayoutFileCollector(private val project: Project, private val curBuildType
         if (mergeFile.exists()) {
             val gson = GsonBuilder().disableHtmlEscaping().create()
             val cacheLayoutFileMap = hashMapOf<String, HashMap<String, LayoutFileInfo>>()
-            val cacheFile = outputDir.resolve(Constants.MERGE_XML_CACHE_DIR_NAME).resolve("${projectName}_${curBuildType}.txt")
+            val cacheFile = outputDir.resolve(Constants.MERGE_XML_CACHE_DIR_NAME).resolve("${projectName}_${mainProjectVariantType}.txt")
             var cacheValid = false
             val mergerXmlFileKey = "${mergeFile.lastModified()}_${mergeFile.length()}"
             if (cacheFile.exists()) {
@@ -139,7 +140,8 @@ class LayoutFileCollector(private val project: Project, private val curBuildType
                             xmlTypeMap = hashMapOf()
                             layoutMap[layoutType] = xmlTypeMap
                         }
-                        xmlTypeMap[name] = LayoutFileInfo(name, layoutType, path)
+                        val layoutFile = File(path)
+                        xmlTypeMap[name] = LayoutFileInfo(name, if (layoutType.isEmpty()) layoutType else layoutFile.parentFile.name, path)
                         return
                     }
                 }
@@ -179,10 +181,14 @@ class LayoutFileCollector(private val project: Project, private val curBuildType
                                         var debugDir: File? = File(path)
                                         while (debugDir != null) {
                                             if (debugDir.name == INTERMIDIATES) {
-                                                val packageResourceDir = debugDir.resolve(INCREMENTAL).resolve("package${curBuildType}Resources").resolve(MERGER_XML)
-                                                if (packageResourceDir.exists()) {
-                                                    mergerXmlFilePathList.add(ProjectMergeFileInfo(config.substring(1), packageResourceDir.absolutePath))
-                                                    return@childrenBreak
+                                                val buildDir = debugDir.parentFile
+                                                if (buildDir?.name == Constants.BUILD) {
+                                                    val variantType = libProjectVariantInfoMap[buildDir.absolutePath] ?: mainProjectVariantType
+                                                    val packageResourceDir = debugDir.resolve(INCREMENTAL).resolve("package${variantType}Resources").resolve(MERGER_XML)
+                                                    if (packageResourceDir.exists()) {
+                                                        mergerXmlFilePathList.add(ProjectMergeFileInfo(config.substring(1), packageResourceDir.absolutePath))
+                                                        return@childrenBreak
+                                                    }
                                                 }
                                             }
                                             debugDir = debugDir.parentFile

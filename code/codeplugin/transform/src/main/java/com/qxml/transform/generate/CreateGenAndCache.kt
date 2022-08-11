@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package com.qxml.transform.generate
 
 import com.android.SdkConstants
@@ -10,6 +12,7 @@ import com.qxml.tools.LayoutTypeNameCorrect
 import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.AttrFuncInfoModel
 import com.qxml.tools.model.CompatViewInfoModel
+import com.qxml.transform.TransformConfig
 import com.qxml.transform.collect.ViewGenInfoHolderImpl
 import com.qxml.transform.generate.match.AttrMethodValueMatcher
 import com.qxml.transform.generate.model.*
@@ -22,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 
 private const val FIELD_VIEW_NAME_PREFIX = "___view_"
+private const val DEFAULT_LAYOUT_TYPE = "layout"
 
 interface CreateGenAndCache: CreateView, CreateClassFile {
 
@@ -42,10 +46,12 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                           , genClassInfoCacheDir: File, packageName: String, gson: Gson
                                           , finalGenResultMap: ConcurrentHashMap<String, HashMap<String, ViewGenResultInfo>>
                                           , qxmlExtension: QxmlConfigExtension
+                                          , transformConfig: TransformConfig
                                           , attrMethodValueMatcher: AttrMethodValueMatcher
                                           , viewGenInfoHolder: ViewGenInfoHolderImpl
                                           , compatViewInfoMap: Map<String, CompatViewInfoModel>
                                           , styleInfoMap: Map<String, Map<String, StyleInfo>>
+                                          , layoutTypeInfoMap: Map<String, Map<String, String>>
                                           , idMap: Map<String, Int>
     ): MutableList<String> {
 
@@ -54,13 +60,13 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
         unGenLayoutNameList.forEach xmlLoopContinue@{ layoutName ->
             layoutInfoMap[layoutName]?.let { layoutFileInfoMap ->
                 val layoutFileInfoList = mutableListOf<LayoutFileInfo>()
-                layoutFileInfoMap.forEach { (type, layoutFileInfo) ->
+                layoutFileInfoMap.forEach { (_, layoutFileInfo) ->
                     layoutFileInfoList.add(layoutFileInfo)
                 }
                 layoutFileInfoList.sort()
                 val layoutClassCacheDir = genClassInfoCacheDir.resolve(layoutName)
 
-                val cacheFileName = getGenClassCacheFileName("${layoutName}${makeQxmlConfigVerifyKey(qxmlExtension)}")
+                val cacheFileName = getGenClassCacheFileName("${layoutName}${makeQxmlConfigVerifyKey(qxmlExtension, transformConfig)}")
                 val cacheInfoFile = layoutClassCacheDir.resolve(cacheFileName)
                 val className = makeGenClassName(layoutName)
                 val cacheClassFile = layoutClassCacheDir.resolve(className.replace(".", File.separator) + SdkConstants.DOT_CLASS)
@@ -68,10 +74,10 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                 //waitableExecutor.execute {
                 run execute@{
                     val parser = getXmlParser()
-                    var index = 0
+                    var viewIndex = 0
 
                     val getViewFieldNameFun = {
-                        "$FIELD_VIEW_NAME_PREFIX${index++}"
+                        "$FIELD_VIEW_NAME_PREFIX${viewIndex++}"
                     }
 
                     //不能转换成代码的layout版本
@@ -92,7 +98,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                     //关联的include layout
                     val relativeIncludeLayoutMap = hashMapOf<String, String>()
                     //使用的R
-                    val usedReferenceRMap = hashMapOf<String, String>()
+                    val usedReferenceRMap = hashMapOf<String, Int>()
                     //使用的import
                     val usedImportPackageMap = hashMapOf<String, String>()
                     //用到的localVar
@@ -104,7 +110,8 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                     var jumpByInclude = false
 
                     run layoutTypeLoopBreak@{
-                        usedReferenceRMap["R.layout.$layoutName"] = ""
+                        val key = "R.layout.$layoutName"
+                        usedReferenceRMap[key] = idMap[key] ?: 0
                         layoutFileInfoList.forEach layoutTypeLoopContinue@{ xmlTypeInfo ->
                             //用到的临时变量
                             val usedTempVarMap = hashMapOf<String, String>()
@@ -136,7 +143,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 , attrMethodValueMatcher, layoutGenStateMap, relativeIncludeLayoutMap
                                 , viewGenInfoHolder, compatViewInfoMap, styleInfoMap, usedReferenceRMap
                                 , usedImportPackageMap, finalUsedLocalVarMap, idMap, usedTempVarMap)?.also {
-                                index = 0
+                                viewIndex = 0
                                 if (it.result != GenResult.WAIT_INCLUDE) {
                                     failedLayoutTypeGenInfoList.add(LayoutTypeGenInfo(xmlTypeInfo.type, layoutIsMerge))
                                     finalUsedLocalVarMap.clear()
@@ -147,7 +154,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 }
                                 return@layoutTypeLoopContinue
                             }
-                            index = 0
+                            viewIndex = 0
 
                             //未实现的attr
                             if ((!qxmlExtension.ignoreUnImplementAttr && !qxmlConfig.ignoreUnImplementAttr) || !qxmlConfig.ignoreUnImplementAttr) {
@@ -166,7 +173,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 }
                             }
 
-                            val returnViewName = "${FIELD_VIEW_NAME_PREFIX}$index"
+                            val returnViewName = "${FIELD_VIEW_NAME_PREFIX}$viewIndex"
 
                             if (layoutIsMerge) {
                                 //当layout是merge时固定返回null
@@ -218,6 +225,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                             genCodeBlockBuilder.addStatement(genTypeInfoMap[singleLayoutType]!!.toClearContent())
                         }
                     } else {
+                        var isDefaultLayoutTypeGenSuc: Boolean? = true
                         if (failedLayoutTypeGenInfoList.isNotEmpty()) {
                             val sb = StringBuilder()
                             val commentSb = StringBuilder()
@@ -225,16 +233,26 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                             val failedMergeTypes = mutableListOf<String>()
                             val failedNormalTypes = mutableListOf<String>()
                             failedLayoutTypeGenInfoList.forEach { typeGenInfo ->
-                                if (typeGenInfo.isMerge) {
-                                    failedMergeTypes.add(typeGenInfo.layoutType)
+                                if (isDefaultLayoutTypeGenSuc != null && isDefaultLayoutTypeGenSuc!! && DEFAULT_LAYOUT_TYPE == LayoutTypeNameCorrect.toDisplayText(typeGenInfo.layoutType)) {
+                                    isDefaultLayoutTypeGenSuc = if (typeGenInfo.isMerge) {
+                                        null
+                                    } else {
+                                        false
+                                    }
                                 } else {
-                                    failedNormalTypes.add(typeGenInfo.layoutType)
+                                    if (typeGenInfo.isMerge) {
+                                        failedMergeTypes.add(typeGenInfo.layoutType)
+                                    } else {
+                                        failedNormalTypes.add(typeGenInfo.layoutType)
+                                    }
                                 }
                             }
                             if (failedNormalTypes.isNotEmpty()) {
                                 failedNormalTypes.forEachIndexed { index, failedType ->
-                                    sb.append("${Constants.GEN_FIELD_LAYOUT_TYPE_HASHCODE_NAME} == ${failedType.hashCode()}")
-                                    commentSb.append(" ${LayoutTypeNameCorrect.toDisplayText(failedType)} ")
+                                    val correctType = LayoutTypeNameCorrect.toDisplayText(failedType)
+                                    val typedValueString = layoutTypeInfoMap[layoutName]?.get(correctType) ?: throw RuntimeException("在arsc中未找到${layoutName}的${correctType}类型信息")
+                                    sb.append("${Constants.GEN_FIELD_LAYOUT_TYPE_STRING_NAME}.equals(\"$typedValueString\"))")
+                                    commentSb.append(" $correctType ")
                                     if (index < failedNormalTypes.size - 1) {
                                         sb.append(" || ")
                                     }
@@ -250,8 +268,10 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 commentSb.clear()
                                 sb.clear()
                                 failedMergeTypes.forEachIndexed { index, failedType ->
-                                    sb.append("${Constants.GEN_FIELD_LAYOUT_TYPE_HASHCODE_NAME} == ${failedType.hashCode()}")
-                                    commentSb.append(" ${LayoutTypeNameCorrect.toDisplayText(failedType)} ")
+                                    val correctType = LayoutTypeNameCorrect.toDisplayText(failedType)
+                                    val typedValueString = layoutTypeInfoMap[layoutName]?.get(correctType) ?: throw RuntimeException("在arsc中未找到${layoutName}的${correctType}类型信息")
+                                    sb.append("${Constants.GEN_FIELD_LAYOUT_TYPE_STRING_NAME}.equals(\"$typedValueString\"))")
+                                    commentSb.append(" $correctType ")
                                     if (index < failedMergeTypes.size - 1) {
                                         sb.append(" || ")
                                     }
@@ -268,21 +288,37 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                         if (successLayoutTypeGenInfoList.isNotEmpty()) {
                             successLayoutTypeGenInfoList.forEach { genInfo ->
                                 val type = genInfo.layoutType
-                                genCodeBlockBuilder.addStatement("//type: ${LayoutTypeNameCorrect.toDisplayText(type)}")
-                                genCodeBlockBuilder.beginControlFlow("if(${Constants.GEN_FIELD_LAYOUT_TYPE_HASHCODE_NAME} == ${type.hashCode()})")
+                                val correctType = LayoutTypeNameCorrect.toDisplayText(type)
 
-                                addFieldInfo(generateFieldInfo, type, genCodeBlockBuilder)
-                                genCodeBlockBuilder.addStatement(genTypeInfoMap[type]!!.toClearContent())
-                                genCodeBlockBuilder.endControlFlow()
+                                if (isDefaultLayoutTypeGenSuc != null && isDefaultLayoutTypeGenSuc!!) {
+                                    if (DEFAULT_LAYOUT_TYPE != correctType) {
+                                        val typedValueString = layoutTypeInfoMap[layoutName]?.get(correctType) ?: throw RuntimeException("在arsc中未找到${layoutName}的${correctType}类型信息")
+
+                                        genCodeBlockBuilder.addStatement("//type: $correctType")
+                                        genCodeBlockBuilder.beginControlFlow("if(${Constants.GEN_FIELD_LAYOUT_TYPE_STRING_NAME}.equals(\"$typedValueString\"))")
+
+                                        addFieldInfo(generateFieldInfo, type, genCodeBlockBuilder)
+                                        genCodeBlockBuilder.addStatement(genTypeInfoMap[type]!!.toClearContent())
+                                        genCodeBlockBuilder.endControlFlow()
+                                    }
+                                }
                             }
                         }
-                        genCodeBlockBuilder.addStatement(makeReturnDefaultInflate(layoutName, packageName))
+                        if (isDefaultLayoutTypeGenSuc == null || !isDefaultLayoutTypeGenSuc!!) {
+                            genCodeBlockBuilder.addStatement("//type: $DEFAULT_LAYOUT_TYPE gen failed")
+                            genCodeBlockBuilder.addStatement(makeReturnDefaultInflate(layoutName, packageName))
+                        } else {
+                            val defaultType = ""
+                            genCodeBlockBuilder.addStatement("//type: $DEFAULT_LAYOUT_TYPE")
+                            addFieldInfo(generateFieldInfo, defaultType, genCodeBlockBuilder)
+                            genCodeBlockBuilder.addStatement(genTypeInfoMap[defaultType]!!.toClearContent())
+                        }
                     }
                     val methodContent = genCodeBlockBuilder.toClearContent()
                     //LogUtil.pl("final code "+layoutName+" \n"+methodContent)
                     val classGenInfo = ClassGenCacheInfo(false, className, layoutName, layoutClassCacheDir, cacheClassFile, cacheInfoFile
                         , GenerateClassInfo(usedGenInfoMap, usedOnEndInfoMap, usedStyleInfoMap, invalidGenInfoMap
-                            , relativeIncludeLayoutMap, usedReferenceRMap, usedImportPackageMap, getLayoutGenResultMapFromFinalResultMap(layoutName, finalGenResultMap), getCacheVerifyKey(layoutFileInfoList, qxmlExtension, qxmlConfigMap), methodContent)
+                            , relativeIncludeLayoutMap, usedReferenceRMap, usedImportPackageMap, getLayoutGenResultMapFromFinalResultMap(layoutName, finalGenResultMap), getCacheVerifyKey(layoutFileInfoList, qxmlExtension, qxmlConfigMap, transformConfig), layoutTypeInfoMap, methodContent)
                         , generateFieldInfo, successLayoutTypeGenInfoList, failedLayoutTypeGenInfoList, layoutFileInfoList.size)
 
                     try {
@@ -312,19 +348,19 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
             waitToGenLayoutNameList.add(layoutName)
         }
         if (waitToGenLayoutNameList.isNotEmpty()) {
-            LogUtil.pl("un resolve layout "+waitToGenLayoutNameList)
+            LogUtil.pl("un resolve layout $waitToGenLayoutNameList")
         }
         return waitToGenLayoutNameList
     }
 
     private fun addFieldInfo(generateFieldInfo: GenerateFieldInfoMap, type: String, genCodeBlockBuilder: CodeBlock.Builder) {
-        generateFieldInfo.allSizeMap[type]?.forEach { _, initBlock ->
+        generateFieldInfo.allSizeMap[type]?.forEach { (_, initBlock) ->
             genCodeBlockBuilder.addStatement(initBlock)
         }
-        generateFieldInfo.allContextThemeWrapMap[type]?.forEach { _, initBlock ->
+        generateFieldInfo.allContextThemeWrapMap[type]?.forEach { (_, initBlock) ->
             genCodeBlockBuilder.addStatement(initBlock)
         }
-        generateFieldInfo.allNewViewMap[type]?.forEach { _, newViewBlocList ->
+        generateFieldInfo.allNewViewMap[type]?.forEach { (_, newViewBlocList) ->
             newViewBlocList.forEach { newViewBloc ->
                 genCodeBlockBuilder.addStatement(newViewBloc)
             }
@@ -362,16 +398,16 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
         return methodContent.substring(0, methodContent.length - 2)
     }
 
-    fun getCacheVerifyKey(xmlTypeInfoList: MutableList<LayoutFileInfo>, qxmlExtension: QxmlConfigExtension, qxmlConfigMap: HashMap<String, QxmlConfigExtension>? = null): String {
+    fun getCacheVerifyKey(xmlTypeInfoList: MutableList<LayoutFileInfo>, qxmlExtension: QxmlConfigExtension, qxmlConfigMap: HashMap<String, QxmlConfigExtension>? = null, transformConfig: TransformConfig): String {
         val stringBuilder = StringBuilder()
         xmlTypeInfoList.forEach { typeInfo ->
             stringBuilder.append("_${typeInfo.type}_${File(typeInfo.filePath).lastModified()}")
             if (qxmlConfigMap != null) {
                 qxmlConfigMap[typeInfo.type]?.also {
-                    stringBuilder.append(makeQxmlConfigVerifyKey(it))
+                    stringBuilder.append(makeQxmlConfigVerifyKey(it, transformConfig))
                 }
             } else {
-                stringBuilder.append(makeQxmlConfigVerifyKey(qxmlExtension))
+                stringBuilder.append(makeQxmlConfigVerifyKey(qxmlExtension, transformConfig))
             }
         }
         return stringBuilder.toString()
@@ -382,7 +418,8 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
     fun getXmlParser(): XmlParser
     fun releaseXmlParser(xmlParser: XmlParser)
 
-    fun makeQxmlConfigVerifyKey(qxmlConfig: QxmlConfigExtension): String {
+    fun makeQxmlConfigVerifyKey(qxmlConfig: QxmlConfigExtension,
+                                transformConfig: TransformConfig): String {
         return "_useFactory_${qxmlConfig.useFactory}_viewDebug_${qxmlConfig.viewDebug}_compatMode_${qxmlConfig.compatMode}_useCreateViewListener_${qxmlConfig.useCreateViewListener}"
     }
 

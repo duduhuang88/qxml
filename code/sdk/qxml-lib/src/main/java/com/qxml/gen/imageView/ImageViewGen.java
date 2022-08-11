@@ -4,7 +4,6 @@ import android.widget.ImageView;
 
 import com.qxml.AndroidRS;
 import com.qxml.gen.view.ViewGen;
-import com.qxml.helper.AttrHelperKt;
 import com.qxml.value.ValueInfo;
 import com.yellow.qxml_annotions.Attr;
 import com.yellow.qxml_annotions.LocalVar;
@@ -45,11 +44,8 @@ public class ImageViewGen extends ViewGen {
 
     @Attr(AndroidRS.attr.tint)
     public void imageViewTint(ImageView imageView, ValueInfo valueInfo) {
-        android.content.Context context = imageView.getContext();
-        android.content.res.ColorStateList colorStateList;
-        colorStateList = valueInfo.getColorStateList(__context);
         if (android.os.Build.VERSION.SDK_INT >= 21) {
-            imageView.setImageTintList(colorStateList);
+            imageView.setImageTintList(valueInfo.getColorStateList(__context));
         } else {
             //android.support.v4.view.ViewCompat.setBackgroundTintList(imageView, colorStateList);
         }
@@ -59,6 +55,11 @@ public class ImageViewGen extends ViewGen {
     @Attr(AndroidRS.attr.tintMode)
     public void imageViewTintMode(ImageView imageView, int tintMode) {
         __imageViewLocalVar.tintMode = tintMode;
+        if (android.os.Build.VERSION.SDK_INT >= 21) {
+            imageView.setImageTintMode(com.qxml.helper.AttrHelperKt.intToMode(__imageViewLocalVar.tintMode, null));
+        } else {
+            //android.support.v4.view.ViewCompat.setBackgroundTintMode(imageView, mode);
+        }
     }
 
     @Attr(AndroidRS.attr.scaleType)
@@ -73,23 +74,9 @@ public class ImageViewGen extends ViewGen {
         }
     }
 
-    @OnEnd({AndroidRS.attr.tint, AndroidRS.attr.tintMode})
-    public void onImageViewTintModeEnd(ImageView imageView) {
-        if (__imageViewLocalVar.tintMode != -1) {
-            android.graphics.PorterDuff.Mode mode = com.qxml.helper.AttrHelperKt.intToMode(__imageViewLocalVar.tintMode, null);
-            if (android.os.Build.VERSION.SDK_INT >= 21) {
-                imageView.setImageTintMode(mode);
-            } else {
-                //android.support.v4.view.ViewCompat.setBackgroundTintMode(imageView, mode);
-            }
-        }
-    }
-
     @OnEnd({AndroidRS.attr.scaleType, AndroidRS.attr.adjustViewBounds})
     public void onImageViewScaleTypeEnd(ImageView imageView) {
-        if (__imageViewLocalVar.adjustViewBounds) {
-            imageView.setAdjustViewBounds(true);
-        }
+        if (__imageViewLocalVar.adjustViewBounds) imageView.setAdjustViewBounds(true);
         imageView.setScaleType(com.qxml.helper.AttrHelperKt.intToScaleType(__imageViewLocalVar.scaleType));
     }
 

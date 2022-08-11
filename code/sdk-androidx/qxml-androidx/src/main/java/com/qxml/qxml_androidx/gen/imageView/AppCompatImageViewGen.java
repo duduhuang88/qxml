@@ -55,7 +55,7 @@ public class AppCompatImageViewGen extends ImageViewGen {
     }
 
     @SuppressLint("RestrictedApi")
-    @OnEnd({RS.attr.srcCompat, AndroidRS.attr.src, RS.attr.tint, RS.attr.tintMode})
+    @OnEnd({RS.attr.srcCompat, AndroidRS.attr.src})
     public void onAppCompatSrcEnd(AppCompatImageView appCompatImageView) {
         if (__appCompatImageViewLocalVar.src != 0) {
             appCompatImageView.setImageResource(__appCompatImageViewLocalVar.src);
@@ -63,20 +63,26 @@ public class AppCompatImageViewGen extends ImageViewGen {
             appCompatImageView.setImageDrawable(androidx.appcompat.content.res.AppCompatResources.getDrawable(__context, __appCompatImageViewLocalVar.srcCompat));
         }
         com.qxml.qxml_androidx.gen.imageView.ImageViewHelper.fixDrawable(appCompatImageView.getDrawable());
+    }
 
-        android.content.res.ColorStateList colorStateList = null;
-        if (__appCompatImageViewLocalVar.tint != 0) {
-            colorStateList = androidx.appcompat.content.res.AppCompatResources.getColorStateList(__context, __appCompatImageViewLocalVar.tint);
-        } else if (__appCompatImageViewLocalVar.tintColor != Integer.MAX_VALUE) {
-            colorStateList = android.content.res.ColorStateList.valueOf(__appCompatImageViewLocalVar.tintColor);
-        }
+    @SuppressLint("RestrictedApi")
+    @OnEnd({RS.attr.tint, RS.attr.tintMode})
+    public void onAppCompatTintEnd(AppCompatImageView appCompatImageView) {
+        {
+            android.content.res.ColorStateList colorStateList = null;
+            if (__appCompatImageViewLocalVar.tint != 0) {
+                colorStateList = androidx.appcompat.content.res.AppCompatResources.getColorStateList(__context, __appCompatImageViewLocalVar.tint);
+            } else if (__appCompatImageViewLocalVar.tintColor != Integer.MAX_VALUE) {
+                colorStateList = android.content.res.ColorStateList.valueOf(__appCompatImageViewLocalVar.tintColor);
+            }
 
-        if (colorStateList != null) {
-            androidx.core.widget.ImageViewCompat.setImageTintList(appCompatImageView, colorStateList);
-        }
+            if (colorStateList != null) {
+                androidx.core.widget.ImageViewCompat.setImageTintList(appCompatImageView, colorStateList);
+            }
 
-        if (__appCompatImageViewLocalVar.tintMode != -1) {
-            androidx.core.widget.ImageViewCompat.setImageTintMode(appCompatImageView, androidx.appcompat.widget.DrawableUtils.parseTintMode(__appCompatImageViewLocalVar.tintMode, null));
+            if (__appCompatImageViewLocalVar.tintMode != -1) {
+                androidx.core.widget.ImageViewCompat.setImageTintMode(appCompatImageView, androidx.appcompat.widget.DrawableUtils.parseTintMode(__appCompatImageViewLocalVar.tintMode, null));
+            }
         }
     }
 

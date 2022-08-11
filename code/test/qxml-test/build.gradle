@@ -8,12 +8,12 @@ apply plugin: 'kotlin-kapt'
 group 'com.qxml.test'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion android_compileSdkVersion.toInteger()
 
     defaultConfig {
         /*applicationId "com.qxml"*/
-        minSdkVersion 14
-        targetSdkVersion 29
+        minSdkVersion android_minSdkVersion
+        targetSdkVersion android_targetSdkVersion.toInteger()
         versionCode 1
         versionName "1.0"
 
@@ -67,28 +67,16 @@ android {
 
 }
 
-/*qxml {
-    enable true
-    useFactory false
-    viewDebug true
-    logEnable true
-    compatMode CompatMode.AUTO
-}*/
-
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation kotlin_stdlib
 
-    testImplementation deps.junit
-    androidTestImplementation deps.test.runner
-    androidTestImplementation deps.test.core
+    testImplementation junit
 
-    //annotationProcessor deps.qxml.processor
+    androidTestImplementation test_runner
+    androidTestImplementation test_core
+
     implementation project(':module')
 
     api deps.qxml.dynamic_baseLib
-
-    /*implementation deps.qxml.annotations
-    kapt deps.qxml.processor
-    implementation deps.qxml.tools*/
 }

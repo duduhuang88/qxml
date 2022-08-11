@@ -10,9 +10,8 @@ public interface LinearAttr extends ViewLocalVar {
 
     @Attr(AndroidRS.attr.layout_weight)
     default void viewLayoutWeight(View view, float weight) {
-        android.view.ViewGroup.LayoutParams lp = ___cur_layout_param;
-        if (lp instanceof android.widget.LinearLayout.LayoutParams) {
-            android.widget.LinearLayout.LayoutParams llp = (android.widget.LinearLayout.LayoutParams) lp;
+        if (___cur_layout_param instanceof android.widget.LinearLayout.LayoutParams) {
+            android.widget.LinearLayout.LayoutParams llp = (android.widget.LinearLayout.LayoutParams) ___cur_layout_param;
             llp.weight = weight;
         }
     }

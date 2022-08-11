@@ -1,6 +1,5 @@
 package com.qxml.qxml_androidx.gen.textview;
 
-import android.os.Build;
 import android.widget.TextView;
 
 import androidx.core.widget.TextViewCompat;
@@ -17,14 +16,14 @@ public class TextViewCompatGen extends TextViewGen implements TextViewAutoSizeAt
 
     @Attr(RS.attr.lastBaselineToBottomHeight)
     public void textViewAppLastBaselineToTopHeight(TextView textView, int lastBaselineToBottomHeight) {
-        if (Build.VERSION.SDK_INT >= 28) {
+        if (android.os.Build.VERSION.SDK_INT >= 28) {
             textView.setLastBaselineToBottomHeight(lastBaselineToBottomHeight);
         }
     }
 
     @Attr(RS.attr.firstBaselineToTopHeight)
     public void textViewAppFirstBaselineToTopHeight(TextView textView, int firstBaselineToTopHeight) {
-        if (Build.VERSION.SDK_INT >= 28) {
+        if (android.os.Build.VERSION.SDK_INT >= 28) {
             textView.setFirstBaselineToTopHeight(firstBaselineToTopHeight);
         }
     }
@@ -35,7 +34,8 @@ public class TextViewCompatGen extends TextViewGen implements TextViewAutoSizeAt
         android.graphics.PorterDuff.Mode tintMode = null;
         if (__textViewDrawableLocalVar.drawableTintModeEnum != -1) {
             tintMode = AttrHelperKt.intToMode(__textViewDrawableLocalVar.drawableTintModeEnum, null);
-            if (Build.VERSION.SDK_INT >= 23) {
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                //请使用androidx.appcompat:appcompat:1.1.0以上版本
                 androidx.core.widget.TextViewCompat.setCompoundDrawableTintMode(textView, tintMode);
                 tintMode = null;
             }
@@ -47,7 +47,7 @@ public class TextViewCompatGen extends TextViewGen implements TextViewAutoSizeAt
                 if (tintMode != null) {
                     androidx.core.graphics.drawable.DrawableCompat.setTintMode(drawableLeft, tintMode);
                 }
-                if (Build.VERSION.SDK_INT >= 21) {
+                if (android.os.Build.VERSION.SDK_INT >= 21) {
                     drawableLeft.setTintMode(tintMode);
                 }
                 drawableLeft.setBounds(0, 0, drawableLeft.getIntrinsicWidth(), drawableLeft.getIntrinsicHeight());
@@ -90,9 +90,9 @@ public class TextViewCompatGen extends TextViewGen implements TextViewAutoSizeAt
             }
         }
 
-        if (Build.VERSION.SDK_INT >= 18) {
+        if (android.os.Build.VERSION.SDK_INT >= 18) {
             textView.setCompoundDrawablesRelative(drawableLeft, drawableTop, drawableRight, drawableBottom);
-        } else if (Build.VERSION.SDK_INT >= 17) {
+        } else if (android.os.Build.VERSION.SDK_INT >= 17) {
             boolean rtl = textView.getLayoutDirection() == android.view.View.LAYOUT_DIRECTION_RTL;
             textView.setCompoundDrawables(rtl ? drawableRight : drawableLeft, drawableTop, rtl ? drawableLeft : drawableRight, drawableBottom);
         } else {

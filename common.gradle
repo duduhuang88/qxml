@@ -3,21 +3,19 @@ def REMOTE_DEPENDENCE = false
 
 allprojects {
 
-    ext.PUBLISH_VERSION = "2.0.0"
+    ext.PUBLISH_VERSION = "3.0.0"
 
     ext.versions = [
-            'minSdkVersion': 14,
-            'compileSdkVersion': 29,
 
             'buildToolsVersion': '30.0.3',
-            'kotlin_version': '1.4.10',
+            'kotlin_version': '1.6.10',
 
-            'build_gradle_version': '4.0.2',
+            'build_gradle_version': '7.0.3',
     ]
 
     ext.deps = [
             android: [
-                    'gradlePlugin': "com.android.tools.build:gradle:4.0.2",
+                    'gradlePlugin': "com.android.tools.build:gradle:7.0.3",
             ],
             'support': [
                     'v7': 'com.android.support:appcompat-v7:28.0.0',
@@ -51,7 +49,7 @@ allprojects {
                     'tests': "com.android.tools.lint:lint-tests:${versions.buildToolsVersion}",
             ],
             javapoet: 'com.squareup:javapoet:1.11.1',
-            javassist: 'org.javassist:javassist:3.28.0-GA',
+            javassist: 'org.javassist:javassist:3.29.0-GA',
             junit: 'junit:junit:4.12',
             'auto': [
                     'service': 'com.google.auto.service:auto-service:1.0-rc6',

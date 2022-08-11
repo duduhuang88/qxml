@@ -11,6 +11,7 @@ import com.qxml.constant.Constants
 import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.CompatViewInfoModel
 import com.qxml.transform.AttrInfoModel
+import com.qxml.transform.TransformConfig
 import com.qxml.transform.collect.ViewGenInfoHolderImpl
 import com.qxml.transform.generate.match.AttrMethodValueMatcher
 import com.qxml.transform.generate.model.*
@@ -22,18 +23,20 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 
-private const val INCLUDE_LOOP_COUNT_LIMIT = 2000
+private const val INCLUDE_LOOP_COUNT_LIMIT = 300
 
 class LayoutClassGenerator(
     private val isAndroidx: Boolean,
     private val transformOutputProvide: TransformOutputProvider,
     private val layoutInfoMap: HashMap<String, HashMap<String, LayoutFileInfo>>,// Map<name, Map<type, info>>
+    private val layoutTypeInfoMap: Map<String, Map<String, String>>,
     private val attrInfoMap: HashMap<String, AttrInfoModel>,
     private val viewGenInfoHolder: ViewGenInfoHolderImpl,
     private val packageName: String,
     private val waitableExecutor: WaitableExecutor,
     private val genClassInfoCacheDir: File,
     private val qxmlExtension: QxmlConfigExtension,
+    private val transformConfig: TransformConfig,
     private val compatViewInfoMap: Map<String, CompatViewInfoModel>,
     private val idMap: Map<String, Int>,
     private val idCacheMap: Map<String, Int>
@@ -132,8 +135,8 @@ class LayoutClassGenerator(
             loopTimes++
             val unResolveLayoutNameList = createGenContentAndGenInfoResult(isAndroidx, finalGenInfoMap, layoutInfoMap
                 , unGenLayoutNameList, classGenInfoList, waitableExecutor, layoutGenStateMap, genClassInfoCacheDir
-                , packageName, gson, finalGenResultMap, qxmlExtension, attrMethodValueMatcher, viewGenInfoHolder
-                , compatViewInfoMap, styleInfoMap, idMap)
+                , packageName, gson, finalGenResultMap, qxmlExtension, transformConfig, attrMethodValueMatcher, viewGenInfoHolder
+                , compatViewInfoMap, styleInfoMap, layoutTypeInfoMap, idMap)
             unGenLayoutNameList.clear()
             unGenLayoutNameList.addAll(unResolveLayoutNameList)
         }
@@ -180,7 +183,7 @@ class LayoutClassGenerator(
                 xmlTypeInfoList.sort()
                 val layoutClassCacheDir = genClassInfoCacheDir.resolve(layoutName)
 
-                val cacheFileName = getGenClassCacheFileName("${layoutName}${makeQxmlConfigVerifyKey(qxmlExtension)}")
+                val cacheFileName = getGenClassCacheFileName("${layoutName}${makeQxmlConfigVerifyKey(qxmlExtension, transformConfig)}")
                 val cacheInfoFile = layoutClassCacheDir.resolve(cacheFileName)
                 val methodContentCacheFile = layoutClassCacheDir.resolve(Constants.QXML_METHOD_CONTENT_CACHE_FILE_NAME)
                 val className = makeGenClassName(layoutName)
@@ -205,7 +208,7 @@ class LayoutClassGenerator(
                             return@forEach
                         }
                     }
-                    if (!isGenFailed && generateClassInfo.verifyKey == getCacheVerifyKey(xmlTypeInfoList, qxmlExtension) && !viewGenInfoHolder.anyChange(generateClassInfo)) {
+                    if (!isGenFailed && generateClassInfo.verifyKey == getCacheVerifyKey(xmlTypeInfoList, qxmlExtension, null, transformConfig) && !viewGenInfoHolder.anyChange(generateClassInfo, layoutName, qxmlExtension)) {
                         //LogUtil.pl("no change "+className+" "+cacheInfoFile.absolutePath)
                         var hasIncludeUnGen = false
                         val hasInclude = generateClassInfo.relativeIncludeLayoutMap.isNotEmpty()
@@ -228,8 +231,8 @@ class LayoutClassGenerator(
                             var idChange = false
                             if (generateClassInfo.usedReferenceRMap.isNotEmpty()) {
                                 run loopBreak@{
-                                    generateClassInfo.usedReferenceRMap.forEach { (rName, _) ->
-                                        if (idChangeMap[rName] != null) {
+                                    generateClassInfo.usedReferenceRMap.forEach { (rName, rValue) ->
+                                        if (idChangeMap[rName] != null || (rValue != 0 && idMap[rName] != rValue)) {
                                             LogUtil.pl("$layoutName regen by R change $rName")
                                             idChange = true
                                             return@loopBreak
@@ -304,7 +307,7 @@ data class ClassGenCacheInfo(val cacheValid: Boolean,  //cache是否有效
 
 data class ViewGenResultInfo(val layoutType: String, val result: GenResult, val info: String, val noGenViewClassName: String = "")
 enum class GenResult {
-    NO_GEN_CLASS, STYLE_UN_SUPPORT, REFERENCE_STYLE_UN_SUPPORT, VALUE_MATCH_ERROR, IGNORE, ATTR_UN_IMPLEMENT, GEN_FAILED, WAIT_INCLUDE, SUCCESS
+    NO_GEN_CLASS, STYLE_UN_SUPPORT, ANDROIDX_FRAGMENT_UN_SUPPORT, REFERENCE_STYLE_UN_SUPPORT, VALUE_MATCH_ERROR, IGNORE, ATTR_UN_IMPLEMENT, GEN_FAILED, WAIT_INCLUDE, SUCCESS
 }
 
 interface QxmlGenResultProvider {

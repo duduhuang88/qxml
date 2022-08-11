@@ -6,11 +6,11 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion android_compileSdkVersion.toInteger()
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 29
+        minSdkVersion android_minSdkVersion
+        targetSdkVersion android_targetSdkVersion.toInteger()
         versionCode 1
         versionName "1.0"
 
@@ -32,10 +32,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    testImplementation deps.junit
-    androidTestImplementation deps.test.runner
-    androidTestImplementation deps.test.core
+    implementation kotlin_stdlib
+    testImplementation junit
+    androidTestImplementation test_runner
+    androidTestImplementation test_core
 
     /*kapt deps.qxml.processor
     implementation deps.qxml.annotations*/

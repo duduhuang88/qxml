@@ -61,8 +61,8 @@ class ValueInfo {
         if (isColor()) {
             return ColorStateList.valueOf(colorValue)
         }
-        return if (Build.VERSION.SDK_INT >= 23) context.getColorStateList(resourceId) else context.resources
-            .getColorStateList(resourceId)
+        return if (Build.VERSION.SDK_INT >= 23) context.resources.getColorStateList(resourceId, context.theme) else
+            context.resources.getColorStateList(resourceId)
     }
 
     fun getReferenceDrawable(context: Context, resources: Resources): Drawable? {

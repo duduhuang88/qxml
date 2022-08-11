@@ -18,6 +18,7 @@ public class AttrFuncInfoModel implements Cloneable {
     private String belongViewName;
     private List<String> onEndCondition;
     private boolean afterAdd;
+    private String requiredCondition;
     private HashMap<String, String> usedLocalVarMap;
 
     public String cacheSignKey;
@@ -41,6 +42,14 @@ public class AttrFuncInfoModel implements Cloneable {
             generateKey();
         }
         return !cacheSignKey.equals(other.cacheSignKey) || !funcBodyContent.equals(other.funcBodyContent);
+    }
+
+    public String getRequiredCondition() {
+        return requiredCondition;
+    }
+
+    public void setRequiredCondition(String requiredCondition) {
+        this.requiredCondition = requiredCondition;
     }
 
     public boolean isAfterAdd() {

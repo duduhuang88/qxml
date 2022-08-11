@@ -32,13 +32,4 @@ public interface ViewLocalVar {
      */
     ViewGroup.LayoutParams ___cur_layout_param = new ViewGroup.LayoutParams(-2, -2);
 
-    class $$ViewLocalVariable {
-        public int layoutWidth = 0;
-        public int layoutHeight = 0;
-        public boolean layoutWidthSet = false;
-        public boolean layoutHeightSet = false;
-    }
-
-    @LocalVar
-    $$ViewLocalVariable __viewLocalVar = new $$ViewLocalVariable();
 }

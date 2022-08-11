@@ -1,11 +1,8 @@
 package com.qxml.gen.button;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.widget.CompoundButton;
 
 import com.qxml.AndroidRS;
-import com.qxml.helper.AttrHelperKt;
 import com.qxml.value.ValueInfo;
 import com.yellow.qxml_annotions.Attr;
 import com.yellow.qxml_annotions.LocalVar;

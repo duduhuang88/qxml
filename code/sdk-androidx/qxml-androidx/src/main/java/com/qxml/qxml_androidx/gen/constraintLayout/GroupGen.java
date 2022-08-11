@@ -27,8 +27,8 @@ public class GroupGen extends ConstraintHelperGen {
 
     @OnEnd({RS.attr.constraint_referenced_ids, AndroidRS.attr.visibility})
     public void onGroupEnd(Group group) {
-        if (__groupLocalVar.visibility != View.VISIBLE) {
-            group.setVisibility((__groupLocalVar.visibility == 1 ? View.INVISIBLE : View.GONE));
+        if (__groupLocalVar.visibility != android.view.View.VISIBLE) {
+            group.setVisibility((__groupLocalVar.visibility == 1 ? android.view.View.INVISIBLE : android.view.View.GONE));
         }
     }
 

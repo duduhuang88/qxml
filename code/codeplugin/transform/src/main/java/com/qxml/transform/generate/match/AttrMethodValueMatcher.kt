@@ -35,7 +35,7 @@ class AttrMethodValueMatcher(private val packageName: String, private val attrIn
      */
     fun match(viewTypeName: String, viewFieldName: String, layoutName: String, layoutType: String
               , attrFuncInfoModel: AttrFuncInfoModel, attrValue: String, fieldInfo: FieldInfo
-              , contextName: String, usedReferenceRMap: HashMap<String, String>
+              , contextName: String, usedReferenceRMap: HashMap<String, Int>
               , idMap: Map<String, Int>
               , usedTempVarMap: HashMap<String, String>): MatchResult {
 
@@ -48,38 +48,29 @@ class AttrMethodValueMatcher(private val packageName: String, private val attrIn
                         " can't parse to ${attrFuncInfoModel.valueParamType} "))
 
         if (valueInfo.valueType <= ValueType.REFERENCE_ATTR) {
-            usedReferenceRMap.putIfAbsent(valueInfo.valueWithoutPackageName, "")
+            usedReferenceRMap.putIfAbsent(valueInfo.valueWithoutPackageName, idMap[valueInfo.valueWithoutPackageName] ?: 0)
             //valueInfo.value = idMap[valueInfo.valueWithoutPackageName]?.toString() ?: valueInfo.value
         }
 
-        val shouldWrapScope = false //shouldWrapScope(attrFuncInfoModel, usedTempVarMap)
-
-        when(paramType) {
-            ParamType.INT -> {
-                return intTypeValueResolver.resolve(viewTypeName, viewFieldName, layoutName, layoutType, attrFuncInfoModel, valueInfo, attrInfoModel, fieldInfo, contextName, usedTempVarMap, shouldWrapScope)
-            }
-            ParamType.FLOAT -> {
-                return floatTypeValueResolver.resolve(viewTypeName, viewFieldName, layoutName, layoutType, attrFuncInfoModel, valueInfo, attrInfoModel, fieldInfo, contextName, usedTempVarMap, shouldWrapScope)
-            }
-            ParamType.BOOLEAN -> {
-                return booleanTypeValueResolver.resolve(viewTypeName, viewFieldName, layoutName, layoutType, attrFuncInfoModel, valueInfo, attrInfoModel, fieldInfo, contextName, usedTempVarMap, shouldWrapScope)
-            }
-            ParamType.STRING -> {
-                return stringTypeValueResolver.resolve(viewTypeName, viewFieldName, layoutName, layoutType, attrFuncInfoModel, valueInfo, attrInfoModel, fieldInfo, contextName, usedTempVarMap, shouldWrapScope)
-            }
-            ParamType.VALUE_INFO -> {
-                return typedValueTypeResolver.resolve(viewTypeName, viewFieldName, layoutName, layoutType, attrFuncInfoModel, valueInfo, attrInfoModel, fieldInfo, contextName, usedTempVarMap, false)
-            }
-            else -> {}
+        val valueResolver = when (paramType) {
+            ParamType.INT -> intTypeValueResolver
+            ParamType.FLOAT -> floatTypeValueResolver
+            ParamType.BOOLEAN -> booleanTypeValueResolver
+            ParamType.STRING -> stringTypeValueResolver
+            ParamType.VALUE_INFO -> typedValueTypeResolver
+            else -> null
+        }
+        valueResolver?.let {
+            return it.resolve(viewTypeName, viewFieldName, layoutName, layoutType, attrFuncInfoModel, valueInfo, attrInfoModel, fieldInfo, contextName, usedTempVarMap)
         }
         return MatchResult(MatchType.FAILED, "", ViewGenResultInfo("$layoutName $layoutType", GenResult.VALUE_MATCH_ERROR, "${attrFuncInfoModel.viewParamType}-${attrFuncInfoModel.attrName} the value(${valueInfo.sourceValue}) can't parse to ${attrFuncInfoModel.valueParamType}"))
     }
 
     fun getValueInfo(attrName: String, attrValue: String
-                     , usedReferenceRMap: HashMap<String, String>, idMap: Map<String, Int>?): ValueInfo {
+                     , usedReferenceRMap: HashMap<String, Int>, idMap: Map<String, Int>): ValueInfo {
         val valueInfo = valueParser.getValueInfo(attrName, attrValue)!!
         if (valueInfo.valueType <= ValueType.REFERENCE_ATTR) {
-            usedReferenceRMap.putIfAbsent(valueInfo.valueWithoutPackageName, "")
+            usedReferenceRMap.putIfAbsent(valueInfo.valueWithoutPackageName, idMap[valueInfo.valueWithoutPackageName] ?: 0)
             /*idMap?.apply {
                 valueInfo.value = idMap[valueInfo.valueWithoutPackageName]?.toString() ?: valueInfo.value
             }*/
@@ -89,11 +80,6 @@ class AttrMethodValueMatcher(private val packageName: String, private val attrIn
 
     private fun getMethodParamType(paramType: String): ParamType {
         return typeMap[paramType] ?: ParamType.UN_SUPPORT
-    }
-
-    private fun shouldWrapScope(attrFuncInfoModel: AttrFuncInfoModel, usedTempVarMap: HashMap<String, String>): Boolean {
-        val existType = usedTempVarMap[attrFuncInfoModel.valueParamName]
-        return existType != null && existType != attrFuncInfoModel.valueParamType
     }
 
 }

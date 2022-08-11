@@ -12,16 +12,14 @@ public interface CollapsingToolbarAttr extends ViewLocalVar {
     @Attr(RS.attr.layout_collapseMode)
     default void viewLayoutCollapseMode(View view, int layout_collapseMode) {
         if (___cur_layout_param instanceof com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) {
-            com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams lp = (com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) ___cur_layout_param;
-            lp.setCollapseMode(layout_collapseMode);
+            ((com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) ___cur_layout_param).setCollapseMode(layout_collapseMode);
         }
     }
 
     @Attr(RS.attr.layout_collapseParallaxMultiplier)
     default void viewLayoutCollapseParallaxMultiplier(View view, float layout_collapseParallaxMultiplier) {
         if (___cur_layout_param instanceof com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) {
-            com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams lp = (com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) ___cur_layout_param;
-            lp.setParallaxMultiplier(layout_collapseParallaxMultiplier);
+            ((com.google.android.material.appbar.CollapsingToolbarLayout.LayoutParams) ___cur_layout_param).setParallaxMultiplier(layout_collapseParallaxMultiplier);
         }
     }
 

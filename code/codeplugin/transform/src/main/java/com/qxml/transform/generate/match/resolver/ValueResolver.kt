@@ -14,19 +14,18 @@ interface ValueResolver {
     fun resolve(viewTypeName: String, viewFieldName: String, layoutName: String, layoutType: String
                 , attrFuncInfoModel: AttrFuncInfoModel, valueInfo: ValueInfo, attrInfoModel: AttrInfoModel
                 , fieldInfo: FieldInfo, contextName: String, usedTempVarMap: HashMap<String, String>
-                , shouldWrapScope: Boolean
     ): MatchResult
     fun type(): String
 
     fun makeResolverErrInfo(layoutName: String, layoutType: String, attrFuncInfoModel: AttrFuncInfoModel, valueInfo: ValueInfo) = MatchResult(MatchType.FAILED, "", ViewGenResultInfo("$layoutName $layoutType", GenResult.VALUE_MATCH_ERROR, "${attrFuncInfoModel.viewParamType}-${attrFuncInfoModel.attrName} the value(${valueInfo.sourceValue}) can't parse to ${type()}"))
     fun makeResolverSucInfo(result: String) = MatchResult(MatchType.SUCCESS_VALUE, result)
-    fun makeResolverSucStateInfo(stringBuilder: StringBuilder, shouldWrapScope: Boolean): MatchResult {
+    fun makeResolverSucStateInfo(stringBuilder: StringBuilder, useBaseTypeValue: Boolean): MatchResult {
         val result = stringBuilder.toString()
-        return MatchResult(MatchType.SUCCESS_ATTR_REFERENCE, result.substring(0, result.length - 1), null, shouldWrapScope)
+        return MatchResult(MatchType.SUCCESS_ATTR_REFERENCE, result.substring(0, result.length - 1), null, useBaseTypeValue)
     }
 
-    fun makeResolverSucStateInfo(stringBuilder: StringBuilder, lastBodyContent: String, shouldWrapScope: Boolean): MatchResult {
-        return MatchResult(MatchType.SUCCESS_ATTR_REFERENCE, stringBuilder.append(lastBodyContent.substring(0, lastBodyContent.length - 1)).toString(), null, shouldWrapScope)
+    fun makeResolverSucStateInfo(stringBuilder: StringBuilder, lastBodyContent: String, useBaseTypeValue: Boolean): MatchResult {
+        return MatchResult(MatchType.SUCCESS_ATTR_REFERENCE, stringBuilder.append(lastBodyContent.substring(0, lastBodyContent.length - 1)).toString(), null, useBaseTypeValue)
     }
 
     fun makeResolverNullInfo(stringBuilder: StringBuilder): MatchResult{
@@ -65,9 +64,25 @@ interface ValueResolver {
         usedTempVarMap[attrFuncInfoModel.valueParamName] = attrFuncInfoModel.valueParamType*/
         return "${attrFuncInfoModel.valueParamType} ${attrFuncInfoModel.valueParamName} = $value;"
     }
+
+    fun replaceToParamName(funcBody: String, attrFuncInfoModel: AttrFuncInfoModel): String {
+        return funcBody.replace(Constants.BASE_TYPE_PARAM_NAME_TEMP, attrFuncInfoModel.valueParamName)
+    }
+
+    fun replaceToBaseType(funcBody: String, baseTypeValue: String): String {
+        return funcBody.replace(Constants.BASE_TYPE_PARAM_NAME_TEMP, baseTypeValue)
+    }
+
+    fun String.toParamNameFuncBody(attrFuncInfoModel: AttrFuncInfoModel): String {
+        return replaceToParamName(this, attrFuncInfoModel)
+    }
+
+    fun String.toBaseTypeFuncBody(baseTypeValue: String): String {
+        return replaceToBaseType(this, baseTypeValue)
+    }
 }
 
-data class MatchResult(val matchType: MatchType, val result: String, val ignoreInfo: ViewGenResultInfo? = null, val shouldWrapScope: Boolean = false)
+data class MatchResult(val matchType: MatchType, val result: String, val ignoreInfo: ViewGenResultInfo? = null, val useBaseTypeValue: Boolean = true)
 
 enum class MatchType {
     FAILED, SUCCESS_VALUE, SUCCESS_TYPE_VALUE, SUCCESS_ATTR_REFERENCE, SUCCESS_NULL

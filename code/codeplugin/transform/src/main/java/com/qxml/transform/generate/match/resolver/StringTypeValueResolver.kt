@@ -19,36 +19,35 @@ class StringTypeValueResolver: ValueResolver {
         attrInfoModel: AttrInfoModel,
         fieldInfo: FieldInfo,
         contextName: String,
-        usedTempVarMap: HashMap<String, String>,
-        shouldWrapScope: Boolean
+        usedTempVarMap: HashMap<String, String>
     ): MatchResult {
         val valueType = valueInfo.valueType
         val value = valueInfo.value
-        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName)
+        val funcBody = attrFuncInfoModel.funcBodyContent.substring(3).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName)
 
         val stringBuilder = StringBuilder()
 
         if (valueInfo.isAttrReference) {
             stringBuilder.append(getAttrReferenceResolveState(contextName, valueInfo))
             stringBuilder.append(makeParamInit(attrFuncInfoModel, callAttrStringReferenceMethod(contextName, value), usedTempVarMap))
-            return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+            return makeResolverSucStateInfo(stringBuilder, funcBody.toParamNameFuncBody(attrFuncInfoModel), false)
         } else {
             if (valueType == ValueType.NULL) {
-                stringBuilder.append(makeParamInit(attrFuncInfoModel, "\"\"", usedTempVarMap))
-                return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                //stringBuilder.append(makeParamInit(attrFuncInfoModel, "\"\"", usedTempVarMap))
+                return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody("\"\""), true)
             }
             if (attrInfoModel.isReference()) {//necessary?
                 if (valueType == ValueType.REFERENCE_STRING) {
                     stringBuilder.append(makeParamInit(attrFuncInfoModel, "${Constants.GEN_PARAM_CONTEXT_NAME}.getString($value)", usedTempVarMap))
-                    return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                    return makeResolverSucStateInfo(stringBuilder, funcBody.toParamNameFuncBody(attrFuncInfoModel), false)
                 }
             } else if (attrInfoModel.isString()) {
                 if (valueType == ValueType.REFERENCE_STRING) {
                     stringBuilder.append(makeParamInit(attrFuncInfoModel, "${Constants.GEN_PARAM_CONTEXT_NAME}.getString($value)", usedTempVarMap))
-                    return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                    return makeResolverSucStateInfo(stringBuilder, funcBody.toParamNameFuncBody(attrFuncInfoModel), false)
                 } else {
-                    stringBuilder.append(makeParamInit(attrFuncInfoModel, "\"${valueInfo.sourceValue}\"", usedTempVarMap))
-                    return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                    //stringBuilder.append(makeParamInit(attrFuncInfoModel, "\"${valueInfo.sourceValue}\"", usedTempVarMap))
+                    return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody("\"${valueInfo.sourceValue}\""), true)
                 }
             }
         }

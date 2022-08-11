@@ -4,9 +4,11 @@ apply plugin: 'kotlin'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    compile 'com.android.tools.lint:lint-api:27.1.1'
-    compile 'com.android.tools.lint:lint-checks:27.1.1'
+    implementation 'com.android.tools.lint:lint-api:27.1.1'
+    implementation 'com.android.tools.lint:lint-checks:27.1.1'
 }
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}

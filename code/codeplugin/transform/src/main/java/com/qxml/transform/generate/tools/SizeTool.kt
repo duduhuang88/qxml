@@ -7,8 +7,8 @@ class SizeTool {
 
     companion object {
 
-        private const val MAX_COMPAT_SIZE = 5
-        private const val MAX_F_COMPAT_SIZE = -5
+        private const val MAX_COMPAT_SIZE = 5F
+        private const val MAX_F_COMPAT_SIZE = -5F
 
         private const val SIZE_OFFSET = "com.qxml.helper.QxmlSize.TYPE_VALUED_COMPLEX_TO_DIMENSION_PIXEL_SIZE_OFFSET"
 
@@ -168,12 +168,12 @@ class SizeTool {
             val sb = StringBuilder()
             sb.append("float _float_$fieldName = ${value}f * ${param};")
             if (floatValue > 0) {
-                sb.append("\nint $fieldName = (int) (_float_$fieldName + 0.5f);")
+                sb.append("\r\nint $fieldName = (int) (_float_$fieldName + 0.5f)")
             } else if (floatValue < 0) {
-                sb.append("\nint $fieldName = (int)  (_float_$fieldName + ${SIZE_OFFSET});")
+                sb.append("\r\nint $fieldName = (int)  (_float_$fieldName + ${SIZE_OFFSET})")
             }
-            if (floatValue <= MAX_COMPAT_SIZE && floatValue >= MAX_F_COMPAT_SIZE) {
-                sb.append("\nif ($fieldName == 0) { $fieldName = (_float_$fieldName > 0 ? 1 : -1); }")
+            if (floatValue in MAX_F_COMPAT_SIZE..MAX_COMPAT_SIZE) {
+                sb.append(";\r\nif ($fieldName == 0) $fieldName = (_float_$fieldName > 0 ? 1 : -1)")
             }
             return sb.toString()
         }

@@ -13,13 +13,16 @@ open class LayoutWatchTask: DefaultTask() {
     @get:Input
     var buildType: String? = null
 
+    @get:Input
+    var libProjectVariantInfoMap: Map<String, String>? = null
+
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
     var mergeXmlFiles: Set<File>? = null
 
     @TaskAction
     fun watch() {
-        LayoutFileCollector(project, buildType!!, mergeXmlFiles!!, outputDir!!).collect()
+        LayoutFileCollector(project, buildType!!, mergeXmlFiles!!, outputDir!!, libProjectVariantInfoMap!!).collect()
     }
 
 }

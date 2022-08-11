@@ -15,6 +15,7 @@
             android:id="@+id/tv_111"
             android:text="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             android:textSize="20sp"
+            android:textColor="@color/color_selector_test"
             android:includeFontPadding="false"
             android:layout_width="200dp"
             android:layout_height="50dp"/>

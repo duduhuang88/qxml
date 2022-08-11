@@ -16,9 +16,6 @@ import java.lang.StringBuilder
 open class IdCollector: DefaultTask() {
 
     @get:OutputFile
-    var publicROutputFile: File? = null
-
-    @get:OutputFile
     var outputFile: File? = null
 
     @get:InputFiles
@@ -37,11 +34,6 @@ open class IdCollector: DefaultTask() {
         val reader = IdCollectSymbolListReader(packageName!!, exactIdMap)
         val content = reader.readSymbolTable(rFile!!.singleFile)
         outputFile!!.writeText(content)
-        val stringBuilder = StringBuilder()
-        reader.publicIdList.forEach {
-            stringBuilder.append(it).append("\n")
-        }
-        publicROutputFile!!.writeText(stringBuilder.toString())
     }
 }
 

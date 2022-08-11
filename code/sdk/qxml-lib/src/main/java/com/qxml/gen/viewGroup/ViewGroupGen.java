@@ -52,7 +52,7 @@ public class ViewGroupGen extends ViewGen {
         } else if (descendantFocusability == 1) {
             viewGroup.setDescendantFocusability(android.view.ViewGroup.FOCUS_AFTER_DESCENDANTS);
         } else {
-            viewGroup.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+            viewGroup.setDescendantFocusability(android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         }
     }
 

@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class ViewGenClassModel {
 
-    private Map<String, AttrFuncInfoModel> funcInfoModelHashMap = new HashMap<>();
+    private LinkedHashMap<String, AttrFuncInfoModel> funcInfoModelHashMap = new LinkedHashMap<>();
     private List<AttrFuncInfoModel> overrideFuncInfoModelList = new ArrayList<>();
     private Map<String, AttrFuncInfoModel> onEndFuncInfoModelMap = new LinkedHashMap<>();
     private Map<String, String> importPackageMap = new HashMap<>();
@@ -21,11 +21,11 @@ public class ViewGenClassModel {
         this.importPackageMap = importPackageMap;
     }
 
-    public Map<String, AttrFuncInfoModel> getFuncInfoModelHashMap() {
+    public LinkedHashMap<String, AttrFuncInfoModel> getFuncInfoModelHashMap() {
         return funcInfoModelHashMap;
     }
 
-    public void setFuncInfoModelHashMap(Map<String, AttrFuncInfoModel> funcInfoModelHashMap) {
+    public void setFuncInfoModelHashMap(LinkedHashMap<String, AttrFuncInfoModel> funcInfoModelHashMap) {
         this.funcInfoModelHashMap = funcInfoModelHashMap;
     }
 

@@ -15,10 +15,6 @@ import com.yellow.qxml_annotions.ViewParse;
 public class TabLayoutGen extends HorizontalScrollViewGen {
 
     public static class $$TabLayoutLocalVariable {
-        public boolean tabPaddingStartSet = false;
-        public boolean tabPaddingTopSet = false;
-        public boolean tabPaddingEndSet = false;
-        public boolean tabPaddingBottomSet = false;
         public int tabPaddingStart = 0;
         public int tabPaddingTop = 0;
         public int tabPaddingEnd = 0;
@@ -61,51 +57,6 @@ public class TabLayoutGen extends HorizontalScrollViewGen {
         tabLayout.setTabIndicatorFullWidth(tabIndicatorFullWidth);
     }
 
-    @Attr(RS.attr.tabPadding)
-    public void onTabLayoutTabPadding(TabLayout tabLayout, int tabPadding) {
-        if (!__tabLayoutLocalVar.tabPaddingStartSet) {
-            __tabLayoutLocalVar.tabPaddingStart = tabPadding;
-        }
-        if (!__tabLayoutLocalVar.tabPaddingTopSet) {
-            __tabLayoutLocalVar.tabPaddingTop = tabPadding;
-        }
-        if (!__tabLayoutLocalVar.tabPaddingEndSet) {
-            __tabLayoutLocalVar.tabPaddingEnd = tabPadding;
-        }
-        if (!__tabLayoutLocalVar.tabPaddingBottomSet) {
-            __tabLayoutLocalVar.tabPaddingBottom = tabPadding;
-        }
-    }
-
-    @Attr(RS.attr.tabPaddingStart)
-    public void onTabLayoutTabPaddingStart(TabLayout tabLayout, int tabPaddingStart) {
-        __tabLayoutLocalVar.tabPaddingStart = tabPaddingStart;
-        __tabLayoutLocalVar.tabPaddingStartSet = true;
-    }
-
-    @Attr(RS.attr.tabPaddingTop)
-    public void onTabLayoutTabPaddingTop(TabLayout tabLayout, int tabPaddingTop) {
-        __tabLayoutLocalVar.tabPaddingTop = tabPaddingTop;
-        __tabLayoutLocalVar.tabPaddingTopSet = true;
-    }
-
-    @Attr(RS.attr.tabPaddingEnd)
-    public void onTabLayoutTabPaddingEnd(TabLayout tabLayout, int tabPaddingEnd) {
-        __tabLayoutLocalVar.tabPaddingEnd = tabPaddingEnd;
-        __tabLayoutLocalVar.tabPaddingEndSet = true;
-    }
-
-    @Attr(RS.attr.tabPaddingBottom)
-    public void onTabLayoutTabPaddingBottom(TabLayout tabLayout, int tabPaddingBottom) {
-        __tabLayoutLocalVar.tabPaddingBottom = tabPaddingBottom;
-        __tabLayoutLocalVar.tabPaddingBottomSet = true;
-    }
-
-    @Attr(RS.attr.tabContentStart)
-    public void onTabLayoutTabContentStart(TabLayout tabLayout, int tabContentStart) {
-        __tabLayoutLocalVar.tabContentStart = tabContentStart;
-    }
-
     @Attr(RS.attr.tabBackground)
     public void onTabLayoutTabBackground(TabLayout tabLayout, int tabBackground) {
         com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setTabBackgroundResId(tabLayout, tabBackground);
@@ -124,11 +75,6 @@ public class TabLayoutGen extends HorizontalScrollViewGen {
     @Attr(RS.attr.tabMaxWidth)
     public void onTabLayoutTabMaxWidth(TabLayout tabLayout, int tabMaxWidth) {
         com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setRequestedTabMaxWidthField(tabLayout, tabMaxWidth);
-    }
-
-    @Attr(RS.attr.tabMode)
-    public void onTabLayoutTabMode(TabLayout tabLayout, int tabMode) {
-        __tabLayoutLocalVar.tabMode = tabMode;
     }
 
     @SuppressLint({"RestrictedApi", "ResourceType"})
@@ -199,24 +145,52 @@ public class TabLayoutGen extends HorizontalScrollViewGen {
         tabLayout.setUnboundedRipple(tabUnboundedRipple);
     }
 
+    @Attr(RS.attr.tabPadding)
+    public void onTabLayoutTabPadding(TabLayout tabLayout, int tabPadding) {
+        __tabLayoutLocalVar.tabPaddingStart = tabPadding;
+        __tabLayoutLocalVar.tabPaddingTop = tabPadding;
+        __tabLayoutLocalVar.tabPaddingEnd = tabPadding;
+        __tabLayoutLocalVar.tabPaddingBottom = tabPadding;
+    }
+
+    @Attr(RS.attr.tabPaddingStart)
+    public void onTabLayoutTabPaddingStart(TabLayout tabLayout, int tabPaddingStart) {
+        __tabLayoutLocalVar.tabPaddingStart = tabPaddingStart;
+    }
+
+    @Attr(RS.attr.tabPaddingTop)
+    public void onTabLayoutTabPaddingTop(TabLayout tabLayout, int tabPaddingTop) {
+        __tabLayoutLocalVar.tabPaddingTop = tabPaddingTop;
+    }
+
+    @Attr(RS.attr.tabPaddingEnd)
+    public void onTabLayoutTabPaddingEnd(TabLayout tabLayout, int tabPaddingEnd) {
+        __tabLayoutLocalVar.tabPaddingEnd = tabPaddingEnd;
+    }
+
+    @Attr(RS.attr.tabPaddingBottom)
+    public void onTabLayoutTabPaddingBottom(TabLayout tabLayout, int tabPaddingBottom) {
+        __tabLayoutLocalVar.tabPaddingBottom = tabPaddingBottom;
+    }
+
+    @Attr(RS.attr.tabContentStart)
+    public void onTabLayoutTabContentStart(TabLayout tabLayout, int tabContentStart) {
+        __tabLayoutLocalVar.tabContentStart = tabContentStart;
+    }
+
+    @Attr(RS.attr.tabMode)
+    public void onTabLayoutTabMode(TabLayout tabLayout, int tabMode) {
+        __tabLayoutLocalVar.tabMode = tabMode;
+    }
+
     @OnEnd({RS.attr.tabPaddingStart, RS.attr.tabPaddingTop, RS.attr.tabPaddingEnd, RS.attr.tabPaddingBottom, RS.attr.tabPadding
             , RS.attr.tabMode, RS.attr.tabContentStart})
     public void onTabLayoutTabModeEnd(TabLayout tabLayout) {
-        if (__tabLayoutLocalVar.tabPaddingStart != 0) {
-            com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setTabPaddingStartField(tabLayout, __tabLayoutLocalVar.tabPaddingStart);
-        }
-        if (__tabLayoutLocalVar.tabPaddingTop != 0) {
-            com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setTabPaddingTopField(tabLayout, __tabLayoutLocalVar.tabPaddingTop);
-        }
-        if (__tabLayoutLocalVar.tabPaddingEnd != 0) {
-            com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setTabPaddingEndField(tabLayout, __tabLayoutLocalVar.tabPaddingEnd);
-        }
-        if (__tabLayoutLocalVar.tabPaddingBottom != 0) {
-            com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setTabPaddingBottomField(tabLayout, __tabLayoutLocalVar.tabPaddingBottom);
-        }
-        if (__tabLayoutLocalVar.tabContentStart != 0) {
-            com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setContentInsetStart(tabLayout, __tabLayoutLocalVar.tabContentStart);
-        }
+        if (__tabLayoutLocalVar.tabPaddingStart != 0) com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setTabPaddingStartField(tabLayout, __tabLayoutLocalVar.tabPaddingStart);
+        if (__tabLayoutLocalVar.tabPaddingTop != 0) com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setTabPaddingTopField(tabLayout, __tabLayoutLocalVar.tabPaddingTop);
+        if (__tabLayoutLocalVar.tabPaddingEnd != 0) com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setTabPaddingEndField(tabLayout, __tabLayoutLocalVar.tabPaddingEnd);
+        if (__tabLayoutLocalVar.tabPaddingBottom != 0) com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setTabPaddingBottomField(tabLayout, __tabLayoutLocalVar.tabPaddingBottom);
+        if (__tabLayoutLocalVar.tabContentStart != 0) com.qxml.qxml_androidx.gen.tabLayout.TabLayoutHelper.setContentInsetStart(tabLayout, __tabLayoutLocalVar.tabContentStart);
         tabLayout.setTabMode(__tabLayoutLocalVar.tabMode);
     }
 

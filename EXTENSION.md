@@ -54,6 +54,7 @@ public class TextViewGen extends ViewGen {
 ```
 ##### 注1：Attr注解中请使用 AndroidRS.attr.* 引用Android属性或 RS.attr.* 引用自定义属性，如果找不到RS类，请先 build project 进行生成
 ##### 注2：Attr注解的方法必须包含两个参数，第一个参数类型为`ViewParse`注解中`value`定义的类型，第二个参数详见下参数说明
+##### 注3：Attr注解的方法会按照声明的顺序执行
 
 ### 3. 根据需要，使用`LocalVar`与`OnEnd`注解
 

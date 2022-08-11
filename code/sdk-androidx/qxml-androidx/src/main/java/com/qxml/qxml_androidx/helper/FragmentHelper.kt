@@ -19,7 +19,7 @@ object FragmentHelper {
     private val mInLayoutField = ReflectUtils.getDeclaredFieldOrNull(Fragment::class.java, "mInLayout")
     private val mFragmentManagerField = ReflectUtils.getDeclaredFieldOrNull(Fragment::class.java, "mFragmentManager")
     private val mHostField = ReflectUtils.getDeclaredFieldOrNull(Fragment::class.java, "mHost")
-    private val addFragmentMethod = /*supportFragmentManager::class.java*/Class.forName("androidx.fragment.app.FragmentManagerImpl").getMethod("addFragment", Fragment::class.java, Boolean::class.java)
+    //private val addFragmentMethod = /*supportFragmentManager::class.java*/Class.forName("androidx.fragment.app.FragmentManagerImpl").getMethod("addFragment", Fragment::class.java, Boolean::class.java)
 
     @JvmStatic
     fun add(context: Context, f: Fragment, id: Int, tag: String? = null, parent: ViewGroup? = null) {
@@ -38,7 +38,8 @@ object FragmentHelper {
                 mHostField?.set(f, mHost)
                 `$$FragmentHelper`.fragmentOnInflate(fragmentActivity, f)
                 //f.onInflate(fragmentActivity, null, null)
-                addFragmentMethod.invoke(fm, f, true)
+                //change to androidx.fragment.app.FragmentLayoutInflaterFactory logic
+                //addFragmentMethod.invoke(fm, f, true)
             }
         }
     }

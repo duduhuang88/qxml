@@ -130,7 +130,7 @@ public class QXmlProcessor extends AbstractProcessor {
                 w.flush();
                 w.close();
             } catch (Exception e) {
-                System.out.println("f process err "+e.getMessage());
+                LogUtil.pl("process err "+e.getMessage());
                 e.printStackTrace();
             }
             long spendTime = (System.currentTimeMillis() - time);

@@ -80,7 +80,6 @@ class AttrsXmlParser(private val project: Project, private val curBuildType: Str
     private val xmlParser: XmlParser by lazy { XmlParser() }
 
     fun parse(): HashMap<String, AttrInfoModel> {
-
         val attrInfoMap = hashMapOf<String, AttrInfoModel>()
 
         val cacheDir = project.buildDir.resolve(cacheDirPath)

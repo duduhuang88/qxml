@@ -15,10 +15,6 @@ import com.yellow.qxml_annotions.ViewParse;
 public class CardViewGen extends FrameLayoutGen {
 
     public static final class $$CardViewLocalVar {
-        public boolean contentPaddingLeftSet = false;
-        public boolean contentPaddingRightSet = false;
-        public boolean contentPaddingTopSet = false;
-        public boolean contentPaddingBottomSet = false;
         public int contentPaddingLeft = 0;
         public int contentPaddingRight = 0;
         public int contentPaddingTop = 0;
@@ -60,27 +56,31 @@ public class CardViewGen extends FrameLayoutGen {
         cardView.setPreventCornerOverlap(cardPreventCornerOverlap);
     }
 
+    @Attr(RS.attr.contentPadding)
+    public void cardViewContentPadding(CardView cardView, int contentPadding) {
+        __cardViewLocalVar.contentPaddingLeft = contentPadding;
+        __cardViewLocalVar.contentPaddingRight = contentPadding;
+        __cardViewLocalVar.contentPaddingTop = contentPadding;
+        __cardViewLocalVar.contentPaddingBottom = contentPadding;
+    }
+
     @Attr(RS.attr.contentPaddingLeft)
     public void cardViewContentPaddingLeft(CardView cardView, int contentPaddingLeft) {
-        __cardViewLocalVar.contentPaddingLeftSet = true;
         __cardViewLocalVar.contentPaddingLeft = contentPaddingLeft;
     }
 
     @Attr(RS.attr.contentPaddingRight)
     public void cardViewContentPaddingRight(CardView cardView, int contentPaddingRight) {
-        __cardViewLocalVar.contentPaddingRightSet = true;
         __cardViewLocalVar.contentPaddingRight = contentPaddingRight;
     }
 
     @Attr(RS.attr.contentPaddingTop)
     public void cardViewContentPaddingTop(CardView cardView, int contentPaddingTop) {
-        __cardViewLocalVar.contentPaddingTopSet = true;
         __cardViewLocalVar.contentPaddingTop = contentPaddingTop;
     }
 
     @Attr(RS.attr.contentPaddingBottom)
     public void cardViewContentPaddingBottom(CardView cardView, int contentPaddingBottom) {
-        __cardViewLocalVar.contentPaddingBottomSet = true;
         __cardViewLocalVar.contentPaddingBottom = contentPaddingBottom;
     }
 
@@ -93,14 +93,6 @@ public class CardViewGen extends FrameLayoutGen {
     public void viewMinHeight(View view, int minHeight) {
         view.setMinimumHeight(minHeight);
     }*/
-
-    @Attr(RS.attr.contentPadding)
-    public void cardViewContentPadding(CardView cardView, int contentPadding) {
-        if (!__cardViewLocalVar.contentPaddingLeftSet) __cardViewLocalVar.contentPaddingLeft = contentPadding;
-        if (!__cardViewLocalVar.contentPaddingRightSet) __cardViewLocalVar.contentPaddingRight = contentPadding;
-        if (!__cardViewLocalVar.contentPaddingTopSet) __cardViewLocalVar.contentPaddingTop = contentPadding;
-        if (!__cardViewLocalVar.contentPaddingBottomSet) __cardViewLocalVar.contentPaddingBottom = contentPadding;
-    }
 
     @OnEnd({RS.attr.contentPadding, RS.attr.contentPaddingLeft
             , RS.attr.contentPaddingTop, RS.attr.contentPaddingRight

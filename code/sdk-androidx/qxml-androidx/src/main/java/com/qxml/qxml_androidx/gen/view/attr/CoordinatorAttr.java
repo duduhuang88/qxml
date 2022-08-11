@@ -58,15 +58,14 @@ public interface CoordinatorAttr extends ViewLocationAttr {
 
     @Override
     default void viewLayoutGravity(View view, int gravityFlag) {
-        android.view.ViewGroup.LayoutParams lp = ___cur_layout_param;
-        if (lp instanceof android.widget.LinearLayout.LayoutParams) {
-            ((android.widget.LinearLayout.LayoutParams) lp).gravity = gravityFlag;
-        } else if (lp instanceof android.widget.FrameLayout.LayoutParams) {
-            ((android.widget.FrameLayout.LayoutParams) lp).gravity = gravityFlag;
-        } else if (lp instanceof androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams) {
+        if (___cur_layout_param instanceof android.widget.LinearLayout.LayoutParams) {
+            ((android.widget.LinearLayout.LayoutParams) ___cur_layout_param).gravity = gravityFlag;
+        } else if (___cur_layout_param instanceof android.widget.FrameLayout.LayoutParams) {
+            ((android.widget.FrameLayout.LayoutParams) ___cur_layout_param).gravity = gravityFlag;
+        } else if (___cur_layout_param instanceof androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams) {
             __coordinatorLocalVar.gravity = gravityFlag;
-        } else if (lp instanceof androidx.drawerlayout.widget.DrawerLayout.LayoutParams) {
-            ((androidx.drawerlayout.widget.DrawerLayout.LayoutParams) lp).gravity = gravityFlag;
+        } else if (___cur_layout_param instanceof androidx.drawerlayout.widget.DrawerLayout.LayoutParams) {
+            ((androidx.drawerlayout.widget.DrawerLayout.LayoutParams) ___cur_layout_param).gravity = gravityFlag;
         }
     }
 
@@ -75,9 +74,8 @@ public interface CoordinatorAttr extends ViewLocationAttr {
             , RS.attr.layout_dodgeInsetEdges, RS.attr.layout_behavior
             , AndroidRS.attr.layout_gravity})
     default void onCoordinatorLayoutEnd(View v) {
-        android.view.ViewGroup.LayoutParams lp = ___cur_layout_param;
-        if (lp instanceof androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams) {
-            androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams layoutParams = (androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams) lp;
+        if (___cur_layout_param instanceof androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams) {
+            androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams layoutParams = (androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams) ___cur_layout_param;
             layoutParams.gravity = __coordinatorLocalVar.gravity;
             layoutParams.setAnchorId(__coordinatorLocalVar.layout_anchor);
             layoutParams.anchorGravity = __coordinatorLocalVar.layout_anchorGravity;

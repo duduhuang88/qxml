@@ -44,12 +44,16 @@ abstract class FirstUnOverrideMethodConverter(
     }
 
     override fun match(m: MethodCall, belongClass: CtClass): Boolean {
-        if ((methodCallClassName == null || m.className == methodCallClassName)
-            && (methodName == null || m.methodName == methodName)
-            && (methodSignature == null || m.method.signature == methodSignature)
-            && isSubClassOfRoot(PoolManager.pool.get(m.className))
-        ) {
-            return true
+        try {
+            if ((methodCallClassName == null || m.className == methodCallClassName)
+                && (methodName == null || m.methodName == methodName)
+                && (methodSignature == null || m.method.signature == methodSignature)
+                && isSubClassOfRoot(PoolManager.pool.get(m.className))
+            ) {
+                return true
+            }
+        } catch (e: javassist.NotFoundException) {
+            LogUtil.pl("can not found super method of ${m.methodName} in ${belongClass.name}, ignore")
         }
         return false
     }
@@ -76,7 +80,7 @@ abstract class FirstUnOverrideMethodConverter(
                 }
             }
         } catch (e: Exception) {
-            LogUtil.pl("FirstUnOverrideMethodConverter err " + belongClass + " " + m.methodName)
+            LogUtil.pl("FirstUnOverrideMethodConverter err : ${belongClass.name}(${m.methodName})")
             e.printStackTrace()
             throw e
         }

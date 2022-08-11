@@ -20,14 +20,17 @@ public interface TextViewTextAttr extends ViewLocalVar {
         public int textFontWeight = -1;
         public String fontFamily = null;
         public android.graphics.Typeface typeface = null;
-        public int typefaceIndex = -1;
         public int textStyle = 0;
-        public int bufferType = -1;
+        public android.widget.TextView.BufferType bufferType = android.widget.TextView.BufferType.NORMAL;
         public float lineSpacingExtra = 0.0f;
         public float lineSpacingMultiplier = 1.0f;
         public boolean password = false;
         public int inputTypeFlag = -1;
         public int autoLinkFlag = -1;
+        public float shadowRadius = 0;
+        public float shadowDx = 0;
+        public float shadowDy = 0;
+        public int shadowColor = 0;
     }
 
     @LocalVar
@@ -68,11 +71,7 @@ public interface TextViewTextAttr extends ViewLocalVar {
 
     @Attr(AndroidRS.attr.textColorHint)
     default void textViewTextColorHint(TextView textView, ValueInfo valueInfo) {
-        if (valueInfo.isColor()) {
-            textView.setHintTextColor(valueInfo.colorValue);
-        } else if (valueInfo.isReference()) {
-            textView.setHintTextColor(android.os.Build.VERSION.SDK_INT >= 23 ? __context.getColorStateList(valueInfo.resourceId) : ___resources.getColorStateList(valueInfo.resourceId));
-        }
+        textView.setHintTextColor(valueInfo.getColorStateList(__context));
     }
 
     @Attr(AndroidRS.attr.textAppearance)
@@ -86,11 +85,7 @@ public interface TextViewTextAttr extends ViewLocalVar {
 
     @Attr(AndroidRS.attr.textColorLink)
     default void textViewTextColorLink(TextView textView, ValueInfo valueInfo) {
-        if (valueInfo.isColor()) {
-            textView.setLinkTextColor(valueInfo.colorValue);
-        } else if (valueInfo.isReference()) {
-            textView.setLinkTextColor(android.os.Build.VERSION.SDK_INT >= 23 ? __context.getColorStateList(valueInfo.resourceId) : ___resources.getColorStateList(valueInfo.resourceId));
-        }
+        textView.setLinkTextColor(valueInfo.getColorStateList(__context));
     }
 
     @Attr(AndroidRS.attr.textFontWeight)
@@ -124,7 +119,14 @@ public interface TextViewTextAttr extends ViewLocalVar {
     //todo test
     @Attr(AndroidRS.attr.typeface)
     default void textViewTypeface(TextView textView, int typefaceEnum) {
-        __textViewLocalVar.typefaceIndex = typefaceEnum;
+        if (__textViewLocalVar.typeface == null && __textViewLocalVar.fontFamily == null) {
+            switch (typefaceEnum) {
+                case 1: { __textViewLocalVar.typeface = android.graphics.Typeface.SANS_SERIF; break; }
+                case 2: { __textViewLocalVar.typeface = android.graphics.Typeface.SERIF; break; }
+                case 3: { __textViewLocalVar.typeface = android.graphics.Typeface.MONOSPACE; break; }
+                default: { __textViewLocalVar.typeface = /*android.graphics.Typeface.DEFAULT*/null; }
+            }
+        }
     }
 
     @Attr(AndroidRS.attr.textStyle)
@@ -217,52 +219,26 @@ public interface TextViewTextAttr extends ViewLocalVar {
         __textViewLocalVar.maxLength = maxLength;
     }
 
-    @Attr(AndroidRS.attr.shadowColor)
+    @Attr(value = AndroidRS.attr.shadowColor, requiredCondition = "android.os.Build.VERSION.SDK_INT >= 16")
     default void textViewShadowColor(TextView textView, ValueInfo valueInfo) {
-        if (valueInfo.isColor() && android.os.Build.VERSION.SDK_INT >= 16) {
-            textView.setShadowLayer(
-                    textView.getShadowRadius(),
-                    textView.getShadowDx(),
-                    textView.getShadowDy(),
-                    valueInfo.colorValue
-            );
+        if (valueInfo.isColor()) {
+            __textViewLocalVar.shadowColor = valueInfo.colorValue;
         }
     }
 
-    @Attr(AndroidRS.attr.shadowDx)
+    @Attr(value = AndroidRS.attr.shadowDx, requiredCondition = "android.os.Build.VERSION.SDK_INT >= 16")
     default void textViewShadowDx(TextView textView, float shadowDx) {
-        if (android.os.Build.VERSION.SDK_INT >= 16) {
-            textView.setShadowLayer(
-                    textView.getShadowRadius(),
-                    shadowDx,
-                    textView.getShadowDy(),
-                    textView.getShadowColor()
-            );
-        }
+        __textViewLocalVar.shadowDx = shadowDx;
     }
 
-    @Attr(AndroidRS.attr.shadowDy)
+    @Attr(value = AndroidRS.attr.shadowDy, requiredCondition = "android.os.Build.VERSION.SDK_INT >= 16")
     default void textViewShadowDy(TextView textView, float shadowDy) {
-        if (android.os.Build.VERSION.SDK_INT >= 16) {
-            textView.setShadowLayer(
-                    textView.getShadowRadius(),
-                    textView.getShadowDx(),
-                    shadowDy,
-                    textView.getShadowColor()
-            );
-        }
+        __textViewLocalVar.shadowDy = shadowDy;
     }
 
-    @Attr(AndroidRS.attr.shadowRadius)
+    @Attr(value = AndroidRS.attr.shadowRadius, requiredCondition = "android.os.Build.VERSION.SDK_INT >= 16")
     default void textViewShadowRadius(TextView textView, float shadowRadius) {
-        if (android.os.Build.VERSION.SDK_INT >= 16) {
-            textView.setShadowLayer(
-                    shadowRadius,
-                    textView.getShadowDx(),
-                    textView.getShadowDy(),
-                    textView.getShadowColor()
-            );
-        }
+        __textViewLocalVar.shadowRadius = shadowRadius;
     }
 
     @Attr(AndroidRS.attr.autoLink)
@@ -500,7 +476,6 @@ public interface TextViewTextAttr extends ViewLocalVar {
     @UnSupport
     @Attr(AndroidRS.attr.allowUndo)
     default void textViewAllowUndo(TextView textView, boolean allowUndo) {
-
     }
 
     @Attr(AndroidRS.attr.text)
@@ -515,7 +490,15 @@ public interface TextViewTextAttr extends ViewLocalVar {
 
     @Attr(AndroidRS.attr.bufferType)
     default void textViewBufferType(TextView textView, int bufferTypeEnum) {
-        __textViewLocalVar.bufferType = bufferTypeEnum;
+        if (bufferTypeEnum == 0) {
+            __textViewLocalVar.bufferType = android.widget.TextView.BufferType.NORMAL;
+        } else if (bufferTypeEnum == 1) {
+            __textViewLocalVar.bufferType = android.widget.TextView.BufferType.SPANNABLE;
+        } else if (bufferTypeEnum == 2) {
+            __textViewLocalVar.bufferType = android.widget.TextView.BufferType.EDITABLE;
+        } else {
+            __textViewLocalVar.bufferType = android.widget.TextView.BufferType.EDITABLE;
+        }
     }
 
     @Attr(AndroidRS.attr.hint)
@@ -525,28 +508,34 @@ public interface TextViewTextAttr extends ViewLocalVar {
 
     @Attr(AndroidRS.attr.textColor)
     default void textViewTextColor(TextView textView, ValueInfo valueInfo) {
-        if (valueInfo.isColor()) {
-            textView.setTextColor(valueInfo.colorValue);
-        } else {
-            textView.setTextColor(android.os.Build.VERSION.SDK_INT >= 23 ? __context.getColorStateList(valueInfo.resourceId) : ___resources.getColorStateList(valueInfo.resourceId));
+        textView.setTextColor(valueInfo.getColorStateList(__context));
+    }
+    
+    @OnEnd({AndroidRS.attr.shadowColor, AndroidRS.attr.shadowDx, AndroidRS.attr.shadowDy, AndroidRS.attr.shadowRadius})
+    default void onTextViewShadowEnd(TextView textView) {
+        if (android.os.Build.VERSION.SDK_INT >= 16) {
+            textView.setShadowLayer(__textViewLocalVar.shadowRadius, __textViewLocalVar.shadowDx, __textViewLocalVar.shadowDy, __textViewLocalVar.shadowColor);
         }
     }
 
-    @OnEnd({AndroidRS.attr.maxLength, AndroidRS.attr.text, AndroidRS.attr.textStyle
-            , AndroidRS.attr.textFontWeight, AndroidRS.attr.typeface
-            , AndroidRS.attr.fontFamily, AndroidRS.attr.bufferType
-            , AndroidRS.attr.password, AndroidRS.attr.inputType
-            , AndroidRS.attr.textSize, AndroidRS.attr.autoLink })
-    default void onTextViewTextEnd(TextView textView) {
+    @OnEnd({AndroidRS.attr.maxLength})
+    default void onTextViewMaxLengthEnd(TextView textView) {
         if (__textViewLocalVar.maxLength >= 0) {
             android.text.InputFilter[] filters = new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(__textViewLocalVar.maxLength)};
             textView.setFilters(filters);
         }
-        boolean isPassword = __textViewLocalVar.password;
+    }
+
+    @OnEnd({AndroidRS.attr.password})
+    default void onTextViewPassWordEnd(TextView textView) {
         if (__textViewLocalVar.password) {
             textView.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
         }
-        if (__textViewLocalVar.inputTypeFlag != -1) {
+    }
+
+    @OnEnd({AndroidRS.attr.inputType})
+    default void onTextViewInputTypeFlagEnd(TextView textView) {
+        {
             textView.setInputType(__textViewLocalVar.inputTypeFlag);
             final int variation =
                     __textViewLocalVar.inputTypeFlag & (android.view.inputmethod.EditorInfo.TYPE_MASK_CLASS | android.view.inputmethod.EditorInfo.TYPE_MASK_VARIATION);
@@ -556,21 +545,22 @@ public interface TextViewTextAttr extends ViewLocalVar {
                     == (android.view.inputmethod.EditorInfo.TYPE_CLASS_TEXT | android.view.inputmethod.EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD);
             final boolean numberPasswordInputType = variation
                     == (android.view.inputmethod.EditorInfo.TYPE_CLASS_NUMBER | android.view.inputmethod.EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD);
-            isPassword = isPassword || passwordInputType || webPasswordInputType || numberPasswordInputType;
-        }
-
-        if (__textViewLocalVar.typeface != null || __textViewLocalVar.fontFamily != null || __textViewLocalVar.typefaceIndex != -1) {
-            if (__textViewLocalVar.typeface == null && __textViewLocalVar.fontFamily != null) {
-                __textViewLocalVar.typeface = android.graphics.Typeface.create(__textViewLocalVar.fontFamily, android.graphics.Typeface.NORMAL);
-            } else if (__textViewLocalVar.typeface != null) {
-
-            } else {
-                switch (__textViewLocalVar.typefaceIndex) {
-                    case 1: { __textViewLocalVar.typeface = android.graphics.Typeface.SANS_SERIF; break; }
-                    case 2: { __textViewLocalVar.typeface = android.graphics.Typeface.SERIF; break; }
-                    case 3: { __textViewLocalVar.typeface = android.graphics.Typeface.MONOSPACE; break; }
-                    default: { __textViewLocalVar.typeface = /*android.graphics.Typeface.DEFAULT*/null; }
+            __textViewLocalVar.password = __textViewLocalVar.password || passwordInputType || webPasswordInputType || numberPasswordInputType;
+            if (__textViewLocalVar.typeface == null && __textViewLocalVar.fontFamily == null) {
+                if (__textViewLocalVar.password || __textViewLocalVar.textStyle != 0) {
+                    textView.setTypeface(null, __textViewLocalVar.textStyle);
+                    __textViewLocalVar.password = false;
                 }
+            }
+        }
+    }
+
+    @OnEnd({AndroidRS.attr.textFontWeight, AndroidRS.attr.typeface
+            , AndroidRS.attr.fontFamily, AndroidRS.attr.textStyle})
+    default void onTextViewTypeFaceEnd(TextView textView) {
+        if (__textViewLocalVar.typeface != null || __textViewLocalVar.fontFamily != null) {
+            if (__textViewLocalVar.typeface == null) {
+                __textViewLocalVar.typeface = android.graphics.Typeface.create(__textViewLocalVar.fontFamily, android.graphics.Typeface.NORMAL);
             }
 
             if (android.os.Build.VERSION.SDK_INT >= 28 && __textViewLocalVar.textFontWeight >= 0) {
@@ -581,47 +571,29 @@ public interface TextViewTextAttr extends ViewLocalVar {
                 textView.setTypeface(__textViewLocalVar.typeface, __textViewLocalVar.textStyle);
             }
         } else {
-            if (isPassword || __textViewLocalVar.textStyle != 0) {
+            if (__textViewLocalVar.password || __textViewLocalVar.textStyle != 0) {
                 textView.setTypeface(null, __textViewLocalVar.textStyle);
             }
         }
+    }
 
-        if (__textViewLocalVar.textSize != -1.0f) {
-            textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, (float)((int) (__textViewLocalVar.textSize + 0.5f)));
-        }
+    @OnEnd({AndroidRS.attr.textSize})
+    default void onTextViewTextSizeEnd(TextView textView) {
+        textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, (float)((int) (__textViewLocalVar.textSize + 0.5f)));
+    }
 
-        if (__textViewLocalVar.autoLinkFlag != -1) {
-            textView.setAutoLinkMask(__textViewLocalVar.autoLinkFlag);
-        }
+    @OnEnd({AndroidRS.attr.autoLink})
+    default void onTextViewAutoLinkEnd(TextView textView) {
+        textView.setAutoLinkMask(__textViewLocalVar.autoLinkFlag);
+    }
 
-        if (__textViewLocalVar.bufferType != -1) {
-            android.widget.TextView.BufferType bufferType;
-            if (__textViewLocalVar.bufferType == 0) {
-                bufferType = android.widget.TextView.BufferType.NORMAL;
-            } else if (__textViewLocalVar.bufferType == 1) {
-                bufferType = android.widget.TextView.BufferType.SPANNABLE;
-            } else if (__textViewLocalVar.bufferType == 2) {
-                bufferType = android.widget.TextView.BufferType.EDITABLE;
-            } else {
-                bufferType = android.widget.TextView.BufferType.EDITABLE;
-            }
-            textView.setText(__textViewLocalVar.text, bufferType);
-        } else {
-            if (__textViewLocalVar.text != null) {
-                textView.setText(__textViewLocalVar.text);
-            }
-        }
-
-        /*if (__textViewLocalVar.textSize != -1.0f) {
-            textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, (float)((int) (__textViewLocalVar.textSize + 0.5f)));
-        }*/
+    @OnEnd({AndroidRS.attr.text, AndroidRS.attr.bufferType})
+    default void onTextViewTextEnd(TextView textView) {
+        textView.setText(__textViewLocalVar.text, __textViewLocalVar.bufferType);
     }
 
     @OnEnd({AndroidRS.attr.lineSpacingExtra, AndroidRS.attr.lineSpacingMultiplier})
     default void onTextViewLineSpaceEnd(TextView textView) {
-        /*if (android.os.Build.VERSION.SDK_INT >= 16) {
-            textView.setLineSpacing(__textViewLocalVar.lineSpacingExtra, __textViewLocalVar.lineSpacingMultiplier);
-        }*/
         textView.setLineSpacing(__textViewLocalVar.lineSpacingExtra, __textViewLocalVar.lineSpacingMultiplier);
     }
 

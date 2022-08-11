@@ -3,13 +3,8 @@ package com.yellow.qxml_test.presenter
 import android.app.Activity
 import android.os.Handler
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
 import com.qxml.QxmlInflater
 import com.qxml.helper.QxmlHelper
-import com.yellow.qxml_test.LogUtil
 import com.yellow.qxml_test.R
 import com.yellow.qxml_test.TestLayoutRes
 import kotlinx.android.synthetic.main.activity_compare_root.*

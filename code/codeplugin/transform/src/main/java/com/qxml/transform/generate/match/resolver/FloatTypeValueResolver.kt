@@ -23,41 +23,40 @@ class FloatTypeValueResolver: ValueResolver {
         attrInfoModel: AttrInfoModel,
         fieldInfo: FieldInfo,
         contextName: String,
-        usedTempVarMap: HashMap<String, String>,
-        shouldWrapScope: Boolean
+        usedTempVarMap: HashMap<String, String>
     ): MatchResult {
         val valueType = valueInfo.valueType
         var value = valueInfo.value
 
-        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName)
+        val funcBody = attrFuncInfoModel.funcBodyContent.substring(3).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName)
 
         val stringBuilder = StringBuilder()
 
         if (valueInfo.isAttrReference) {
             stringBuilder.append(getAttrReferenceResolveState(contextName, valueInfo))
             stringBuilder.append(makeParamInit(attrFuncInfoModel, callAttrFloatReferenceMethod(contextName, value), usedTempVarMap))
-            return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+            return makeResolverSucStateInfo(stringBuilder, funcBody.toParamNameFuncBody(attrFuncInfoModel), false)
         } else {
             if (valueType == ValueType.NULL) {
-                stringBuilder.append(makeParamInit(attrFuncInfoModel, "0f", usedTempVarMap))
-                return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                //stringBuilder.append(makeParamInit(attrFuncInfoModel, "0f", usedTempVarMap))
+                return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody("0f"), true)
             }
             if (attrInfoModel.isReference()) {
                 if (valueType == ValueType.REFERENCE_DIMEN) {
                     stringBuilder.append(makeParamInit(attrFuncInfoModel, "${Constants.GEN_FIELD_RESOURCE}.getDimension(${value}f)", usedTempVarMap))
-                    return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                    return makeResolverSucStateInfo(stringBuilder, funcBody.toParamNameFuncBody(attrFuncInfoModel), false)
                 }
             }
             if (attrInfoModel.isDimension() || attrInfoModel.isFloat() || attrInfoModel.isFraction()) {
                 if (valueType == ValueType.REFERENCE_DIMEN) {
                     stringBuilder.append(makeParamInit(attrFuncInfoModel, "${Constants.GEN_FIELD_RESOURCE}.getDimension(${value})", usedTempVarMap))
-                    return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                    return makeResolverSucStateInfo(stringBuilder, funcBody.toParamNameFuncBody(attrFuncInfoModel), false)
                 } else if (valueType == ValueType.SOURCE_STRING) {
                     if (value.endsWith(Constants.PX)) {
                         value = value.substring(0, value.length - 2)
                         value.toFloatOrNull()?.also {
-                            stringBuilder.append(makeParamInit(attrFuncInfoModel, "${value}f", usedTempVarMap))
-                            return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                            //stringBuilder.append(makeParamInit(attrFuncInfoModel, "${value}f", usedTempVarMap))
+                            return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody("${value}f"), true)
                         }
                     } else if (value.endsWith(Constants.DP) || value.endsWith(Constants.DIP)) {
                         val endSuffixLength = if (value.endsWith(Constants.DP)) 2 else 3
@@ -65,45 +64,45 @@ class FloatTypeValueResolver: ValueResolver {
                         value.toFloatOrNull()?.also {
                             val dpFiledFloat = SizeTool.makeDpFieldFloat(value)
                             fieldInfo.sizeMap.putIfAbsent(dpFiledFloat, SizeTool.makeDpValueFloat(value))
-                            stringBuilder.append(makeParamInit(attrFuncInfoModel, dpFiledFloat, usedTempVarMap))
-                            return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                            //stringBuilder.append(makeParamInit(attrFuncInfoModel, dpFiledFloat, usedTempVarMap))
+                            return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody(dpFiledFloat), true)
                         }
                     } else if (value.endsWith(Constants.SP)) {
                         value = value.substring(0, value.length - 2)
                         value.toFloatOrNull()?.also {
                             val spFiledFloat = SizeTool.makeSpFieldFloat(value)
                             fieldInfo.sizeMap.putIfAbsent(spFiledFloat, SizeTool.makeSpValueFloat(value))
-                            stringBuilder.append(makeParamInit(attrFuncInfoModel, spFiledFloat, usedTempVarMap))
-                            return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                            //stringBuilder.append(makeParamInit(attrFuncInfoModel, spFiledFloat, usedTempVarMap))
+                            return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody(spFiledFloat), true)
                         }
                     } else if (value.endsWith(Constants.MM)) {
                         value = value.substring(0, value.length - 2)
                         value.toFloatOrNull()?.also {
                             val mmFiledFloat = SizeTool.makeMMFieldFloat(value)
                             fieldInfo.sizeMap.putIfAbsent(mmFiledFloat, SizeTool.makeMMValueFloat(value))
-                            stringBuilder.append(makeParamInit(attrFuncInfoModel, mmFiledFloat, usedTempVarMap))
-                            return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                            //stringBuilder.append(makeParamInit(attrFuncInfoModel, mmFiledFloat, usedTempVarMap))
+                            return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody(mmFiledFloat), true)
                         }
                     } else if (value.endsWith(Constants.PT)) {
                         value = value.substring(0, value.length - 2)
                         value.toFloatOrNull()?.also {
                             val ptFiledFloat = SizeTool.makePTFieldFloat(value)
                             fieldInfo.sizeMap.putIfAbsent(ptFiledFloat, SizeTool.makePTValueFloat(value))
-                            stringBuilder.append(makeParamInit(attrFuncInfoModel, ptFiledFloat, usedTempVarMap))
-                            return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                            //stringBuilder.append(makeParamInit(attrFuncInfoModel, ptFiledFloat, usedTempVarMap))
+                            return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody(ptFiledFloat), true)
                         }
                     } else if (value.endsWith(Constants.IN)) {
                         value = value.substring(0, value.length - 2)
                         value.toFloatOrNull()?.also {
                             val inFiledFloat = SizeTool.makeINFieldFloat(value)
                             fieldInfo.sizeMap.putIfAbsent(inFiledFloat, SizeTool.makeINValueFloat(value))
-                            stringBuilder.append(makeParamInit(attrFuncInfoModel, inFiledFloat, usedTempVarMap))
-                            return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                            //stringBuilder.append(makeParamInit(attrFuncInfoModel, inFiledFloat, usedTempVarMap))
+                            return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody(inFiledFloat), true)
                         }
                     } else {
                         value.toFloatOrNull()?.also {
-                            stringBuilder.append(makeParamInit(attrFuncInfoModel, "${value}f", usedTempVarMap))
-                            return makeResolverSucStateInfo(stringBuilder, funcBody, shouldWrapScope)
+                            //stringBuilder.append(makeParamInit(attrFuncInfoModel, "${value}f", usedTempVarMap))
+                            return makeResolverSucStateInfo(stringBuilder, funcBody.toBaseTypeFuncBody("${value}f"), true)
                         }
                     }
                 }

@@ -16,6 +16,7 @@ open class QxmlExtension(project: Project) {
     var logEnable = false
     var debugEnable = false
     var useCreateViewListener = false
+    var checkMethod = false
 
     val buildType = project.container(QxmlConfigExtension::class.java)
 
@@ -54,6 +55,9 @@ open class QxmlExtension(project: Project) {
             if (!it.useCreateViewListenerSet) {
                 it.useCreateViewListener = useCreateViewListener
             }
+            if (!it.checkMethodSet) {
+                it.checkMethod = checkMethod
+            }
         }
         defaultConfig = QxmlConfigExtension("default").also {
             it.enable = enable
@@ -64,6 +68,7 @@ open class QxmlExtension(project: Project) {
             it.viewDebug = viewDebug
             it.logEnable = logEnable
             it.useCreateViewListener = useCreateViewListener
+            it.checkMethod = checkMethod
         }
     }
 
@@ -89,6 +94,7 @@ open class QxmlConfigExtension(val name: String) {
     var logEnable = false
     var debugEnable = false
     var useCreateViewListener = false
+    var checkMethod = false
 
     var enableSet = false
     var ignoreUnImplementAttrSet = false
@@ -99,6 +105,7 @@ open class QxmlConfigExtension(val name: String) {
     var logEnableSet = false
     var debugEnableSet = false
     var useCreateViewListenerSet = false
+    var checkMethodSet = false
 
     fun enable(enable: Boolean) {
         this.enable = enable
@@ -143,6 +150,11 @@ open class QxmlConfigExtension(val name: String) {
     fun compatMode(compatMode: CompatMode) {
         this.compatMode = compatMode
         compatModeSet = true
+    }
+
+    fun checkMethod(checkMethod: Boolean) {
+        this.checkMethod = checkMethod
+        checkMethodSet = true
     }
 
 }

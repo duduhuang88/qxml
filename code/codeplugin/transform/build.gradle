@@ -6,12 +6,17 @@ apply from: '../../gradleScript/dokka.gradle'
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    //implementation "org.gradle:gradle-api:6.1.1"
-    //org.gradle:gradle-api:3.0
-    //implementation("com.android.tools.build:gradle:4.0.2")
-    implementation deps.android.gradlePlugin
+
+    api "com.android.tools.build:gradle-api:$build_gradle_version"
+    api "com.android.tools.build:gradle:$build_gradle_version"
+    api "com.android.tools:common:30.0.3"
+    api "commons-codec:commons-codec:1.10"
+    api "com.android.tools:sdk-common:30.0.3"
+    implementation "commons-io:commons-io:2.9.0"
+
     api deps.javassist
-    implementation deps.javapoet
+    api deps.gson
+    api deps.javapoet
 
     implementation project(":constant")
     implementation project(":qxml-annotations")

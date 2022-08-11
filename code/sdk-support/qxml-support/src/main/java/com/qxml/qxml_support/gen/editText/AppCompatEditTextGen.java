@@ -12,6 +12,7 @@ import com.qxml.qxml_support.gen.textView.attr.TextViewAutoSizeAttr;
 import com.qxml.value.ValueInfo;
 import com.yellow.qxml_annotions.Attr;
 import com.yellow.qxml_annotions.LocalVar;
+import com.yellow.qxml_annotions.OnEnd;
 import com.yellow.qxml_annotions.ViewParse;
 
 @ViewParse(value = AppCompatEditText.class, compatOf = EditText.class,
@@ -23,72 +24,66 @@ public class AppCompatEditTextGen extends EditTextCompatGen implements TextViewA
     @LocalVar
     public AppCompatTextViewGen.$$CompatTextViewLocalVariable __compatEditTextLocalVar = new AppCompatTextViewGen.$$CompatTextViewLocalVariable();
 
+    @Override
+    public void textViewFontFamily(TextView textView, ValueInfo valueInfo) {
+        if (valueInfo.isReference() && valueInfo.referenceType == com.qxml.constant.ValueType.REFERENCE_ATTR) {
+            __compatEditTextLocalVar.finalFontFamilyId = valueInfo.resourceId;
+        }
+        if (__compatEditTextLocalVar.finalFontFamilyId == 0) {
+            __textViewLocalVar.fontFamily = valueInfo.stringValue;
+        }
+    }
+
     @Attr(RS.attr.fontFamily)
     public void compatTextViewFontFamily(AppCompatEditText textView, ValueInfo valueInfo) {
         if (valueInfo.isReference() && valueInfo.referenceType == com.qxml.constant.ValueType.REFERENCE_ATTR) {
-            __compatEditTextLocalVar.appFontFamilyId = valueInfo.resourceId;
+            __compatEditTextLocalVar.finalFontFamilyId = valueInfo.resourceId;
         }
-        if (__compatEditTextLocalVar.appFontFamilyId == 0) {
-            __compatEditTextLocalVar.appFontFamily = valueInfo.stringValue;
+        if (__compatEditTextLocalVar.finalFontFamilyId == 0) {
+            __textViewLocalVar.fontFamily = valueInfo.stringValue;
         }
     }
 
     @Override
-    public void textViewFontFamily(TextView textView, ValueInfo valueInfo) {
-        if (valueInfo.isReference() && valueInfo.referenceType == com.qxml.constant.ValueType.REFERENCE_ATTR) {
-            __compatEditTextLocalVar.androidFontFamilyId = valueInfo.resourceId;
-        }
-        if (__compatEditTextLocalVar.androidFontFamilyId == 0) {
-            __textViewLocalVar.fontFamily = valueInfo.stringValue;
+    public void textViewTypeface(TextView textView, int typefaceEnum) {
+        if (__compatEditTextLocalVar.finalFontFamilyId == 0 && __textViewLocalVar.fontFamily == null) {
+            switch (typefaceEnum) {
+                case 1: { __textViewLocalVar.typeface = android.graphics.Typeface.SANS_SERIF; break; }
+                case 2: { __textViewLocalVar.typeface = android.graphics.Typeface.SERIF; break; }
+                case 3: { __textViewLocalVar.typeface = android.graphics.Typeface.MONOSPACE; break; }
+                default: { __textViewLocalVar.typeface = android.graphics.Typeface.DEFAULT; }
+            }
         }
     }
 
     @SuppressLint("RestrictedApi")
     @Override
-    public void onTextViewTextEnd(TextView textView) {
+    public void onTextViewAutoSizeEnd(TextView textView) {
+        if (__textViewAutoSizeLocalVar.autoSizeTextType == 1) {
+            android.support.v7.widget.AppCompatTextView compatTextView = (android.support.v7.widget.AppCompatTextView) textView;
+            if (__textViewAutoSizeLocalVar.autoSizeMaxTextSize == -1) {
+                __textViewAutoSizeLocalVar.autoSizeMaxTextSize = (int) ((___scaledDensity * 112) + 0.5f);
+            }
+            if (__textViewAutoSizeLocalVar.autoSizeMinTextSize == -1) {
+                __textViewAutoSizeLocalVar.autoSizeMinTextSize = (int) ((___scaledDensity * 12) + 0.5f);
+            }
+            compatTextView.setAutoSizeTextTypeUniformWithConfiguration(__textViewAutoSizeLocalVar.autoSizeMinTextSize, __textViewAutoSizeLocalVar.autoSizeMaxTextSize, __textViewAutoSizeLocalVar.autoSizeStepGranularity, android.util.TypedValue.COMPLEX_UNIT_PX);
+        }
+    }
+
+    @Override
+    public void onTextViewMaxLengthEnd(TextView textView) {
         if (__textViewLocalVar.maxLength >= 0) {
             android.text.InputFilter[] filters = new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(__textViewLocalVar.maxLength)};
             textView.setFilters(filters);
         }
+    }
 
-        int finalFontFamilyId = 0;
-        if (__compatEditTextLocalVar.appFontFamilyId != 0) {
-            finalFontFamilyId = __compatEditTextLocalVar.appFontFamilyId;
+    @OnEnd({RS.attr.fontFamily, AndroidRS.attr.fontFamily})
+    public void onTextViewFontFamily(AppCompatEditText textView) {
+        if (__compatEditTextLocalVar.finalFontFamilyId != 0 || __textViewLocalVar.fontFamily != null) {
+            com.qxml.qxml_support.gen.textView.TextViewGenHelper.setCompatFontFamily(__context, ___typedValue, __compatEditTextLocalVar.finalFontFamilyId, __textViewLocalVar.fontFamily, textView, __textViewLocalVar.textStyle, __textViewLocalVar.textFontWeight);
         } else {
-            if (__compatEditTextLocalVar.androidFontFamilyId != 0) {
-                finalFontFamilyId = __compatEditTextLocalVar.androidFontFamilyId;
-            }
-        }
-
-        String finalFontFamily = null;
-        if (__compatEditTextLocalVar.appFontFamily != null) {
-            finalFontFamily = __compatEditTextLocalVar.appFontFamily;
-        } else {
-            if (__textViewLocalVar.fontFamily != null) {
-                finalFontFamily = __textViewLocalVar.fontFamily;
-            }
-        }
-
-        if (finalFontFamilyId != 0 || finalFontFamily != null) {
-            com.qxml.qxml_support.gen.textView.TextViewGenHelper.setCompatFontFamily(__context, ___typedValue, finalFontFamilyId, finalFontFamily, textView, __textViewLocalVar.textStyle, __textViewLocalVar.textFontWeight);
-        } else {
-            switch (__textViewLocalVar.typefaceIndex) {
-                case 1: {
-                    __textViewLocalVar.typeface = android.graphics.Typeface.SANS_SERIF;
-                    break;
-                }
-                case 2: {
-                    __textViewLocalVar.typeface = android.graphics.Typeface.SERIF;
-                    break;
-                }
-                case 3: {
-                    __textViewLocalVar.typeface = android.graphics.Typeface.MONOSPACE;
-                    break;
-                }
-                default: {
-                    __textViewLocalVar.typeface = android.graphics.Typeface.DEFAULT;
-                }
-            }
             if (android.os.Build.VERSION.SDK_INT >= 28 && __textViewLocalVar.textFontWeight >= 0) {
                 __textViewLocalVar.textFontWeight = Math.min(/*android.graphics.fonts.FontStyle.FONT_WEIGHT_MAX*/1000, __textViewLocalVar.textFontWeight);
                 final boolean italic = (__textViewLocalVar.textStyle & android.graphics.Typeface.ITALIC) != 0;
@@ -97,27 +92,68 @@ public class AppCompatEditTextGen extends EditTextCompatGen implements TextViewA
                 textView.setTypeface(__textViewLocalVar.typeface, __textViewLocalVar.textStyle);
             }
         }
+    }
 
-        if (__textViewLocalVar.bufferType != -1) {
-            android.widget.TextView.BufferType bufferType;
-            if (__textViewLocalVar.bufferType == 0) {
-                bufferType = android.widget.TextView.BufferType.NORMAL;
-            } else if (__textViewLocalVar.bufferType == 1) {
-                bufferType = android.widget.TextView.BufferType.SPANNABLE;
-            } else if (__textViewLocalVar.bufferType == 2) {
-                bufferType = android.widget.TextView.BufferType.EDITABLE;
+    @Override
+    public void onTextViewPassWordEnd(TextView textView) {
+        if (__textViewLocalVar.password) {
+            textView.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
+        }
+    }
+
+    @Override
+    public void onTextViewInputTypeFlagEnd(TextView textView) {
+        textView.setInputType(__textViewLocalVar.inputTypeFlag);
+        final int variation =
+                __textViewLocalVar.inputTypeFlag & (android.view.inputmethod.EditorInfo.TYPE_MASK_CLASS | android.view.inputmethod.EditorInfo.TYPE_MASK_VARIATION);
+        final boolean passwordInputType = variation
+                == (android.view.inputmethod.EditorInfo.TYPE_CLASS_TEXT | android.view.inputmethod.EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+        final boolean webPasswordInputType = variation
+                == (android.view.inputmethod.EditorInfo.TYPE_CLASS_TEXT | android.view.inputmethod.EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD);
+        final boolean numberPasswordInputType = variation
+                == (android.view.inputmethod.EditorInfo.TYPE_CLASS_NUMBER | android.view.inputmethod.EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD);
+        __textViewLocalVar.password = __textViewLocalVar.password || passwordInputType || webPasswordInputType || numberPasswordInputType;
+        if (__textViewLocalVar.typeface == null && __textViewLocalVar.fontFamily == null) {
+            if (__textViewLocalVar.password || __textViewLocalVar.textStyle != 0) {
+                textView.setTypeface(null, __textViewLocalVar.textStyle);
+                __textViewLocalVar.password = false;
+            }
+        }
+    }
+
+    @Override
+    public void onTextViewTypeFaceEnd(TextView textView) {
+        if (__textViewLocalVar.typeface != null || __textViewLocalVar.fontFamily != null) {
+            if (__textViewLocalVar.typeface == null) {
+                __textViewLocalVar.typeface = android.graphics.Typeface.create(__textViewLocalVar.fontFamily, android.graphics.Typeface.NORMAL);
+            }
+
+            if (android.os.Build.VERSION.SDK_INT >= 28 && __textViewLocalVar.textFontWeight >= 0) {
+                __textViewLocalVar.textFontWeight = java.lang.Math.min(/*android.graphics.fonts.FontStyle.FONT_WEIGHT_MAX*/1000, __textViewLocalVar.textFontWeight);
+                final boolean italic = (__textViewLocalVar.textStyle & android.graphics.Typeface.ITALIC) != 0;
+                textView.setTypeface(android.graphics.Typeface.create(__textViewLocalVar.typeface, __textViewLocalVar.textFontWeight, italic));
             } else {
-                bufferType = android.widget.TextView.BufferType.EDITABLE;
+                textView.setTypeface(__textViewLocalVar.typeface, __textViewLocalVar.textStyle);
             }
-            textView.setText(__textViewLocalVar.text, bufferType);
         } else {
-            if (__textViewLocalVar.text != null) {
-                textView.setText(__textViewLocalVar.text);
+            if (__textViewLocalVar.password || __textViewLocalVar.textStyle != 0) {
+                textView.setTypeface(null, __textViewLocalVar.textStyle);
             }
         }
+    }
 
-        if (__textViewLocalVar.textSize != -1.0f) {
-            textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, (float) ((int) (__textViewLocalVar.textSize + 0.5f)));
-        }
+    @Override
+    public void onTextViewTextSizeEnd(TextView textView) {
+        textView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, (float)((int) (__textViewLocalVar.textSize + 0.5f)));
+    }
+
+    @Override
+    public void onTextViewAutoLinkEnd(TextView textView) {
+        textView.setAutoLinkMask(__textViewLocalVar.autoLinkFlag);
+    }
+
+    @Override
+    public void onTextViewTextEnd(TextView textView) {
+        textView.setText(__textViewLocalVar.text, __textViewLocalVar.bufferType);
     }
 }

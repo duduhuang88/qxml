@@ -14,6 +14,8 @@ import java.io.OutputStream
 
 object CodeTransformer {
 
+    const val MAX_RETRY_TIMES = 3
+
     init {
         MethodCallManager.register(
             InflateMethodConverter(),
@@ -40,8 +42,8 @@ object CodeTransformer {
             ctClass.defrost()
             ctClass.detach()
         } catch (e: Exception) {
-            //e.printStackTrace()
-            if (retryCount < 2) {
+            e.printStackTrace()
+            if (retryCount < MAX_RETRY_TIMES) {
                 Thread.sleep(200)
                 transform(input, output, genClassInfoList, packageName, layoutIdMap, retryCount+1)
             } else {

@@ -31,7 +31,7 @@ public class ToggleButtonGen extends CompoundButtonGen {
 
     @Attr(AndroidRS.attr.disabledAlpha)
     public void onToggleButtonDisabledAlpha(ToggleButton toggleButton, float disabledAlpha) {
-        ToggleButtonHelper.setDisabledAlpha(toggleButton, disabledAlpha);
+        com.qxml.gen.button.ToggleButtonHelper.setDisabledAlpha(toggleButton, disabledAlpha);
     }
 
     @Override

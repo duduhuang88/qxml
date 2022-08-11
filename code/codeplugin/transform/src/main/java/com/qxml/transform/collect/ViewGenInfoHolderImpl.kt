@@ -37,7 +37,7 @@ interface ViewGenInfoHolder {
 
     fun getLayoutParamInitBloc(parentViewClassName: String): String?
 
-    fun anyChange(generateClassInfo: GenerateClassInfo): Boolean
+    fun anyChange(generateClassInfo: GenerateClassInfo, layoutName: String, qxmlExtension: QxmlConfigExtension): Boolean
 }
 
 class ViewGenInfoHolderImpl(private val viewGenInfoMap: HashMap<String, ViewGenClassModel>
@@ -47,6 +47,7 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: HashMap<String, ViewGenC
                             , private val WaitableExecutor: WaitableExecutor
                             , val styleInfoMap: Map<String, Map<String, StyleInfo>>
                             , private val genClassInfoModelJsonStr: String
+                            , private val layoutTypeInfoMap: Map<String, Map<String, String>>
                             , private val cacheDir: File
                             , private val gson: Gson)
     : ViewGenInfoHolder {
@@ -283,33 +284,24 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: HashMap<String, ViewGenC
         return finalLayoutParamInitBlocMap[parentViewClassName]
     }
 
-    override fun anyChange(generateClassInfo: GenerateClassInfo): Boolean {
+    override fun anyChange(generateClassInfo: GenerateClassInfo, layoutName: String, qxmlExtension: QxmlConfigExtension): Boolean {
 
-        //共享变量有变
-        /*if (isLocalVarDefChange) {
-            LogUtil.pl("anyChange true by LocalVarDefChange ")
+        val layoutInfoMap = layoutTypeInfoMap[layoutName]
+        val cacheLayoutInfoMap = generateClassInfo.layoutTypeInfoMap[layoutName]
+        if (layoutInfoMap == null || cacheLayoutInfoMap == null) {
+            LogUtil.pl("anyChange true by layout type change $layoutName")
             return true
-        }*/
-        //没用到的attr有了实现
-        generateClassInfo.invalidGenInfoMap.forEach { (viewClassName, attrMap) ->
-            viewGenInfoMap[viewClassName]?.funcInfoModelHashMap?.also { map ->
-                attrMap.forEach { (attrName, _) ->
-                    if (map[attrName] != null) {
-                        LogUtil.pl("anyChange true by invalidGenInfoMap "+viewClassName+" "+attrName)
+        } else {
+            if (layoutInfoMap.size != cacheLayoutInfoMap.size) {
+                LogUtil.pl("anyChange true by layout type change, $layoutName curTypeSize: ${layoutInfoMap.size}, cacheTypeSize: ${cacheLayoutInfoMap.size}")
+                return true
+            } else {
+                layoutInfoMap.forEach { (typeName, typeValue) ->
+                    val cacheTypeValue = cacheLayoutInfoMap[typeName]
+                    if (cacheTypeValue != typeValue) {
+                        LogUtil.pl("anyChange true by layout type change, $layoutName $typeName curValue: $typeValue, cacheValue: $cacheTypeValue")
                         return true
                     }
-                }
-            }
-        }
-
-        //用到的attr实现有变
-        generateClassInfo.usedGenInfoMap.forEach { (viewClassName, attrFuncMap) ->
-            val viewTypeInfoMap = viewGenInfoMap[viewClassName]
-            attrFuncMap.forEach { (attrName, attrFuncInfoModel) ->
-                //消失或变动
-                if ((viewTypeInfoMap?.funcInfoModelHashMap?.get(attrName)?.isChange(attrFuncInfoModel)) != false) {
-                    LogUtil.pl("anyChange true by usedGenInfoMap "+viewClassName+" "+attrName)
-                    return true
                 }
             }
         }
@@ -357,6 +349,39 @@ class ViewGenInfoHolderImpl(private val viewGenInfoMap: HashMap<String, ViewGenC
                     return true
                 }
             }*/
+        }
+
+        if (!qxmlExtension.checkMethod) {
+            return false
+        }
+
+        //共享变量有变
+        /*if (isLocalVarDefChange) {
+            LogUtil.pl("anyChange true by LocalVarDefChange ")
+            return true
+        }*/
+        //没用到的attr有了实现
+        generateClassInfo.invalidGenInfoMap.forEach { (viewClassName, attrMap) ->
+            viewGenInfoMap[viewClassName]?.funcInfoModelHashMap?.also { map ->
+                attrMap.forEach { (attrName, _) ->
+                    if (map[attrName] != null) {
+                        LogUtil.pl("anyChange true by invalidGenInfoMap "+viewClassName+" "+attrName)
+                        return true
+                    }
+                }
+            }
+        }
+
+        //用到的attr实现有变
+        generateClassInfo.usedGenInfoMap.forEach { (viewClassName, attrFuncMap) ->
+            val viewTypeInfoMap = viewGenInfoMap[viewClassName]
+            attrFuncMap.forEach { (attrName, attrFuncInfoModel) ->
+                //消失或变动
+                if ((viewTypeInfoMap?.funcInfoModelHashMap?.get(attrName)?.isChange(attrFuncInfoModel)) != false) {
+                    LogUtil.pl("anyChange true by usedGenInfoMap "+viewClassName+" "+attrName)
+                    return true
+                }
+            }
         }
 
         //用到的onEnd实现

@@ -28,17 +28,10 @@ android {
         }
     }
 
-    aaptOptions {
-        File publicTxtFile = new File(buildDir, "qxml/public.txt")
-        if (publicTxtFile.exists()) {
-            additionalParameters "--stable-ids", "${publicTxtFile.absolutePath}"
-        }
-    }
-
     buildTypes {
         debug {
             minifyEnabled false
-            debuggable false
+            debuggable true
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

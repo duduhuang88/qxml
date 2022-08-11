@@ -20,4 +20,6 @@ public @interface OnEnd {
      * @return 是否添加View后调用
      */
     boolean afterAdd() default false;
+
+    String requiredCondition() default "";
 }

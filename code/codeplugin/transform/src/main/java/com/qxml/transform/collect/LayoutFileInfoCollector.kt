@@ -13,12 +13,13 @@ class LayoutFileInfoCollector {
      */
     private val layoutInfoMap = hashMapOf<String, HashMap<String, LayoutFileInfo>>()
 
-    fun collect(mergeLayoutList: List<LayoutFileInfo>): HashMap<String, HashMap<String, LayoutFileInfo>> {
+    fun collect(mergeLayoutList: List<LayoutFileInfo>, layoutTypeInfoMap: Map<String, Map<String, String>>): HashMap<String, HashMap<String, LayoutFileInfo>> {
 
         layoutInfoMap.clear()
         //build\intermediates\incremental\mergeDebugResources&packageDebugResource\merger.xml收集的layout信息
         mergeLayoutList.forEach { xmlTypeInfo ->
             //LogUtil.pl("mergeLayout "+xmlTypeInfo)
+            xmlTypeInfo.resourceTypeName = layoutTypeInfoMap[xmlTypeInfo.name]?.get(xmlTypeInfo.type) ?: ""
             val infoMap = layoutInfoMap[xmlTypeInfo.name]
             if (infoMap != null) {
                 infoMap[xmlTypeInfo.type] = xmlTypeInfo

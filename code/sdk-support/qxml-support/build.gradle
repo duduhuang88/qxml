@@ -11,12 +11,12 @@ apply from: '../../gradleScript/privateKey.gradle'
 apply from: '../../gradleScript/dokka.gradle'
 
 android {
-    compileSdkVersion versions.compileSdkVersion
-    buildToolsVersion versions.buildToolsVersion
+    compileSdkVersion android_compileSdkVersion.toInteger()
+    buildToolsVersion android_buildToolsVersion
 
     defaultConfig {
-        minSdkVersion versions.minSdkVersion
-        targetSdkVersion versions.targetSdkVersion
+        minSdkVersion android_minSdkVersion
+        targetSdkVersion android_targetSdkVersion.toInteger()
         versionCode 1
         versionName "1.0"
 
@@ -44,21 +44,22 @@ android {
 }
 
 qxml {
-    logEnable = false
+    logEnable = true
+    debugEnable = true
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    testImplementation deps.junit
+    implementation kotlin_stdlib
+    testImplementation junit
 
-    implementation deps.support.v7
-    implementation deps.support.constraintLayout
-    implementation deps.support.recyclerview
-    implementation deps.support.design
+    implementation support_v7
+    implementation support_constraintLayout
+    implementation support_recyclerview
+    implementation support_design
 
-    compileOnly deps.support.lottie
-    compileOnly deps.support.fresco
+    compileOnly support_lottie
+    compileOnly support_fresco
 
     implementation deps.qxml.baseLib
 
@@ -67,6 +68,6 @@ dependencies {
     api deps.qxml.constantConstant
     implementation deps.qxml.annotationsConstant
 
-    androidTestImplementation deps.test.runner
-    androidTestImplementation deps.test.core
+    androidTestImplementation test_runner
+    androidTestImplementation test_core
 }

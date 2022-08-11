@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion versions.compileSdkVersion
-    buildToolsVersion versions.buildToolsVersion
+    compileSdkVersion android_compileSdkVersion.toInteger()
+    buildToolsVersion android_buildToolsVersion
 
     defaultConfig {
-        minSdkVersion versions.minSdkVersion
-        targetSdkVersion versions.targetSdkVersion
+        minSdkVersion android_minSdkVersion
+        targetSdkVersion android_targetSdkVersion.toInteger()
         versionCode 1
         versionName "1.0"
 
@@ -26,8 +26,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    testImplementation deps.junit
-    androidTestImplementation deps.test.runner
-    androidTestImplementation deps.test.core
+    implementation kotlin_stdlib
+    testImplementation junit
+    androidTestImplementation test_runner
+    androidTestImplementation test_core
 }

@@ -225,23 +225,32 @@ public class TextInputLayoutGen extends LinearLayoutGen {
     }
 
     @SuppressLint("RestrictedApi")
-    @OnEnd({RS.attr.passwordToggleContentDescription, RS.attr.passwordToggleDrawable
-            , RS.attr.passwordToggleEnabled, RS.attr.passwordToggleTint, RS.attr.passwordToggleTintMode})
-    public void onTextInputLayoutPasswordToggleEnd(TextInputLayout textInputLayout) {
-        if (__textInputLayoutLocalVar.passwordToggleContentDescription != null) {
-            textInputLayout.setPasswordVisibilityToggleContentDescription(__textInputLayoutLocalVar.passwordToggleContentDescription);
-        }
-        if (__textInputLayoutLocalVar.passwordToggleEnabled) {
-            textInputLayout.setPasswordVisibilityToggleEnabled(true);
-        }
-        if (__textInputLayoutLocalVar.passwordToggleDrawable != -1) {
-            textInputLayout.setPasswordVisibilityToggleDrawable(__textInputLayoutLocalVar.passwordToggleDrawable);
-        }
-        if (__textInputLayoutLocalVar.passwordToggleTintMode != -1) {
-            textInputLayout.setPasswordVisibilityToggleTintMode(android.support.design.internal.ViewUtils.parseTintMode(__textInputLayoutLocalVar.passwordToggleTintMode, (PorterDuff.Mode)null));
-        }
-        if (__textInputLayoutLocalVar.passwordToggleTint != null) {
-            textInputLayout.setPasswordVisibilityToggleTintList(__textInputLayoutLocalVar.passwordToggleTint);
-        }
+    @OnEnd({RS.attr.passwordToggleContentDescription})
+    public void onTextInputLayoutPasswordToggleContentDescriptionEnd(TextInputLayout textInputLayout) {
+        textInputLayout.setPasswordVisibilityToggleContentDescription(__textInputLayoutLocalVar.passwordToggleContentDescription);
+    }
+
+    @SuppressLint("RestrictedApi")
+    @OnEnd({RS.attr.passwordToggleEnabled})
+    public void onTextInputLayoutPasswordToggleEnabledEnd(TextInputLayout textInputLayout) {
+        textInputLayout.setPasswordVisibilityToggleEnabled(__textInputLayoutLocalVar.passwordToggleEnabled);
+    }
+
+    @SuppressLint("RestrictedApi")
+    @OnEnd({RS.attr.passwordToggleDrawable})
+    public void onTextInputLayoutPasswordToggleDrawableEnd(TextInputLayout textInputLayout) {
+        textInputLayout.setPasswordVisibilityToggleDrawable(__textInputLayoutLocalVar.passwordToggleDrawable);
+    }
+
+    @SuppressLint("RestrictedApi")
+    @OnEnd({RS.attr.passwordToggleTintMode})
+    public void onTextInputLayoutPasswordToggleTintModeEnd(TextInputLayout textInputLayout) {
+        textInputLayout.setPasswordVisibilityToggleTintMode(android.support.design.internal.ViewUtils.parseTintMode(__textInputLayoutLocalVar.passwordToggleTintMode, (PorterDuff.Mode)null));
+    }
+
+    @SuppressLint("RestrictedApi")
+    @OnEnd({RS.attr.passwordToggleTint})
+    public void onTextInputLayoutPasswordToggleTintEnd(TextInputLayout textInputLayout) {
+        textInputLayout.setPasswordVisibilityToggleTintList(__textInputLayoutLocalVar.passwordToggleTint);
     }
 }

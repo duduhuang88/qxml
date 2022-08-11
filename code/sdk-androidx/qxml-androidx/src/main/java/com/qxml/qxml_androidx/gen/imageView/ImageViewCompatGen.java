@@ -2,6 +2,8 @@ package com.qxml.qxml_androidx.gen.imageView;
 
 import android.widget.ImageView;
 
+import androidx.core.widget.ImageViewCompat;
+
 import com.qxml.gen.imageView.ImageViewGen;
 import com.qxml.helper.AttrHelperKt;
 import com.qxml.value.ValueInfo;
@@ -12,26 +14,13 @@ public class ImageViewCompatGen extends ImageViewGen {
 
     @Override
     public void imageViewTint(ImageView imageView, ValueInfo valueInfo) {
-        android.content.Context context = imageView.getContext();
-        android.content.res.ColorStateList colorStateList;
-        colorStateList = valueInfo.getColorStateList(__context);
-        if (android.os.Build.VERSION.SDK_INT >= 21) {
-            imageView.setImageTintList(colorStateList);
-        } else {
-            androidx.core.view.ViewCompat.setBackgroundTintList(imageView, colorStateList);
-        }
+        androidx.core.widget.ImageViewCompat.setImageTintList(imageView, valueInfo.getColorStateList(__context));
         __imageViewLocalVar.tintMode = 9;
     }
 
     @Override
-    public void onImageViewTintModeEnd(ImageView imageView) {
-        if (__imageViewLocalVar.tintMode != -1) {
-            android.graphics.PorterDuff.Mode mode = AttrHelperKt.intToMode(__imageViewLocalVar.tintMode, null);
-            if (android.os.Build.VERSION.SDK_INT >= 21) {
-                imageView.setImageTintMode(mode);
-            } else {
-                androidx.core.view.ViewCompat.setBackgroundTintMode(imageView, mode);
-            }
-        }
+    public void imageViewTintMode(ImageView imageView, int tintMode) {
+        __imageViewLocalVar.tintMode = tintMode;
+        androidx.core.widget.ImageViewCompat.setImageTintMode(imageView, com.qxml.helper.AttrHelperKt.intToMode(__imageViewLocalVar.tintMode, null));
     }
 }

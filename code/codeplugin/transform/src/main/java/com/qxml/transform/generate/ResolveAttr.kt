@@ -23,10 +23,11 @@ interface ResolveAttr {
                     , attrMethodValueMatcher: AttrMethodValueMatcher
                     , usedLocalVarMap: HashMap<String, String>
                     , finalUsedLocalVarMap: HashMap<String, String>
-                    , usedReferenceRMap: HashMap<String, String>
+                    , usedReferenceRMap: HashMap<String, Int>
                     , idMap: Map<String, Int>
                     , usedTempVarMap: HashMap<String, String>
                     , keepAndroidTag : Boolean = true
+                    , preRequiredCondition: String = "", curRequiredCondition: String = "", nextRequiredCondition: String = ""
     ): ViewGenResultInfo? {
 
         if (nameNode.namespaceURI == Constants.ANDROID_NAME_SPACE_URI || nameNode.namespaceURI == Constants.RES_AUTO_NAME_SPACE_URI) {
@@ -82,9 +83,20 @@ interface ResolveAttr {
                     return matchResult.ignoreInfo
                 }
                 else -> {
-                    codeBlockBuilder.beginControlFlow("")
+                    val shouldUseRequiredCondition = curRequiredCondition.isNotEmpty() && curRequiredCondition != preRequiredCondition
+                    if (shouldUseRequiredCondition) {
+                        codeBlockBuilder.beginControlFlow("if (${curRequiredCondition})")
+                    }
+                    if (!matchResult.useBaseTypeValue) {
+                        codeBlockBuilder.beginControlFlow("")
+                    }
                     codeBlockBuilder.add(matchResult.result)
-                    codeBlockBuilder.endControlFlow()
+                    if (!matchResult.useBaseTypeValue) {
+                        codeBlockBuilder.endControlFlow()
+                    }
+                    if (curRequiredCondition.isNotEmpty() && curRequiredCondition != nextRequiredCondition) {
+                        codeBlockBuilder.endControlFlow()
+                    }
                 }
             }
 
@@ -94,7 +106,7 @@ interface ResolveAttr {
                 usedGenInfoMap[viewClassName] = viewTypeGenInfoMap
             }
             viewTypeGenInfoMap.putIfAbsent(attrFuncInfo.attrName, attrFuncInfo)
-            attrFuncInfo.usedLocalVarMap?.forEach { fullName, _ ->
+            attrFuncInfo.usedLocalVarMap?.forEach { (fullName, _) ->
                 usedLocalVarMap.putIfAbsent(fullName, "")
             }
             finalUsedLocalVarMap.putAll(usedLocalVarMap)
@@ -113,7 +125,7 @@ interface ResolveAttr {
                          , usedGenInfoMap: HashMap<String, HashMap<String, AttrFuncInfoModel>>
                          , fieldInfo: FieldInfo, dataBindingAttrResolveInfo: DataBindingAttrResolveInfo
                          , attrMethodValueMatcher: AttrMethodValueMatcher
-                         , usedReferenceRMap: HashMap<String, String>
+                         , usedReferenceRMap: HashMap<String, Int>
                          , usedLocalVarMap: HashMap<String, String>
                          , finalUsedLocalVarMap: HashMap<String, String>
                          , idMap: Map<String, Int>
@@ -163,7 +175,7 @@ interface ResolveAttr {
             usedGenInfoMap[viewClassName] = viewTypeGenInfoMap
         }
         viewTypeGenInfoMap.putIfAbsent(attrFuncInfo.attrName, attrFuncInfo)
-        attrFuncInfo.usedLocalVarMap?.forEach { fullName, _ ->
+        attrFuncInfo.usedLocalVarMap?.forEach { (fullName, _) ->
             usedLocalVarMap.putIfAbsent(fullName, "")
         }
         finalUsedLocalVarMap.putAll(usedLocalVarMap)

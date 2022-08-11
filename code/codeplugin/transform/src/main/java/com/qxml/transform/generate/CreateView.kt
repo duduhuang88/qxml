@@ -16,6 +16,7 @@ import com.qxml.transform.generate.model.StyleInfo
 import com.qxml.transform.generate.tools.ContextWrapTool
 import com.squareup.javapoet.CodeBlock
 import groovy.util.Node
+import groovy.xml.QName
 import java.util.concurrent.ConcurrentHashMap
 
 private val idQName = groovy.xml.QName(Constants.ANDROID_NAME_SPACE_URI, Constants.ATTR_NAME_ID, Constants.ATTR_PREFIX_ANDROID)
@@ -27,6 +28,7 @@ private val tagQName = groovy.xml.QName(Constants.ANDROID_NAME_SPACE_URI, Consta
 private val qxmlUseFactoryQName = groovy.xml.QName(Constants.RES_AUTO_NAME_SPACE_URI, Constants.QXML_USE_FACTORY_CONFIG_ATTR_NAME)
 private val qxmlUseCompatQName = groovy.xml.QName(Constants.RES_AUTO_NAME_SPACE_URI, Constants.QXML_USE_COMPAT_CONFIG_ATTR_NAME)
 private val qxmlViewDebugQName = groovy.xml.QName(Constants.RES_AUTO_NAME_SPACE_URI, Constants.QXML_VIEW_DEBUG_CONFIG_ATTR_NAME)
+private val qxmlStartQName = groovy.xml.QName(Constants.RES_AUTO_NAME_SPACE_URI, Constants.QXML_START_ATTR_NAME, "app")
 
 interface CreateView: ResolveAttr {
 
@@ -69,7 +71,7 @@ interface CreateView: ResolveAttr {
                          , viewGenInfoHolder: ViewGenInfoHolderImpl
                          , compatViewInfoMap: Map<String, CompatViewInfoModel>
                          , styleInfoMap: Map<String, Map<String, StyleInfo>>
-                         , usedReferenceRMap: HashMap<String, String>
+                         , usedReferenceRMap: HashMap<String, Int>
                          , usedImportPackageMap: HashMap<String, String>
                          , finalUsedLocalVarMap: HashMap<String, String>
                          , idMap: Map<String, Int>
@@ -102,7 +104,7 @@ interface CreateView: ResolveAttr {
                 isInclude = true
                 val attributes = node.attributes()
                 val layoutIdStr = attributes[Constants.LAYOUT_LAYOUT] as? String ?: return null
-                val valueInfo = attrMethodValueMatcher.getValueInfo("", layoutIdStr, usedReferenceRMap, null)
+                val valueInfo = attrMethodValueMatcher.getValueInfo("", layoutIdStr, usedReferenceRMap, idMap)
                 if (valueInfo.valueType != ValueType.REFERENCE_LAYOUT) {//只处理layout
                     return null
                 }
@@ -141,6 +143,9 @@ interface CreateView: ResolveAttr {
 
             //处理fragment
             if (curNodeIsFragment) {
+                if (isAndroidx) {
+                    return makeViewGenResult(layoutName, GenResult.ANDROIDX_FRAGMENT_UN_SUPPORT, "Androidx项目暂不支持在layout文件中使用fragment标签")
+                }
                 var fragmentClassName = attributes[Constants.LAYOUT_CLASS] as? String ?: ""
                 if (fragmentClassName.isEmpty()) {
                     fragmentClassName = attributes[nameQName]?.toString() ?: return null
@@ -412,25 +417,62 @@ interface CreateView: ResolveAttr {
 
             val useAttrs = hashMapOf<String, Boolean>()
 
+            val sortedAttrQNameList = mutableListOf<groovy.xml.QName>()
+            val sortedAttrValueList = mutableListOf<String>()
+
+            val attributesMap = mutableMapOf<String, Map.Entry<Any?, Any?>>()
             attributes.forEach attrContinue@{ attrs ->
                 if (attrs.key is String) {
                     return@attrContinue
                 }
                 val nameNode = attrs.key as groovy.xml.QName
-                val attrValue = attrs.value as String
-                resolveAttr(nameNode, attrValue, genLoopInfo.viewCount
+                val finalAttrName = if (nameNode.prefix == Constants.ATTR_PREFIX_ANDROID) nameNode.qualifiedName else nameNode.localPart
+                if (finalAttrName != Constants.QXML_START_ATTR_NAME) {
+                    attributesMap[finalAttrName] = attrs
+                }
+            }
+
+            //每次都调用
+            sortedAttrQNameList.add(qxmlStartQName)
+            sortedAttrValueList.add("false")
+
+            viewGenInfoMap.forEach { (attrName, _) ->
+                attributesMap[attrName]?.let {
+                    val nameNode = it.key as groovy.xml.QName
+                    val attrValue = it.value as String
+                    sortedAttrQNameList.add(nameNode)
+                    sortedAttrValueList.add(attrValue)
+                }
+            }
+
+            val attrSize = sortedAttrQNameList.size
+            var preRequiredCondition = ""
+            sortedAttrQNameList.forEachIndexed { index, qName ->
+                val attrValue = sortedAttrValueList[index]
+                val finalAttrName = if (qName.prefix == Constants.ATTR_PREFIX_ANDROID) qName.qualifiedName else qName.localPart
+
+                val attrFucInfo = viewGenInfoMap[finalAttrName]
+
+                val curRequiredCondition = attrFucInfo?.requiredCondition ?: ""
+
+                val nextQName = if (index + 1 < attrSize) sortedAttrQNameList[index + 1] else null
+                val nextFinalAttrName = if (nextQName == null) null else if (nextQName.prefix == Constants.ATTR_PREFIX_ANDROID) nextQName.qualifiedName else nextQName.localPart
+                val nextAttrFucInfo = if (nextFinalAttrName == null) null else viewGenInfoMap[nextFinalAttrName]
+                val nextRequiredCondition = nextAttrFucInfo?.requiredCondition ?: ""
+
+                resolveAttr(qName, attrValue, genLoopInfo.viewCount
                     , layoutName, layoutType, contextName
                     , rootIsDataBinding, viewGenInfoMap, invalidGenInfoMap
                     , viewClassName, viewFieldName, methodCodeBlockBuilder, qxmlConfig
                     , usedGenInfoMap, fieldInfo, dataBindingAttrResolveInfo, attrMethodValueMatcher
                     , usedLocalVarMap, finalUsedLocalVarMap, usedReferenceRMap, idMap, usedTempVarMap
-                    , false)?.also {
+                    , false, preRequiredCondition, curRequiredCondition, nextRequiredCondition)?.also {
                     return it
                 }
-                val finalAttrName = if (nameNode.prefix == Constants.ATTR_PREFIX_ANDROID) nameNode.qualifiedName else nameNode.localPart
                 if (Constants.ATTR_TAG != finalAttrName) {//tag放在后面
                     useAttrs[finalAttrName] = true
                 }
+                preRequiredCondition = curRequiredCondition
             }
 
             //设置style的attr
@@ -557,8 +599,14 @@ interface CreateView: ResolveAttr {
                 }
             }
 
-            onEndAttrBeforeAddList.forEach {
-                callOnEndMethod(it, viewFieldName, methodCodeBlockBuilder, usedOnEndInfoMap, viewClassName, it.funcSignInfo, usedLocalVarMap, finalUsedLocalVarMap)
+            preRequiredCondition = ""
+            for (index in 0 until onEndAttrBeforeAddList.size) {
+                val curOnEndAttr = onEndAttrBeforeAddList[index]
+                val nextOnEndAttr = if (index + 1 < onEndAttrBeforeAddList.size) onEndAttrBeforeAddList[index + 1] else null
+                val curRequiredCondition = curOnEndAttr.requiredCondition ?: ""
+                val nextRequiredCondition = nextOnEndAttr?.requiredCondition ?: ""
+                callOnEndMethod(curOnEndAttr, viewFieldName, methodCodeBlockBuilder, usedOnEndInfoMap, viewClassName, curOnEndAttr.funcSignInfo, usedLocalVarMap, finalUsedLocalVarMap, preRequiredCondition, curRequiredCondition, nextRequiredCondition)
+                preRequiredCondition = curRequiredCondition
             }
 
             if (isInclude) {
@@ -636,7 +684,7 @@ interface CreateView: ResolveAttr {
                                  , dataBindingAttrResolveInfo: DataBindingAttrResolveInfo, styleName: String
                                  , finalType: String, styleInfo: StyleInfo?
                                  , usedStyleInfoMap: HashMap<String, HashMap<String, StyleInfo>>
-                                 , isTheme: Boolean, usedReferenceRMap: HashMap<String, String>
+                                 , isTheme: Boolean, usedReferenceRMap: HashMap<String, Int>
                                  , usedLocalVarMap: HashMap<String, String>
                                  , finalUsedLocalVarMap: HashMap<String, String>
                                  , idMap: Map<String, Int>
@@ -675,22 +723,30 @@ interface CreateView: ResolveAttr {
         return null
     }
 
-    private fun callOnEndMethod(attrFuncInfoModel: AttrFuncInfoModel, viewFieldName: String,  codeBlockBuilder: CodeBlock.Builder
+    private fun callOnEndMethod(attrFuncInfoModel: AttrFuncInfoModel, viewFieldName: String, codeBlockBuilder: CodeBlock.Builder
                                 , usedOnEndInfoMap: HashMap<String, HashMap<String, AttrFuncInfoModel>>, viewClassName: String
-                                , funcSign: String, usedLocalVarMap: HashMap<String, String>, finalUsedLocalVarMap: HashMap<String, String>) {
-        val funcBody = attrFuncInfoModel.funcBodyContent.substring(1).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName)
+                                , funcSign: String, usedLocalVarMap: HashMap<String, String>, finalUsedLocalVarMap: HashMap<String, String>
+                                , preRequiredCondition: String = "", curRequiredCondition: String = "", nextRequiredCondition: String = "") {
+        val shouldUseRequiredCondition = curRequiredCondition.isNotEmpty() && curRequiredCondition != preRequiredCondition
+        if (shouldUseRequiredCondition) {
+            codeBlockBuilder.beginControlFlow("if (${curRequiredCondition})")
+        }
+        val funcBody = attrFuncInfoModel.funcBodyContent.substring(3).replace(Constants.VIEW_PARAM_NAME_TEMP, viewFieldName)
         val stringBuilder = StringBuilder()
-        stringBuilder.append("{\n")
+        //stringBuilder.append("{")
         //stringBuilder.append("${attrFuncInfoModel.viewParamType} ${attrFuncInfoModel.viewParamName} = $viewFieldName;\n")
-        stringBuilder.append(funcBody)
-        codeBlockBuilder.addStatement(stringBuilder.toString())
+        stringBuilder.append(funcBody.substring(0, funcBody.length - 1))//.append("\n")
+        codeBlockBuilder.add(stringBuilder.toString())
+        if (curRequiredCondition.isNotEmpty() && curRequiredCondition != nextRequiredCondition) {
+            codeBlockBuilder.endControlFlow()
+        }
         var viewTypeOnEndInfoMap = usedOnEndInfoMap[viewClassName]
         if (viewTypeOnEndInfoMap == null) {
             viewTypeOnEndInfoMap = hashMapOf()
             usedOnEndInfoMap[viewClassName] = viewTypeOnEndInfoMap
         }
         viewTypeOnEndInfoMap.putIfAbsent(funcSign, attrFuncInfoModel)
-        attrFuncInfoModel.usedLocalVarMap?.forEach { fullName, _ ->
+        attrFuncInfoModel.usedLocalVarMap?.forEach { (fullName, _) ->
             usedLocalVarMap.putIfAbsent(fullName, "")
         }
         finalUsedLocalVarMap.putAll(usedLocalVarMap)

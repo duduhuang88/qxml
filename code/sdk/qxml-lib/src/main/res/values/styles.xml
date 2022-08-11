@@ -14,6 +14,9 @@
             <enum name="auto" value="1" />
             <enum name="force" value="2" />
         </attr>
+
+        <!-- 仅占位，提供初始化后时机 -->
+        <attr name="qxml_start" format="boolean"/>
     </declare-styleable>
 
 </resources>

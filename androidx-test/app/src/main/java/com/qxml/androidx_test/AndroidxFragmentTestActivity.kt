@@ -26,7 +26,7 @@ class AndroidxFragmentTestActivity: FragmentActivity() {
     private val fl_bottom by lazy { findViewById<FrameLayout>(R.id.fl_bottom) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        FragmentHelper.toString()
+        //FragmentHelper.toString()
         //先初始化下
         TestFragment()
 

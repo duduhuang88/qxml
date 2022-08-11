@@ -3,8 +3,6 @@ package com.qxml.transform.transform
 import com.android.SdkConstants
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.android.build.gradle.internal.tasks.Workers
-import com.android.build.gradle.internal.transforms.CustomClassTransform
 import com.android.builder.utils.isValidZipEntryName
 import com.android.ide.common.internal.WaitableExecutor
 import com.google.common.io.Files
