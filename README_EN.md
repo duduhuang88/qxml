@@ -16,7 +16,8 @@ Compared with inflate, it can reduce 40% + loading time, which increases with th
 
 # Require
 
-Gradle 3.5.0 above
+AGP 3.5.0 above
+Gradle 5.6.4 above
 
 # Currently supported components
 
@@ -65,7 +66,7 @@ Gradle 3.5.0 above
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "3.0.0"
+    ext.qxml_version = "3.3.0"
     repositories {
         ...
         mavenCentral()

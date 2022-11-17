@@ -31,7 +31,8 @@
 
 # 要求
 
-Gradle 3.5.0 以上
+AGP 3.5.0 以上
+Gradle 5.6.4 以上
 
 # 目前支持的组件
 
@@ -80,7 +81,7 @@ Gradle 3.5.0 以上
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "3.0.0"
+    ext.qxml_version = "3.3.0"
     repositories {
         ...
         mavenCentral()
