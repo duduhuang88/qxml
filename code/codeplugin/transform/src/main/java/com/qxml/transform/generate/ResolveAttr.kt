@@ -2,6 +2,9 @@ package com.qxml.transform.generate
 
 import com.qxml.QxmlConfigExtension
 import com.qxml.constant.Constants
+import com.qxml.constant.ValueType
+import com.qxml.tools.AndroidViewNameCorrect
+import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.AttrFuncInfoModel
 import com.qxml.transform.generate.match.AttrMethodValueMatcher
 import com.qxml.transform.generate.match.resolver.MatchType
@@ -26,6 +29,7 @@ interface ResolveAttr {
                     , usedReferenceRMap: HashMap<String, Int>
                     , idMap: Map<String, Int>
                     , usedTempVarMap: HashMap<String, String>
+                    , relativeIncludeLayoutMap: HashMap<String, String>? = null
                     , keepAndroidTag : Boolean = true
                     , preRequiredCondition: String = "", curRequiredCondition: String = "", nextRequiredCondition: String = ""
     ): ViewGenResultInfo? {
@@ -75,6 +79,18 @@ interface ResolveAttr {
                 }
                 return null
             }
+
+            if (relativeIncludeLayoutMap != null && viewClassName == AndroidViewNameCorrect.VIEW_STUB_FULL_NAME) {
+                if (finalAttrName == Constants.ANDROID_ATTR_LAYOUT) {
+                    val valueInfo = attrMethodValueMatcher.getValueInfo("", attrValue, usedReferenceRMap, idMap)
+                    if (valueInfo.valueType == ValueType.REFERENCE_LAYOUT) {//只处理layout
+                        val includeLayoutFullName = valueInfo.value
+                        val includeLayoutName = includeLayoutFullName.substring(includeLayoutFullName.lastIndexOf(".") + 1)
+                        relativeIncludeLayoutMap[includeLayoutName] = ""
+                    }
+                }
+            }
+
 
             val matchResult = attrMethodValueMatcher.match(viewClassName, viewFieldName, layoutName
                 , layoutType, attrFuncInfo, attrValue, fieldInfo, contextName, usedReferenceRMap, idMap, usedTempVarMap)

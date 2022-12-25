@@ -4,6 +4,7 @@ import com.android.build.gradle.BaseExtension
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.qxml.constant.Constants
+import com.qxml.tools.CommonUtils
 import com.qxml.tools.log.LogUtil
 import groovy.util.Node
 import groovy.util.XmlParser
@@ -74,7 +75,7 @@ class AttrsXmlParser(private val project: Project, private val curBuildType: Str
     }
 
     private val mergerXml by lazy {
-        File(project.buildDir, "intermediates${SEP}incremental${SEP}merge${curBuildType}Resources${SEP}merger.xml")
+        CommonUtils.getMergerXmlFile(project.buildDir, curBuildType)
     }
 
     private val xmlParser: XmlParser by lazy { XmlParser() }
@@ -89,7 +90,6 @@ class AttrsXmlParser(private val project: Project, private val curBuildType: Str
 
         parseWithCache(cacheDir.resolve("${extension.compileSdkVersion}_android_attr_manifest_${androidAttrsManifestXml.lastModified()}.txt")
             , attrInfoMap, androidAttrsManifestXml, true)
-
 
         parseWithCache(cacheDir.resolve("${extension.compileSdkVersion}_android_attr_${androidAttrsXml.lastModified()}.txt")
             , attrInfoMap, androidAttrsXml, true)

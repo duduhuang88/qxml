@@ -17,6 +17,8 @@ open class QxmlExtension(project: Project) {
     var debugEnable = false
     var useCreateViewListener = false
     var checkMethod = false
+    //是否移除已转换的layout文件
+    var removeConvertedLayout = false
 
     val buildType = project.container(QxmlConfigExtension::class.java)
 
@@ -58,6 +60,9 @@ open class QxmlExtension(project: Project) {
             if (!it.checkMethodSet) {
                 it.checkMethod = checkMethod
             }
+            if (!it.removeConvertedLayoutSet) {
+                it.removeConvertedLayout = removeConvertedLayout
+            }
         }
         defaultConfig = QxmlConfigExtension("default").also {
             it.enable = enable
@@ -69,6 +74,7 @@ open class QxmlExtension(project: Project) {
             it.logEnable = logEnable
             it.useCreateViewListener = useCreateViewListener
             it.checkMethod = checkMethod
+            it.removeConvertedLayout = removeConvertedLayout
         }
     }
 
@@ -95,6 +101,7 @@ open class QxmlConfigExtension(val name: String) {
     var debugEnable = false
     var useCreateViewListener = false
     var checkMethod = false
+    var removeConvertedLayout = false
 
     var enableSet = false
     var ignoreUnImplementAttrSet = false
@@ -106,6 +113,7 @@ open class QxmlConfigExtension(val name: String) {
     var debugEnableSet = false
     var useCreateViewListenerSet = false
     var checkMethodSet = false
+    var removeConvertedLayoutSet = false
 
     fun enable(enable: Boolean) {
         this.enable = enable
@@ -155,6 +163,11 @@ open class QxmlConfigExtension(val name: String) {
     fun checkMethod(checkMethod: Boolean) {
         this.checkMethod = checkMethod
         checkMethodSet = true
+    }
+
+    fun removeConvertedLayout(removeConvertedLayout: Boolean) {
+        this.removeConvertedLayout = removeConvertedLayout
+        removeConvertedLayoutSet = true
     }
 
 }

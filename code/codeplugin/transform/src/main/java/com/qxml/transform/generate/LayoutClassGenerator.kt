@@ -65,6 +65,9 @@ class LayoutClassGenerator(
 
     private val styleInfoMap by lazy { viewGenInfoHolder.styleInfoMap }
 
+    private val usingLayoutFileMaps = ConcurrentHashMap<String, HashMap<String, Boolean>>()
+
+
     @Synchronized
     override fun getXmlParser(): XmlParser {
         if (xmlParsers.isNotEmpty()) {
@@ -110,11 +113,11 @@ class LayoutClassGenerator(
 
         //先检查缓存
         val cacheLayoutNameList = checkGenCache(finalGenInfoMap, unGenLayoutNameList, layoutInfoMap, classGenInfoList)
-        LogUtil.pl("use cache layouts "+cacheLayoutNameList)
+        LogUtil.pl("use cache layouts $cacheLayoutNameList")
         cacheLayoutNameList.forEach {
             unGenLayoutNameList.remove(it)
         }
-        LogUtil.pl("unuse cache layouts "+unGenLayoutNameList)
+        LogUtil.pl("unuse cache layouts $unGenLayoutNameList")
 
         //waitableExecutor.waitForTasksWithQuickFail<Any>(true)
 
@@ -156,6 +159,14 @@ class LayoutClassGenerator(
 
         val genClassInfoList2 = mutableListOf<String>()
         finalGenInfoMap.forEach { (layoutName, classGenInfo) ->
+            var usingLayoutFileMap = usingLayoutFileMaps[layoutName]
+            if (usingLayoutFileMap == null) {
+                usingLayoutFileMap = hashMapOf()
+                usingLayoutFileMaps[layoutName] = usingLayoutFileMap
+            }
+            classGenInfo.generateClassInfo.relativeIncludeLayoutMap.forEach { (relativeLayoutName, _) ->
+                usingLayoutFileMap[relativeLayoutName] = true
+            }
             genClassInfoList2.add(layoutName)
         }
 
@@ -164,6 +175,7 @@ class LayoutClassGenerator(
         return object : QxmlGenResultProvider {
             override fun getGenInfoList(): List<String> = genClassInfoList2
             override fun getGenReport(): Map<String, HashMap<String, ViewGenResultInfo>> = finalGenResultMap
+            override fun getUsingLayoutFileMaps(): Map<String, HashMap<String, Boolean>> = usingLayoutFileMaps
         }
     }
 
@@ -295,7 +307,7 @@ class LayoutClassGenerator(
 //classFile cache文件
 data class ClassGenCacheInfo(val cacheValid: Boolean,  //cache是否有效
                              val name: String,         //class name
-                             val layoutName: String,         //class name
+                             val layoutName: String,   //class name
                              val cacheRootDir: File,   //cache根目录
                              val classCacheFile: File, //生成的class缓存文件
                              val cacheInfoFile: File,  //生成结果的缓存文件
@@ -313,6 +325,7 @@ enum class GenResult {
 interface QxmlGenResultProvider {
     fun getGenInfoList(): List<String>
     fun getGenReport(): Map<String, HashMap<String, ViewGenResultInfo>>
+    fun getUsingLayoutFileMaps(): Map<String, HashMap<String, Boolean>>
 }
 
 data class LayoutTypeGenInfo(val layoutType: String, val isMerge: Boolean)

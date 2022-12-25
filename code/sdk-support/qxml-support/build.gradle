@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'com.qxml.code.plugin'
-apply plugin: 'kotlin-kapt'
+//apply plugin: 'kotlin-kapt'
 
 group 'com.qxml.sdk'
 
@@ -63,7 +63,7 @@ dependencies {
 
     implementation deps.qxml.baseLib
 
-    kapt deps.qxml.processorConstant
+    annotationProcessor deps.qxml.processorConstant
 
     api deps.qxml.constantConstant
     implementation deps.qxml.annotationsConstant

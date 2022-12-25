@@ -50,6 +50,7 @@ class Constants {
         const val ATTR_NAME_LAYOUT_WIDTH = "layout_width"
         const val ATTR_NAME_LAYOUT_HEIGHT = "layout_height"
         const val ATTR_NAME_ID = "id"
+        const val ATTR_NAME_LAYOUT = "layout"
         const val ATTR_NAME_NAME = "name"
         const val ATTR_NAME_TAG = "tag"
         const val ATTR_PREFIX_ANDROID = "android"
@@ -99,6 +100,7 @@ class Constants {
 
         const val LAYOUT_CLASS = "class"
         const val LAYOUT_LAYOUT = "layout"
+        const val ANDROID_ATTR_LAYOUT = "android:layout"
         const val LAYOUT_STYLE = "style"
         const val LAYOUT_THEME = "android:theme"
 
@@ -133,8 +135,12 @@ class Constants {
         const val QXML_STYLE_CACHE_FILE_NAME = "qxml_style_info.txt"
         const val QXML_LAYOUT_CACHE_DIR_NAME = "layout"
         const val QXML_LAYOUT_CACHE_FILE_NAME = "qxml_layout_info.txt"
+        const val QXML_LAYOUT_INFO_CACHE_DIR_NAME = "layoutInfo"
+        const val QXML_LAYOUT_INFO_CACHE_FILE_NAME = "layoutInfo.txt"
+        const val QXML_RELATIVE_INCLUDE_LAYOUT_INFO_CACHE_FILE_NAME = "relativeLayoutInfo.txt"
         const val QXML_VIEW_GEN_INFO_CACHE_FILE_NAME = "qxml_view_gen_info.txt"
         const val QXML_METHOD_CONTENT_CACHE_FILE_NAME = "methodContent.txt"
+        const val QXML_REMOVE_LAYOUT_WHITE_LIST_FILE_NAME = "qxmlRemoveLayoutWhiteList.txt"
 
         const val INTERMEDIATES = "intermediates"
         const val BUILD = "build"

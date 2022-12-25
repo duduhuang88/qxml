@@ -3,12 +3,12 @@ def REMOTE_DEPENDENCE = false
 
 allprojects {
 
-    ext.PUBLISH_VERSION = "3.0.0"
+    ext.PUBLISH_VERSION = "3.4.0"
 
     ext.versions = [
 
             'buildToolsVersion': '30.0.3',
-            'kotlin_version': '1.6.10',
+            'kotlin_version': '1.4.21',
 
             'build_gradle_version': '7.0.3',
     ]

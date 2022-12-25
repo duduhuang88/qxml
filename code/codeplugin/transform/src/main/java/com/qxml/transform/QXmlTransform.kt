@@ -11,8 +11,10 @@ import com.qxml.constant.Constants
 import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.GenClassInfoModel
 import com.qxml.transform.collect.*
+import com.qxml.transform.generate.GenResult
 import com.qxml.transform.generate.LayoutClassGenerator
 import com.qxml.transform.generate.model.LayoutFileInfo
+import com.qxml.transform.generate.model.LayoutFileInfoContent
 import com.qxml.transform.generate.model.StyleInfo
 import com.qxml.transform.generate.tools.GenReportTool
 import com.qxml.transform.pool.PoolManager
@@ -29,14 +31,15 @@ import kotlin.collections.HashMap
 
 data class TransformConfig(var projectDebuggable: Boolean = true)
 
+private const val RELATIVE_LAYOUT_DIRECT = 1 //直接关联
+private const val RELATIVE_LAYOUT_INDIRECT = 0 //间接关联
+
 @Suppress("UnstableApiUsage")
 class QXmlTransform(private val project: Project): BaseTransform() {
 
     var packageName: String = ""
     var curBuildType: String = ""
     val transformConfig = TransformConfig()
-
-    private lateinit var curBuildTypeCapitalize: String
 
     private val layoutFileInfoCollector by lazy { LayoutFileInfoCollector() }
 
@@ -88,8 +91,6 @@ class QXmlTransform(private val project: Project): BaseTransform() {
 
         CodeTransformer.qxmlInitContentCacheFile = cacheDir.resolve(Constants.QXML_INIT_CONTENT_DIR).resolve(Constants.QXML_INIT_CONTENT_CACHE_FILE)
 
-        curBuildTypeCapitalize = curBuildType.capitalize(Locale.ROOT)
-
         LogUtil.pl("transform start $packageName")
 
         ClassPool.cacheOpenedJarFile = false
@@ -106,13 +107,13 @@ class QXmlTransform(private val project: Project): BaseTransform() {
         var time = System.currentTimeMillis()
 
         //收集attr信息
-        val attrsXmlParser = AttrsXmlParser(project, curBuildTypeCapitalize)
+        val attrsXmlParser = AttrsXmlParser(project, curBuildType)
         val attrInfoMap = attrsXmlParser.parse()
         LogUtil.pl("attr collect time cost: " + (System.currentTimeMillis() - time) + "ms")
         time = System.currentTimeMillis()
 
         //layout信息
-        layoutFileInfoList = gson.fromJson(layoutInfoFile.readText(), object : TypeToken<List<LayoutFileInfo>>() {}.type)
+        layoutFileInfoList = gson.fromJson(layoutInfoFile.readText(), LayoutFileInfoContent::class.java).layoutFileInfoList
 
         val processOrOptimizedResInfoFile = cacheDir.resolve(curBuildType).resolve(Constants.RES_PROCESS_OR_OPTIMIZED_INFO_COLLECT_FILE_NAME)
 
@@ -198,7 +199,52 @@ class QXmlTransform(private val project: Project): BaseTransform() {
             genClassInfoList.clear()
             genClassInfoList.addAll(result.getGenInfoList())
 
-            GenReportTool.genReport(project.buildDir.resolve("qxml").resolve("report.html"), result.getGenReport())
+            val genReport = result.getGenReport()
+
+            GenReportTool.genReport(project.buildDir.resolve("qxml").resolve("report.html"), genReport)
+            val genResultLayoutInfoCacheFile = cacheDir.resolve(Constants.QXML_LAYOUT_INFO_CACHE_DIR_NAME).resolve(curBuildType).resolve(Constants.QXML_LAYOUT_INFO_CACHE_FILE_NAME)
+            if (!genResultLayoutInfoCacheFile.exists()) {
+                Files.createParentDirs(genResultLayoutInfoCacheFile)
+                genResultLayoutInfoCacheFile.createNewFile()
+            }
+            genResultLayoutInfoCacheFile.writeText(gson.toJson(genReport))
+
+            val failedOrFailedRelativeLayouts = LinkedHashMap<String, Int>()
+            val failedLayoutList = mutableListOf<String>()
+            genReport.forEach genReportLoop@{ (layoutName, resultMap) ->
+                resultMap.forEach { (_, resultInfo) ->
+                    if (resultInfo.result != GenResult.SUCCESS) {
+                        failedLayoutList.add(layoutName)
+                        return@genReportLoop
+                    }
+                }
+            }
+
+            val usingLayoutInfoMap = result.getUsingLayoutFileMaps()
+
+            var index = 0
+            while (index < failedLayoutList.size) {
+                val failedLayoutName = failedLayoutList[index]
+                val relative = failedOrFailedRelativeLayouts[failedLayoutName]
+                if (relative != RELATIVE_LAYOUT_DIRECT) {
+                    failedOrFailedRelativeLayouts[failedLayoutName] = RELATIVE_LAYOUT_DIRECT
+                    usingLayoutInfoMap[failedLayoutName]?.forEach { (relativeLayout, _) ->
+                        if (failedOrFailedRelativeLayouts[relativeLayout] != RELATIVE_LAYOUT_DIRECT) {
+                            failedOrFailedRelativeLayouts[relativeLayout] = RELATIVE_LAYOUT_INDIRECT
+                            failedLayoutList.add(relativeLayout)
+                        }
+                    }
+                }
+                index++
+            }
+
+            val usingLayoutInfoCacheFile = cacheDir.resolve(Constants.QXML_LAYOUT_INFO_CACHE_DIR_NAME).resolve(curBuildType).resolve(Constants.QXML_RELATIVE_INCLUDE_LAYOUT_INFO_CACHE_FILE_NAME)
+            if (!usingLayoutInfoCacheFile.exists()) {
+                Files.createParentDirs(usingLayoutInfoCacheFile)
+                usingLayoutInfoCacheFile.createNewFile()
+            }
+            usingLayoutInfoCacheFile.writeText(gson.toJson(failedOrFailedRelativeLayouts))
+
 
             if (!idMapCacheFile.exists()) {
                 Files.createParentDirs(idMapCacheFile)

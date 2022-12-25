@@ -5,21 +5,21 @@ import org.gradle.api.tasks.*
 import java.io.File
 
 @CacheableTask
-open class StyleWatchTask: DefaultTask() {
+abstract class StyleWatchTask: DefaultTask() {
 
     @get:OutputDirectory
-    var outputDir: File? = null
+    lateinit var outputDir: File
 
     @get:Input
-    var buildType: String? = null
+    lateinit var buildType: String
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
-    var mergeXmlFile: File? = null
+    lateinit var mergeXmlFile: File
 
     @TaskAction
     fun watch() {
-        StyleCollector(project, buildType!!, mergeXmlFile!!, outputDir!!).collect()
+        StyleCollector(project, buildType, mergeXmlFile, outputDir).collect()
     }
 
 }

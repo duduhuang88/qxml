@@ -5,7 +5,7 @@ import java.util.*
 object AndroidViewNameCorrect {
 
     private const val VIEW = "View"
-    private const val VIEW_STUB = "ViewStub"
+    const val VIEW_STUB = "ViewStub"
     private const val SURFACE_VIEW = "SurfaceView"
     private const val TEXTURE_VIEW = "TextureView"
     private const val WEB_VIEW = "WebView"
@@ -20,6 +20,8 @@ object AndroidViewNameCorrect {
     private const val CORRECT_PRE_FIX_WIDGET = "android.widget."
     private const val CORRECT_PRE_FIX_VIEW = "android.view."
     private const val CORRECT_PRE_FIX_WEBKIT = "android.webkit."
+
+    const val VIEW_STUB_FULL_NAME = "android.view.ViewStub"
 
 
     private val correctMap = HashMap<String, String>()

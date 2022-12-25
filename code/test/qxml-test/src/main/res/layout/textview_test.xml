@@ -70,6 +70,7 @@
             android:text="123"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="@dimen/dp10"
+            android:drawableTop="@mipmap/ic_launcher"
             android:drawableStart="@mipmap/ic_launcher"
             android:drawableLeft="@mipmap/ic_launcher"
             android:drawablePadding="12dp"

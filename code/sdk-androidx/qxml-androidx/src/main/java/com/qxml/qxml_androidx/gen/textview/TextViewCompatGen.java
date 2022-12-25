@@ -30,7 +30,6 @@ public class TextViewCompatGen extends TextViewGen implements TextViewAutoSizeAt
 
     @Override
     public void onTextViewDrawableEnd(TextView textView) {
-        android.graphics.drawable.Drawable drawableLeft = null;
         android.graphics.PorterDuff.Mode tintMode = null;
         if (__textViewDrawableLocalVar.drawableTintModeEnum != -1) {
             tintMode = AttrHelperKt.intToMode(__textViewDrawableLocalVar.drawableTintModeEnum, null);
@@ -40,63 +39,51 @@ public class TextViewCompatGen extends TextViewGen implements TextViewAutoSizeAt
                 tintMode = null;
             }
         }
+
         if (__textViewDrawableLocalVar.drawableLeftId != 0) {
-            //drawableLeft = android.support.v4.content.ContextCompat.getDrawable(context, __textViewDrawableLocalVar.drawableLeftId);
-            drawableLeft = com.qxml.tools.DrawableTools.getDrawable(__context, ___resources, __textViewDrawableLocalVar.drawableLeftId);
-            if (drawableLeft != null) {
+            __textViewDrawableLocalVar.drawableLeft = com.qxml.tools.DrawableTools.getDrawable(__context, ___resources, __textViewDrawableLocalVar.drawableLeftId);
+            if (__textViewDrawableLocalVar.drawableLeft != null) {
                 if (tintMode != null) {
-                    androidx.core.graphics.drawable.DrawableCompat.setTintMode(drawableLeft, tintMode);
+                    androidx.core.graphics.drawable.DrawableCompat.setTintMode(__textViewDrawableLocalVar.drawableLeft, tintMode);
                 }
                 if (android.os.Build.VERSION.SDK_INT >= 21) {
-                    drawableLeft.setTintMode(tintMode);
+                    __textViewDrawableLocalVar.drawableLeft.setTintMode(tintMode);
                 }
-                drawableLeft.setBounds(0, 0, drawableLeft.getIntrinsicWidth(), drawableLeft.getIntrinsicHeight());
+                __textViewDrawableLocalVar.drawableLeft.setBounds(0, 0, __textViewDrawableLocalVar.drawableLeft.getIntrinsicWidth(), __textViewDrawableLocalVar.drawableLeft.getIntrinsicHeight());
             }
         }
 
-        android.graphics.drawable.Drawable drawableRight = null;
         if (__textViewDrawableLocalVar.drawableRightId != 0) {
-            //drawableRight  = android.support.v4.content.ContextCompat.getDrawable(context, __textViewDrawableLocalVar.drawableRightId);
-            drawableRight = com.qxml.tools.DrawableTools.getDrawable(__context, ___resources, __textViewDrawableLocalVar.drawableRightId);
-            if (drawableRight != null) {
+            __textViewDrawableLocalVar.drawableRight = com.qxml.tools.DrawableTools.getDrawable(__context, ___resources, __textViewDrawableLocalVar.drawableRightId);
+            if (__textViewDrawableLocalVar.drawableRight != null) {
                 if (tintMode != null) {
-                    androidx.core.graphics.drawable.DrawableCompat.setTintMode(drawableRight, tintMode);
+                    androidx.core.graphics.drawable.DrawableCompat.setTintMode(__textViewDrawableLocalVar.drawableRight, tintMode);
                 }
-                drawableRight.setBounds(0, 0, drawableRight.getIntrinsicWidth(), drawableRight.getIntrinsicHeight());
+                __textViewDrawableLocalVar.drawableRight.setBounds(0, 0, __textViewDrawableLocalVar.drawableRight.getIntrinsicWidth(), __textViewDrawableLocalVar.drawableRight.getIntrinsicHeight());
             }
         }
 
-        android.graphics.drawable.Drawable drawableTop = null;
-        if (__textViewDrawableLocalVar.drawableTopId != 0) {
-            //drawableTop  = android.support.v4.content.ContextCompat.getDrawable(context, __textViewDrawableLocalVar.drawableTopId);
-            drawableTop = com.qxml.tools.DrawableTools.getDrawable(__context, ___resources, __textViewDrawableLocalVar.drawableTopId);
-            if (drawableTop != null) {
-                if (tintMode != null) {
-                    androidx.core.graphics.drawable.DrawableCompat.setTintMode(drawableTop, tintMode);
-                }
-                drawableTop.setBounds(0, 0, drawableTop.getIntrinsicWidth(), drawableTop.getIntrinsicHeight());
+        if (__textViewDrawableLocalVar.drawableTop != null) {
+            if (tintMode != null) {
+                androidx.core.graphics.drawable.DrawableCompat.setTintMode(__textViewDrawableLocalVar.drawableTop, tintMode);
             }
+            __textViewDrawableLocalVar.drawableTop.setBounds(0, 0, __textViewDrawableLocalVar.drawableTop.getIntrinsicWidth(), __textViewDrawableLocalVar.drawableTop.getIntrinsicHeight());
         }
 
-        android.graphics.drawable.Drawable drawableBottom = null;
-        if (__textViewDrawableLocalVar.drawableBottomId != 0) {
-            //drawableBottom  = android.support.v4.content.ContextCompat.getDrawable(context, __textViewDrawableLocalVar.drawableBottomId);
-            drawableBottom = com.qxml.tools.DrawableTools.getDrawable(__context, ___resources, __textViewDrawableLocalVar.drawableBottomId);
-            if (drawableBottom != null) {
-                if (tintMode != null) {
-                    androidx.core.graphics.drawable.DrawableCompat.setTintMode(drawableBottom, tintMode);
-                }
-                drawableBottom.setBounds(0, 0, drawableBottom.getIntrinsicWidth(), drawableBottom.getIntrinsicHeight());
+        if (__textViewDrawableLocalVar.drawableBottom != null) {
+            if (tintMode != null) {
+                androidx.core.graphics.drawable.DrawableCompat.setTintMode(__textViewDrawableLocalVar.drawableBottom, tintMode);
             }
+            __textViewDrawableLocalVar.drawableBottom.setBounds(0, 0, __textViewDrawableLocalVar.drawableBottom.getIntrinsicWidth(), __textViewDrawableLocalVar.drawableBottom.getIntrinsicHeight());
         }
 
         if (android.os.Build.VERSION.SDK_INT >= 18) {
-            textView.setCompoundDrawablesRelative(drawableLeft, drawableTop, drawableRight, drawableBottom);
+            textView.setCompoundDrawablesRelative(__textViewDrawableLocalVar.drawableLeft, __textViewDrawableLocalVar.drawableTop, __textViewDrawableLocalVar.drawableRight, __textViewDrawableLocalVar.drawableBottom);
         } else if (android.os.Build.VERSION.SDK_INT >= 17) {
             boolean rtl = textView.getLayoutDirection() == android.view.View.LAYOUT_DIRECTION_RTL;
-            textView.setCompoundDrawables(rtl ? drawableRight : drawableLeft, drawableTop, rtl ? drawableLeft : drawableRight, drawableBottom);
+            textView.setCompoundDrawables(rtl ? __textViewDrawableLocalVar.drawableRight : __textViewDrawableLocalVar.drawableLeft, __textViewDrawableLocalVar.drawableTop, rtl ? __textViewDrawableLocalVar.drawableLeft : __textViewDrawableLocalVar.drawableRight, __textViewDrawableLocalVar.drawableBottom);
         } else {
-            textView.setCompoundDrawables(drawableLeft, drawableTop, drawableRight, drawableBottom);
+            textView.setCompoundDrawables(__textViewDrawableLocalVar.drawableLeft, __textViewDrawableLocalVar.drawableTop, __textViewDrawableLocalVar.drawableRight, __textViewDrawableLocalVar.drawableBottom);
         }
     }
 }

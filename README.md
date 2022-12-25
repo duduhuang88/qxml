@@ -81,7 +81,7 @@ Gradle 5.6.4 以上
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "3.3.0"
+    ext.qxml_version = "3.4.0"
     repositories {
         ...
         mavenCentral()
@@ -149,6 +149,16 @@ qxml {
     ignoreUnImplementAttr true //是否忽略未实现的属性，默认true
     useCreateViewListener true   //使用createViewListener，默认false
     checkMethod false                //是否检查View属性配置变化进行重新生成，设置false可提高transform速度，默认false，如果修改/自定义View属性时设置为false需删除缓存（build/qxml或clean）
+    
+    //3.4.0起支持移除已转换layout文件
+    //在root build.gradle同级目录中可创建qxmlRemoveLayoutWhiteList.txt白名单文件，内容格式为layout文件名，按行读取，eg：
+    /*
+        activity_main
+        imageview_test
+    */
+    //开启后会自动保留转换失败的layout所关联的layout文件，但未经qxml处理的layout文件需在白名单文件中声明，如动态创建的ViewStub#setLayoutResource引用的layout文件
+    removeConvertedLayout false    
+
     //以上为默认设置
     /*buildType {
         debug { //单独配置debug，没有设置的值会使用默认设置
@@ -199,7 +209,7 @@ QXML_LOG_ENABLE = true/false  : 是否开启annotationProcesser的log
 
 #### 2. ~~增加编译时间~~，首次编译根据 layout 数量和复杂度增长，而后会使用缓存
 
-#### 3. 增加 apk 体积，在 demo 中 52 个 layout 文件时，release apk 体积增加了约 38K，后续可能会添加重打包移除已转换 layout 文件的选项
+#### 3. 增加 apk 体积，在 demo 中 52 个 layout 文件时，release apk 体积增加了约 38K，~~后续可能会添加重打包移除已转换 layout 文件的选项~~，3.4.0已实装，开启后请进行充分测试，将动态引用的layout文件加入白名单
 
 #### 4. ~~目前扩展 View 需使用全限定类名，后续可能会改善这种情况~~，除定义共享变量外已无需全限定类名
 

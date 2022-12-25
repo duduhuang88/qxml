@@ -185,10 +185,7 @@ abstract class BaseTransform: Transform() {
 
     private fun toOutputFile(outputDir: File, inputDir: File, inputFile: File): File {
         return File(
-            outputDir, com.android.utils.FileUtils.relativePossiblyNonExistingPath(
-                inputFile,
-                inputDir
-            )
+            outputDir, inputFile.toRelativeString(inputDir)
         )
     }
 

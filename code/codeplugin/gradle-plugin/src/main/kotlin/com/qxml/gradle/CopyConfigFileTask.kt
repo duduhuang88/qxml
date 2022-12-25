@@ -12,25 +12,25 @@ import java.io.File
  * see https://github.com/gradle/gradle/issues/2919
  */
 @CacheableTask
-open class CopyConfigFileTask : DefaultTask() {
+abstract class CopyConfigFileTask : DefaultTask() {
 
     @get:OutputDirectory
-    var outputDir: File? = null
+    lateinit var outputDir: File
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
-    var configFile: File? = null
+    lateinit var configFile: File
 
     @TaskAction
     fun copy() {
-        val configOutputFile = outputDir!!.resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+        val configOutputFile = outputDir.resolve(Constants.QXML_PARSE_CONFIG_FILE_NAME)
         if (!configOutputFile.parentFile.exists()) {
             configOutputFile.parentFile.mkdirs()
         }
         if (!configOutputFile.exists()) {
             configOutputFile.createNewFile()
         }
-        configFile?.apply {
+        configFile.apply {
             if (exists()) {
                 configOutputFile.writeText(readText())
             }

@@ -2,7 +2,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+//apply plugin: 'kotlin-kapt'
 
 apply plugin: 'com.qxml.code.plugin'
 
@@ -96,6 +96,14 @@ qxml {
     acceptReferenceStyle true
     useCreateViewListener false
     checkMethod true
+
+    //在root build.gradle同级目录中可创建qxmlRemoveLayoutWhiteList.txt白名单文件，内容格式为layout文件名，按行读取，eg：
+    //removeConvertedLayout true会自动保留转换失败的layout所关联的layout文件，但未经qxml处理的layout文件需在白名单文件中声明，如动态添加的ViewStub#setLayoutResource引用的layout文件
+    /*
+        activity_main
+        imageview_test
+    */
+    removeConvertedLayout false
     buildType {
         debug {
             viewDebug true
@@ -118,7 +126,7 @@ dependencies {
     androidTestImplementation test_core
 
     //annotationProcessor deps.qxml.processor
-    kapt deps.qxml.processor
+    annotationProcessor deps.qxml.processor
     //implementation deps.qxml.tools
     implementation deps.qxml.qxmlTest
     implementation deps.qxml.annotations

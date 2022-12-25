@@ -36,11 +36,11 @@ class MainActivity : BaseActivity() {
     fun printAllFields(obj: Any) {
         val cls: Class<*> = obj.javaClass
         val fields: Array<Field> = cls.declaredFields
-        LogUtil.e("f ${obj.javaClass} 共有 " + fields.size + "个属性")
+        LogUtil.e("${obj.javaClass} 共有 " + fields.size + "个属性")
         for (field in fields) {
             field.isAccessible = true
             try {
-                LogUtil.e("f private: " + field.name + ":" + field.get(obj))
+                LogUtil.e("private: " + field.name + ":" + field.get(obj))
             } catch (e: IllegalAccessException) {
                 e.printStackTrace()
             }

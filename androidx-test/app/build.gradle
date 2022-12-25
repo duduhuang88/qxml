@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+//apply plugin: 'kotlin-kapt'
 
 apply plugin: 'com.qxml.code.plugin'
 
@@ -91,7 +91,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
-    kapt deps.qxml.processorConstant
+    annotationProcessor deps.qxml.processorConstant
     implementation deps.qxml.dynamic_androidxLib
 
     api deps.qxml.constantConstant

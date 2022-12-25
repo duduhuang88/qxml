@@ -14,35 +14,35 @@ private const val ARSC_ANME = "resources.arsc"
 
 //4.2+ OptimizeResourcesTask 资源路径压缩
 @CacheableTask
-open class ResProcessOrOptimizedInfoCollectTask : DefaultTask() {
+abstract class ResProcessOrOptimizedInfoCollectTask : DefaultTask() {
 
     private val mAndRes by lazy(LazyThreadSafetyMode.NONE) { AndrolibResources() }
 
     @get:Input
-    var isOptimized: Boolean? = null
+    var isOptimized: Boolean = false
 
     @get:Input
-    var buildType: String? = null
+    lateinit var buildType: String
 
     @get:OutputFile
-    var outputFile: File? = null
+    lateinit var outputFile: File
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
-    var apFiles: FileCollection? = null
+    lateinit var apFiles: FileCollection
 
     @Suppress("unused")
     @TaskAction
     fun collect() {
         val arscFileName = "${buildType}_resources.arsc"
-        val arscFile = outputFile!!.parentFile.resolve(arscFileName)
+        val arscFile = outputFile.parentFile.resolve(arscFileName)
         arscFile.delete()
-        apFiles!!.files.forEach { typeDir ->
+        apFiles.files.forEach { typeDir ->
             if (typeDir.isDirectory && typeDir.exists()) {
                 val optimizedAp = typeDir.resolve("resources-${buildType}-optimize.ap_")
                 val normalAp = typeDir.resolve("resources-${buildType}.ap_")
 
-                val apFile = if (isOptimized!!) {
+                val apFile = if (isOptimized) {
                     if (optimizedAp.exists()) optimizedAp else null
                 } else {
                     if (normalAp.exists()) normalAp else null
@@ -53,7 +53,7 @@ open class ResProcessOrOptimizedInfoCollectTask : DefaultTask() {
                     while (entries.hasMoreElements()) {
                         val entry = entries.nextElement()
                         val name = entry.name
-                        if (name == ARSC_ANME) {
+                        if (name == ARSC_ANME && !name.contains("../")) {
                             arscFile.createNewFile()
                             FileOutputStream(arscFile).use { fos ->
                                 zipFile.getInputStream(entry).use { ins ->
@@ -80,10 +80,10 @@ open class ResProcessOrOptimizedInfoCollectTask : DefaultTask() {
                                 e.printStackTrace()
                             }
                         }
-                        if (!outputFile!!.exists()) {
-                            outputFile!!.createNewFile()
+                        if (!outputFile.exists()) {
+                            outputFile.createNewFile()
                         }
-                        FileOutputStream(outputFile!!).use {
+                        FileOutputStream(outputFile).use {
                             it.bufferedWriter().use { bufferedWriter ->
                                 bufferedWriter.write(Gson().toJson(layoutTypeInfoMap))
                             }

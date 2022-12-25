@@ -8,6 +8,8 @@ import com.google.common.io.Files
 import com.google.gson.Gson
 import com.qxml.QxmlConfigExtension
 import com.qxml.constant.Constants
+import com.qxml.constant.ValueType
+import com.qxml.tools.AndroidViewNameCorrect
 import com.qxml.tools.LayoutTypeNameCorrect
 import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.AttrFuncInfoModel
@@ -17,6 +19,7 @@ import com.qxml.transform.collect.ViewGenInfoHolderImpl
 import com.qxml.transform.generate.match.AttrMethodValueMatcher
 import com.qxml.transform.generate.model.*
 import com.squareup.javapoet.CodeBlock
+import groovy.util.Node
 import groovy.util.XmlParser
 import java.io.File
 import java.lang.StringBuilder
@@ -26,6 +29,8 @@ import kotlin.collections.HashMap
 
 private const val FIELD_VIEW_NAME_PREFIX = "___view_"
 private const val DEFAULT_LAYOUT_TYPE = "layout"
+private val ANDROID_LAYOUT_QNAME = groovy.xml.QName(Constants.ANDROID_NAME_SPACE_URI, Constants.ATTR_NAME_LAYOUT, Constants.ATTR_PREFIX_ANDROID)
+
 
 interface CreateGenAndCache: CreateView, CreateClassFile {
 
@@ -145,6 +150,7 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
                                 , usedImportPackageMap, finalUsedLocalVarMap, idMap, usedTempVarMap)?.also {
                                 viewIndex = 0
                                 if (it.result != GenResult.WAIT_INCLUDE) {
+                                    collectIncludeLayoutInfo(node, relativeIncludeLayoutMap, attrMethodValueMatcher, usedReferenceRMap, idMap)
                                     failedLayoutTypeGenInfoList.add(LayoutTypeGenInfo(xmlTypeInfo.type, layoutIsMerge))
                                     finalUsedLocalVarMap.clear()
                                     getLayoutGenResultMapFromFinalResultMap(xmlTypeInfo.name, finalGenResultMap)[xmlTypeInfo.type] = it
@@ -351,6 +357,41 @@ interface CreateGenAndCache: CreateView, CreateClassFile {
             LogUtil.pl("un resolve layout $waitToGenLayoutNameList")
         }
         return waitToGenLayoutNameList
+    }
+
+    //生成失败时也收集关联的layout，用于删除已转换layout文件时过滤不能删除的文件，目前仅收集include和viewStub关联的layout
+    private fun collectIncludeLayoutInfo(node: Node, includeLayoutInfoMap: HashMap<String, String>
+                                         , attrMethodValueMatcher: AttrMethodValueMatcher, usedReferenceRMap: HashMap<String, Int>
+                                         , idMap: Map<String, Int>) {
+        val originName = node.name().toString()
+        if (originName == Constants.TAG_INCLUDE) {
+            val attributes = node.attributes()
+            val layoutIdStr = attributes[Constants.LAYOUT_LAYOUT] as? String
+            if (layoutIdStr != null) {
+                val valueInfo = attrMethodValueMatcher.getValueInfo("", layoutIdStr, usedReferenceRMap, idMap)
+                if (valueInfo.valueType == ValueType.REFERENCE_LAYOUT) {//只处理layout
+                    val includeLayoutFullName = valueInfo.value
+                    val includeLayoutName = includeLayoutFullName.substring(includeLayoutFullName.lastIndexOf(".") + 1)
+                    includeLayoutInfoMap[includeLayoutName] = ""
+                }
+            }
+        } else if (originName == AndroidViewNameCorrect.VIEW_STUB_FULL_NAME || originName == AndroidViewNameCorrect.VIEW_STUB) {
+            val attributes = node.attributes()
+            val layoutIdStr = attributes[ANDROID_LAYOUT_QNAME]?.toString()
+            if (layoutIdStr != null) {
+                val valueInfo = attrMethodValueMatcher.getValueInfo("", layoutIdStr, usedReferenceRMap, idMap)
+                if (valueInfo.valueType == ValueType.REFERENCE_LAYOUT) {//只处理layout
+                    val includeLayoutFullName = valueInfo.value
+                    val includeLayoutName = includeLayoutFullName.substring(includeLayoutFullName.lastIndexOf(".") + 1)
+                    includeLayoutInfoMap[includeLayoutName] = ""
+                }
+            }
+        }
+        node.children().forEach {
+            (it as? Node)?.also { childNode ->
+                collectIncludeLayoutInfo(childNode, includeLayoutInfoMap, attrMethodValueMatcher, usedReferenceRMap, idMap)
+            }
+        }
     }
 
     private fun addFieldInfo(generateFieldInfo: GenerateFieldInfoMap, type: String, genCodeBlockBuilder: CodeBlock.Builder) {

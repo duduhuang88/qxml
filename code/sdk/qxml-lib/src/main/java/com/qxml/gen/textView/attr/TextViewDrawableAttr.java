@@ -13,8 +13,6 @@ import com.yellow.qxml_annotions.OnEnd;
 public interface TextViewDrawableAttr extends ViewLocalVar {
 
     class $$TextViewDrawableLocalVariable {
-        public int drawableTopId = 0;
-        public int drawableBottomId = 0;
         public int drawableRightId = 0;
         public int drawableLeftId = 0;
         public int drawableTintModeEnum = -1;

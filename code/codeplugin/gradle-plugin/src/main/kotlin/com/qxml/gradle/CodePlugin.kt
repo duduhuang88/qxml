@@ -1,18 +1,22 @@
 package com.qxml.gradle
 
 import com.android.build.gradle.*
+import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.api.DefaultAndroidSourceSet
 import com.android.build.gradle.internal.res.GenerateLibraryRFileTask
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
 import com.google.common.io.Files
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.qxml.QxmlExtension
 import com.qxml.constant.Constants
 import com.qxml.tools.encrypt.RSAUtils
 import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.GenClassInfoModel
 import com.qxml.transform.QXmlTransform
+import com.qxml.transform.generate.model.LayoutFileInfo
+import com.qxml.transform.generate.model.LayoutFileInfoContent
 import groovy.util.XmlSlurper
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
@@ -23,7 +27,7 @@ import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.jar.JarFile
-import java.util.zip.CRC32
+import java.util.zip.*
 
 private const val PUBLIC_KEY_STR = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDAkWb8VzyhkCzkiznSRjAZE8ALwop17CN00nzBvGLbajpvtxMCeriMCWTeDpitD83C4wxxjRGlVBitj6fVVH8xIm1hOdQ5lrDxGQ9T6mvk7q/aYl4uEdFZlIrFxVlIwsjcdHWJ2xdI9RyoHakwGBMjUT8w1o6NB1fgTSHuY83DpwIDAQAB"
 
@@ -62,7 +66,7 @@ class CodePlugin: Plugin<Project> {
                         app.applicationVariants.forEach { v ->
 
                             project.tasks.findByName("transformClassesAndResourcesWithQXmlTransformFor${
-                                v.name.capitalize(Locale.ROOT)}")
+                                v.name.capitalize()}")
                                 ?.doFirst {
                                     transform.packageName = getPackageName(v)
                                     transform.curBuildType = v.name
@@ -94,12 +98,12 @@ class CodePlugin: Plugin<Project> {
                 when (it) {
                     is LibraryPlugin -> {
                         val library = project.extensions.findByType(LibraryExtension::class.java)
-                        library?.packagingOptions?.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+                        //library?.packagingOptions?.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
                         library?.libraryVariants?.forEach { v ->
                             addProcessorOption(v, Constants.QXML_VALID_CODE, qxmlValidCode)
                             addProcessorOption(
                                 v, Constants.QXML_LOG_ENABLE, if (qxmlConfig.getConfigByBuildType(
-                                        v.name.capitalize(Locale.ROOT)
+                                        v.name.capitalize()
                                     ).logEnable
                                 ) "true" else "false"
                             )
@@ -113,50 +117,61 @@ class CodePlugin: Plugin<Project> {
                         val androidApp = project.extensions.findByType(AppExtension::class.java)!!
 
                         //androidApp.packagingOptions.resources.pickFirsts.add(Constants.QXML_PARSE_CONFIG_FILE_NAME)
-                        androidApp.packagingOptions.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
+                        //androidApp.packagingOptions.pickFirst(Constants.QXML_PARSE_CONFIG_FILE_NAME)
                         androidApp.applicationVariants.all { v ->
 
                             val transformTask = project.tasks.findByName("transformClassesAndResourcesWithQXmlTransformFor${
-                                v.name.capitalize(Locale.ROOT)}")
+                                v.name.capitalize()}")
 
                             val libProjectVariantInfoMap = getLibVariantInfoMap(v)
 
                             deleteQxmlConfig(project, v)
-                            val type = v.name.capitalize(Locale.ROOT)
+                            val typeCap = v.name.capitalize()
 
                             val outputDir = project.buildDir.resolve(Constants.QXML_CACHE_PATH)
                             if (!outputDir.exists()) {
                                 outputDir.mkdirs()
                             }
 
-                            val curProjectMergerXmlFile =
-                                project.buildDir.resolve(Constants.INTERMEDIATES)
-                                    .resolve(Constants.INCREMENTAL).resolve("merge${type}Resources")
-                                    .resolve(Constants.MERGER_XML)
+                            var curProjectMergerXmlFile: File? = null
+                            for (file in v.mergeResourcesProvider.get().outputs.files) {
+                                val absPath = file.absolutePath
+                                //7.4前在build\intermediates\incremental\mergeBbDebugResources
+                                //7.4后在build\intermediates\incremental\BbDebug\mergeBbDebugResources packageBbDebugResources
+                                if (absPath.contains(Constants.BUILD) && absPath.contains(Constants.INTERMEDIATES)
+                                    && absPath.contains(Constants.INCREMENTAL)
+                                    && (absPath.endsWith("merge${typeCap}Resources") || absPath.endsWith("package${typeCap}Resources"))) {
+                                    curProjectMergerXmlFile = file.resolve(Constants.MERGER_XML)
+                                    break
+                                }
+                            }
 
                             val styleWatchTask = project.tasks.create(
-                                "qxmlWatch${type}Style",
+                                "qxmlWatch${typeCap}Style",
                                 StyleWatchTask::class.java
                             ) { t ->
                                 t.outputDir = outputDir.resolve(Constants.QXML_STYLE_CACHE_DIR_NAME)
                                 t.buildType = v.name
-                                t.mergeXmlFile = curProjectMergerXmlFile
+                                t.mergeXmlFile = curProjectMergerXmlFile!!
                             }
 
                             transformTask?.dependsOn(styleWatchTask)
 
                             val mergeXmlFiles = getMergerXmlFiles(
-                                v.allRawAndroidResources.files,
-                                curProjectMergerXmlFile,
-                                libProjectVariantInfoMap)
+                                v.allRawAndroidResources.files, curProjectMergerXmlFile!!,
+                                libProjectVariantInfoMap, v.name)
 
                             val layoutWatchTask = project.tasks.create(
-                                "qxmlWatch${type}Layout",
+                                "qxmlWatch${typeCap}Layout",
                                 LayoutWatchTask::class.java
                             ) { t ->
                                 t.outputDir =
                                     outputDir.resolve(Constants.QXML_LAYOUT_CACHE_DIR_NAME)
                                 t.buildType = v.name
+                                t.viewDebug = qxmlConfig.viewDebug
+                                t.useFactory = qxmlConfig.useFactory
+                                t.compatMode = qxmlConfig.compatMode.ordinal
+                                t.ignoreUnImplementAttr = qxmlConfig.ignoreUnImplementAttr
                                 t.libProjectVariantInfoMap = libProjectVariantInfoMap
                                 t.mergeXmlFiles = mergeXmlFiles
                             }
@@ -166,13 +181,30 @@ class CodePlugin: Plugin<Project> {
                             v.mergeAssetsProvider.get().dependsOn(styleWatchTask)
                             styleWatchTask.mustRunAfter(v.mergeResourcesProvider.get())
 
+                            layoutWatchTask.outputs.upToDateWhen {
+                                val layoutInfoCacheFile = outputDir.resolve(Constants.QXML_LAYOUT_CACHE_DIR_NAME).resolve(Constants.QXML_LAYOUT_CACHE_FILE_NAME)
+                                if (!layoutInfoCacheFile.exists()) {
+                                    false
+                                } else {
+                                    val layoutFileInfoContent = gson.fromJson(layoutInfoCacheFile.readText(), LayoutFileInfoContent::class.java)
+                                    var upToDate = true
+                                    for (layoutFileInfo in layoutFileInfoContent.layoutFileInfoList) {
+                                        if (layoutFileInfo.fileLastModify != File(layoutFileInfo.filePath).lastModified()) {
+                                            upToDate = false
+                                            break
+                                        }
+                                    }
+                                    upToDate
+                                }
+                            }
+
                             v.mergeAssetsProvider.get().dependsOn(layoutWatchTask)
                             layoutWatchTask.mustRunAfter(v.mergeResourcesProvider.get())
 
-                            collectResProcessOrOptimizedInfo(project, v, transformTask)
+                            collectResProcessOrOptimizedInfoAndRemoveConvertedLayoutFile(project, v, transformTask)
 
                             setPreBuildConfig(project, v)
-                            mergeQxmlConfig(project, type)
+                            mergeQxmlConfig(project, typeCap)
                             changeTaskOrder(project, v)
                         }
                     }
@@ -193,7 +225,7 @@ class CodePlugin: Plugin<Project> {
                     fileDir = fileDir.parentFile
                 }
                 if (fileDir != null) {
-                    libProjectVariantInfoMap[fileDir.absolutePath] = inputFile.name.capitalize(Locale.ROOT)
+                    libProjectVariantInfoMap[fileDir.absolutePath] = inputFile.name
                 }
             }
         }
@@ -201,40 +233,16 @@ class CodePlugin: Plugin<Project> {
         return libProjectVariantInfoMap
     }
 
-    private fun getMergerXmlFiles(files: Set<File>,
-                                  curProjectMergerXmlFile: File,
-                                  libProjectVariantInfoMap: Map<String, String>): Set<File> {
+    private fun getMergerXmlFiles(files: Set<File>, curProjectMergerXmlFile: File,
+                                  libProjectVariantInfoMap: Map<String, String>, buildType: String): Set<File> {
         val mergeXmlFiles = mutableSetOf<File>()
-        files.forEach { dir ->
-            val path = dir.absolutePath
-            if (path.contains(Constants.INTERMEDIATES) && path.contains(Constants.BUILD)) {
-                var curDir: File? = dir
-                while (curDir != null && curDir.name != Constants.INTERMEDIATES) {
-                    curDir = curDir.parentFile
-                }
-                if (curDir != null) {
-                    val parentDir = curDir.parentFile
-                    if (parentDir != null && parentDir.name == Constants.BUILD && parentDir.parentFile != null) {
-                        val buildDir = parentDir.absolutePath
-                        val libPrjVariant = libProjectVariantInfoMap[buildDir]
-                        if (libPrjVariant != null) {
-                            mergeXmlFiles.add(
-                                curDir.resolve(Constants.INCREMENTAL)
-                                    .resolve("package${libPrjVariant}Resources")
-                                    .resolve(Constants.MERGER_XML)
-                            )
-                        }
-                    }
-                }
-            }
-        }
         mergeXmlFiles.add(curProjectMergerXmlFile)
         return mergeXmlFiles
     }
 
     private fun setPreBuildConfig(project: Project, v: BaseVariant) {
         val type = v.name
-        project.tasks.getByName("pre${type.capitalize(Locale.ROOT)}Build").doFirst {
+        project.tasks.getByName("pre${type.capitalize()}Build").doFirst {
             val curQxmlConfig = qxmlConfig.getConfigByBuildType(type)
             LogUtil.enable = curQxmlConfig.logEnable
             LogUtil.debug = curQxmlConfig.debugEnable
@@ -380,7 +388,7 @@ class CodePlugin: Plugin<Project> {
     //将processJavaResTask依赖apt
     private fun changeTaskOrder(project: Project, variant: BaseVariant) {
         val type = variant.name
-        val typeCap = type.capitalize(Locale.ROOT)
+        val typeCap = type.capitalize()
 
         val outputDir = project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH)
 
@@ -507,7 +515,7 @@ class CodePlugin: Plugin<Project> {
         type: String,
         variant: BaseVariant
     ) {
-        project.tasks.findByName("pre${type.capitalize(Locale.ROOT)}Build")?.doFirst {
+        project.tasks.findByName("pre${type.capitalize()}Build")?.doFirst {
             if (once.compareAndSet(false, true)) {
                 val finalConfigFile = project.buildDir.resolve(Constants.QXML_DIR_NAME).resolve(
                     Constants.QXML_PROJECT_BUILD_TEMP_RES_PATH
@@ -535,17 +543,22 @@ class CodePlugin: Plugin<Project> {
         }
     }
 
-    private fun collectResProcessOrOptimizedInfo(project: Project,
-                                                 variant: BaseVariant, transformTask: Task?) {
-        val curBuildType = variant.name.capitalize(Locale.ROOT)
+    private fun collectResProcessOrOptimizedInfoAndRemoveConvertedLayoutFile(project: Project,
+                                                 variant: ApplicationVariant, transformTask: Task?) {
+        val curBuildType = variant.name.capitalize()
+        val layoutTypeInfoFile = project.buildDir.resolve(Constants.QXML_CACHE_PATH).resolve(Constants.QXML_LAYOUT_INFO_CACHE_DIR_NAME).resolve(variant.name).resolve(Constants.QXML_LAYOUT_INFO_CACHE_FILE_NAME)
         var resTask = project.tasks.findByName("optimize${curBuildType}Resources")
         val processResourceTask = project.tasks.findByName("process${curBuildType}Resources")
+
+        transformTask?.outputs?.upToDateWhen {
+            layoutTypeInfoFile.exists()
+        }
 
         if (resTask == null) {
             resTask = processResourceTask
         }
         if (resTask != null) {
-            val outputFile = project.buildDir.resolve("${Constants.QXML_CACHE_DIR}${variant.name}").resolve(
+            val resProcessOutputFile = project.buildDir.resolve("${Constants.QXML_CACHE_DIR}${variant.name}").resolve(
                 Constants.RES_PROCESS_OR_OPTIMIZED_INFO_COLLECT_FILE_NAME
             )
 
@@ -555,12 +568,37 @@ class CodePlugin: Plugin<Project> {
                 ResProcessOrOptimizedInfoCollectTask::class.java
             ) {
                 it.apFiles = resTask.outputs.files
-                it.outputFile = outputFile
+                it.outputFile = resProcessOutputFile
                 it.buildType = if (isOptimized) variant.baseName else variant.name
                 it.isOptimized = isOptimized
             }
             collectTask.dependsOn(resTask)
             transformTask?.dependsOn(collectTask)
+
+            val apFile = if (isOptimized) {
+                project.buildDir.resolve(Constants.INTERMEDIATES).resolve("optimized_processed_res").resolve(variant.name).resolve("resources-${variant.baseName}-optimize.ap_")
+            } else {
+                project.buildDir.resolve(Constants.INTERMEDIATES).resolve("processed_res").resolve(variant.name).resolve("out").resolve("resources-${variant.name}.ap_")
+            }
+
+            val packageAppTask = variant.packageApplicationProvider.get()
+            val removeTask = project.tasks.create(
+                "qxmlRemove${curBuildType}ConvertedLayoutFile",
+                RemoveConvertedLayoutFileTask::class.java
+            ) {
+                it.isOptimized = isOptimized
+                it.resProcessOutputFile = resProcessOutputFile
+                it.apFile = apFile
+                it.enable = qxmlConfig.removeConvertedLayout
+                it.layoutTypeInfoFile = layoutTypeInfoFile
+                it.relativeIncludeLayoutInfoFile = project.buildDir.resolve(Constants.QXML_CACHE_PATH).resolve(Constants.QXML_LAYOUT_INFO_CACHE_DIR_NAME).resolve(variant.name).resolve(Constants.QXML_RELATIVE_INCLUDE_LAYOUT_INFO_CACHE_FILE_NAME)
+                val whiteListFile = project.rootDir.resolve(Constants.QXML_REMOVE_LAYOUT_WHITE_LIST_FILE_NAME)
+                if (whiteListFile.exists() && whiteListFile.isFile) {
+                    it.getWhiteListFile().set(whiteListFile)
+                }
+            }
+            removeTask.dependsOn(transformTask)
+            packageAppTask.dependsOn(removeTask)
         }
     }
 
@@ -578,7 +616,7 @@ class CodePlugin: Plugin<Project> {
             val once = AtomicBoolean()
             variant.outputs.all { output ->
 
-                val curBuildType = variant.name.capitalize(Locale.ROOT)
+                val curBuildTypeCap = variant.name.capitalize()
 
                 // Though there might be multiple outputs, their R files are all the same. Thus, we only
                 // need to configure the task once with the R.java input and action.
@@ -606,7 +644,7 @@ class CodePlugin: Plugin<Project> {
                     )
 
                     val generate = project.tasks.create(
-                        "generate${curBuildType}RS",
+                        "generate${curBuildTypeCap}RS",
                         RSGenerator::class.java
                     ) {
                         it.outputDir = outputDir
@@ -624,7 +662,7 @@ class CodePlugin: Plugin<Project> {
                             Constants.LAYOUT_ID_COLLECT_FILE_NAME
                         )
                         val layoutIdCollectorTask = project.tasks.create(
-                            "layoutId${curBuildType}Collect",
+                            "layoutId${curBuildTypeCap}Collect",
                             LayoutIdCollector::class.java
                         ) { t->
                             t.outputFile = layoutIdOutputFile
@@ -637,13 +675,13 @@ class CodePlugin: Plugin<Project> {
                             Constants.ID_COLLECT_FILE_NAME
                         )
                         val idCollectorTask = project.tasks.create(
-                            "id${curBuildType}Collect",
+                            "id${curBuildTypeCap}Collect",
                             IdCollector::class.java
                         ) { t->
                             t.outputFile = idOutputFile
                             t.rFile = rFile
                             t.packageName = rPackage
-                            t.curBuildType = curBuildType
+                            t.curBuildType = variant.name
                         }
                         variant.assembleProvider.get().dependsOn(idCollectorTask)
                         idCollectorTask.mustRunAfter(variant.mergeResourcesProvider.get())

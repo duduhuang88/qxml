@@ -42,12 +42,12 @@ class FragmentTestActivity: AppCompatActivity() {
         val fragmentTopTv1 = (fl_top.getChildAt(0) as ViewGroup).getChildAt(0)
         val fragmentTopTv2 = (fl_top.getChildAt(0) as ViewGroup).getChildAt(1)
 
-        LogUtil.e("f top "+fragmentTopTv1+" "+fragmentTopTv1.tag+" "+fragmentTopTv1.id+" "+ R.id.fragment_out_top)
-        LogUtil.e("f top "+fragmentTopTv2+" "+fragmentTopTv2.tag+" "+fragmentTopTv2.id+" "+ R.id.fragment_include_top2)
+        LogUtil.e("top "+fragmentTopTv1+" "+fragmentTopTv1.tag+" "+fragmentTopTv1.id+" "+ R.id.fragment_out_top)
+        LogUtil.e("top "+fragmentTopTv2+" "+fragmentTopTv2.tag+" "+fragmentTopTv2.id+" "+ R.id.fragment_include_top2)
         val fragmentBottomTv1 = (fl_bottom.getChildAt(0) as ViewGroup).getChildAt(0)
         val fragmentBottomTv2 = (fl_bottom.getChildAt(0) as ViewGroup).getChildAt(1)
 
-        //LogUtil.e("f fragments "+supportFragmentManager.fragments)
+        //LogUtil.e("fragments "+supportFragmentManager.fragments)
     }
 
 }

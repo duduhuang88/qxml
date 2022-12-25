@@ -6,6 +6,7 @@ import com.qxml.constant.ValueType
 import com.qxml.tools.AndroidViewNameCorrect
 import com.qxml.tools.LayoutTypeNameCorrect
 import com.qxml.CompatMode
+import com.qxml.tools.log.LogUtil
 import com.qxml.tools.model.AttrFuncInfoModel
 import com.qxml.tools.model.CompatViewInfoModel
 import com.qxml.transform.collect.ViewGenInfoHolderImpl
@@ -466,7 +467,7 @@ interface CreateView: ResolveAttr {
                     , viewClassName, viewFieldName, methodCodeBlockBuilder, qxmlConfig
                     , usedGenInfoMap, fieldInfo, dataBindingAttrResolveInfo, attrMethodValueMatcher
                     , usedLocalVarMap, finalUsedLocalVarMap, usedReferenceRMap, idMap, usedTempVarMap
-                    , false, preRequiredCondition, curRequiredCondition, nextRequiredCondition)?.also {
+                    , relativeIncludeLayoutMap, false, preRequiredCondition, curRequiredCondition, nextRequiredCondition)?.also {
                     return it
                 }
                 if (Constants.ATTR_TAG != finalAttrName) {//tag放在后面

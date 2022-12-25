@@ -4,11 +4,15 @@ import com.google.common.io.Files
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.qxml.constant.Constants
+import com.qxml.tools.log.LogUtil
 import com.qxml.transform.generate.model.LayoutFileInfo
+import com.qxml.transform.generate.model.LayoutFileInfoContent
 import groovy.util.Node
 import groovy.util.XmlParser
 import org.gradle.api.Project
 import java.io.File
+import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * 收集所有可代码依赖project的layout文件信息
@@ -16,7 +20,9 @@ import java.io.File
  */
 class LayoutFileCollector(private val project: Project, private val mainProjectVariantType: String,
                           private val mergeXmlFiles: Set<File>, private val outputDir: File,
-                          private val libProjectVariantInfoMap: Map<String, String>) {
+                          private val libProjectVariantInfoMap: Map<String, String>,
+                          val viewDebug: Boolean, val useFactory: Boolean,
+                          val compatMode: Int, val ignoreUnImplementAttr: Boolean) {
 
     companion object {
         private const val TAG_NAME = "name"
@@ -69,7 +75,8 @@ class LayoutFileCollector(private val project: Project, private val mainProjectV
         if (!outputFile.exists()) {
             outputFile.createNewFile()
         }
-        outputFile.writeText(gson.toJson(layoutFileList))
+        val layoutFileInfoContent = LayoutFileInfoContent(layoutFileList, viewDebug, useFactory, compatMode, ignoreUnImplementAttr)
+        outputFile.writeText(gson.toJson(layoutFileInfoContent))
 
         return layoutFileList
     }
@@ -141,7 +148,7 @@ class LayoutFileCollector(private val project: Project, private val mainProjectV
                             layoutMap[layoutType] = xmlTypeMap
                         }
                         val layoutFile = File(path)
-                        xmlTypeMap[name] = LayoutFileInfo(name, if (layoutType.isEmpty()) layoutType else layoutFile.parentFile.name, path)
+                        xmlTypeMap[name] = LayoutFileInfo(name, if (layoutType.isEmpty()) layoutType else layoutFile.parentFile.name, path, File(path).lastModified(), path)
                         return
                     }
                 }
@@ -184,10 +191,18 @@ class LayoutFileCollector(private val project: Project, private val mainProjectV
                                                 val buildDir = debugDir.parentFile
                                                 if (buildDir?.name == Constants.BUILD) {
                                                     val variantType = libProjectVariantInfoMap[buildDir.absolutePath] ?: mainProjectVariantType
-                                                    val packageResourceDir = debugDir.resolve(INCREMENTAL).resolve("package${variantType}Resources").resolve(MERGER_XML)
-                                                    if (packageResourceDir.exists()) {
-                                                        mergerXmlFilePathList.add(ProjectMergeFileInfo(config.substring(1), packageResourceDir.absolutePath))
+                                                    val variantTypeCap = variantType.capitalize()
+                                                    val lowGradleVersionPackageResourceDir = debugDir.resolve(INCREMENTAL).resolve("package${variantTypeCap}Resources").resolve(MERGER_XML)
+                                                    if (lowGradleVersionPackageResourceDir.exists()) {
+                                                        mergerXmlFilePathList.add(ProjectMergeFileInfo(config.substring(1), lowGradleVersionPackageResourceDir.absolutePath))
                                                         return@childrenBreak
+                                                    } else {
+                                                        //7.2位置改变，这里没判断gradle版本，修改gradle版本后需要clean删除缓存目录
+                                                        val highGradleVersionPackageResourceDir = debugDir.resolve(INCREMENTAL).resolve(variantType).resolve("package${variantTypeCap}Resources").resolve(MERGER_XML)
+                                                        if (highGradleVersionPackageResourceDir.exists()) {
+                                                            mergerXmlFilePathList.add(ProjectMergeFileInfo(config.substring(1), highGradleVersionPackageResourceDir.absolutePath))
+                                                            return@childrenBreak
+                                                        }
                                                     }
                                                 }
                                             }

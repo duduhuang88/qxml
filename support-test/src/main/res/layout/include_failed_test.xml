@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#12000000"
+    android:layout_width="match_parent"
+    android:layout_height="650dp">
+
+    <com.qxml.support_test.TestUnImplView
+        android:background="#f63"
+        android:layout_width="100dp"
+        android:layout_height="50dp"/>
+
+    <include
+        android:layout_marginTop="250dp"
+        android:layout_width="200dp"
+        android:layout_height="250dp"
+        android:layout_marginLeft="50dp"
+        layout="@layout/include_view_test"
+        />
+
+    <ViewStub
+        android:layout="@layout/activity_compare_root"
+        android:layout_width="250dp"
+        android:layout_height="250dp"/>
+
+    <ViewStub
+        android:layout="@layout/include_test"
+        android:layout_width="250dp"
+        android:layout_height="250dp"/>
+
+</RelativeLayout>

@@ -1,8 +1,7 @@
 package com.qxml.gradle
 
 import com.google.gson.GsonBuilder
-import com.qxml.constant.Constants
-import com.qxml.tools.log.LogUtil
+import com.qxml.tools.CommonUtils
 import groovy.util.Node
 import groovy.util.XmlParser
 import org.gradle.api.DefaultTask
@@ -10,30 +9,29 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.*
 import java.io.File
-import java.lang.StringBuilder
 
 @CacheableTask
-open class IdCollector: DefaultTask() {
+abstract class IdCollector: DefaultTask() {
 
     @get:OutputFile
-    var outputFile: File? = null
+    lateinit var outputFile: File
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
-    var rFile: FileCollection? = null
+    lateinit var rFile: FileCollection
 
     @get:Input
-    var packageName: String? = null
+    lateinit var packageName: String
 
     @get:Input
-    var curBuildType: String? = null
+    lateinit var curBuildType: String
 
     @TaskAction
     fun collect() {
-        val exactIdMap = ExactIdCollector(project, curBuildType!!).exactCollect()
-        val reader = IdCollectSymbolListReader(packageName!!, exactIdMap)
-        val content = reader.readSymbolTable(rFile!!.singleFile)
-        outputFile!!.writeText(content)
+        val exactIdMap = ExactIdCollector(project, curBuildType).exactCollect()
+        val reader = IdCollectSymbolListReader(packageName, exactIdMap)
+        val content = reader.readSymbolTable(rFile.singleFile)
+        outputFile.writeText(content)
     }
 }
 
@@ -108,11 +106,7 @@ internal class ExactIdCollector(private val project: Project, private val curBui
     }
 
     private val rootNode by lazy {
-        XmlParser().parse(
-            project.buildDir.resolve(Constants.INTERMEDIATES)
-                .resolve(Constants.INCREMENTAL).resolve("merge${curBuildType}Resources")
-                .resolve(Constants.MERGER_XML)
-        )
+        XmlParser().parse(CommonUtils.getMergerXmlFile(project.buildDir, curBuildType))
     }
 
     fun exactCollect(): Map<String, String> {

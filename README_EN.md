@@ -66,7 +66,7 @@ Gradle 5.6.4 above
 ```groovy
 buildscript {
     ...
-    ext.qxml_version = "3.3.0"
+    ext.qxml_version = "3.4.0"
     repositories {
         ...
         mavenCentral()
@@ -134,6 +134,11 @@ qxml {
     ignoreUnImplementAttr       //ignore unImplement attr or not, default value: true
     useCreateViewListener true  //using createViewListener, default value: false
     checkMethod false               //default value: false,  check the view attr method change when building, you should set true when custom view attr
+    //remove converted layout file or not，support since 3.4.0，default value: false，you can create qxmlRemoveLayoutWhiteList.txt file in project root dir, the content is layout file name，eg：
+    //activity_main
+    //imageview_test
+    removeConvertedLayout false
+
     //default config above
     buildType {
         debug { //the default option will be used for values that are not set
@@ -184,7 +189,7 @@ no need
 
 #### 2. ~~Increase the build time~~ and increase linearly according to the number of layouts, after first time, the build will use cache
 
-#### 3. Increase the raw size of APK. When there are 52 layout files in the demo, the size of release APK increases by about 38K. The option of repackaging and removing converted layout files may be added later
+#### 3. Increase the raw size of APK. When there are 52 layout files in the demo, the size of release APK increases by about 38K. ~~The option of repackaging and removing converted layout files may be added later~~, use removeConvertedLayout option to remove converted layout file with version 3.4.0 above, and you should add layout info that qxml can not deal to the qxmlRemoveLayoutWhiteList.txt, like use the dynamic add ViewStub#setLayoutResource
 
 #### 4. ~~The extension of view needs to use fully qualified class names, which may be improved in the future~~, There is no need for fully qualified class names other than defining shared variables
 
